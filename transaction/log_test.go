@@ -1,4 +1,4 @@
-package sqlx
+package transaction
 
 import "testing"
 

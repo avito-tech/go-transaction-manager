@@ -1,3 +1,4 @@
+// Package sqlx is an implementation of transaction.Transaction interface by Transaction for sqlx.Tx.
 package sqlx
 
 import (
