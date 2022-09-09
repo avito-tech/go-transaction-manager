@@ -1,16 +1,15 @@
 //nolint:ireturn,nolintlint // return Tr for external usage.
 //revive:disable:package-comments
-package sqlx
+package sql
 
 import (
 	"context"
-
-	"github.com/jmoiron/sqlx"
+	"database/sql"
 
 	"github.com/avito-tech/go-transaction-manager/transaction"
 )
 
-// TrOrDBFromCtx returns the opened Tr from the context.Context or sqlx.DB.
+// TrOrDBFromCtx returns the opened Tr from the context.Context or sql.DB.
 // TODO add ability to set ctxKey.
 func TrOrDBFromCtx(ctx context.Context, db Tr) Tr {
 	if tr, ok := TrFromCtx(ctx); ok {
@@ -23,7 +22,7 @@ func TrOrDBFromCtx(ctx context.Context, db Tr) Tr {
 // TrFromCtx returns the opened Tr from the context.Context.
 func TrFromCtx(ctx context.Context) (Tr, bool) {
 	if tr := transaction.TrFromCtx(ctx, transaction.DefaultCtxKey); tr != nil {
-		tx, ok := tr.Transaction().(*sqlx.Tx)
+		tx, ok := tr.Transaction().(*sql.Tx)
 
 		return tx, ok
 	}

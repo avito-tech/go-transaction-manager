@@ -1,12 +1,12 @@
-package sqlx
+package transaction
 
 type logger interface {
 	Printf(format string, a ...interface{})
 }
 
-// WithLog sets logger for transaction.Manager.
-func WithLog(l logger) Option {
-	return func(m *TrManager) {
+// WithLog sets logger for ManagerImpl.
+func WithLog(l logger) ManagerOpt {
+	return func(m *ManagerImpl) {
 		if l == nil {
 			l = defaultLog
 		}
