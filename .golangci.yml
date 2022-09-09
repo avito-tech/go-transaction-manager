@@ -1,0 +1,94 @@
+linters-settings:
+  enable-all: true
+
+linters:
+  enable:
+    - asasalint
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - dogsled
+    - dupl
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref # https://github.com/kyoh86/exportloopref#whats-this
+    - forcetypeassert # https://github.com/gostaticanalysis/forcetypeassert#forcetypeassert
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - goerr113
+    - gofmt
+    - gofumpt
+    - goimports
+    - gomoddirectives
+    - goprintffuncname # https://github.com/jirfag/go-printf-func-name#go-printf-func-name
+    - grouper
+    - gosec
+    - importas
+    - ireturn
+    - lll
+    - makezero # https://github.com/ashanbrown/makezero#purpose
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr # https://github.com/gostaticanalysis/nilerr#nilerr
+    - nilnil # https://github.com/Antonboom/nilnil#motivation
+    - nolintlint # https://github.com/golangci/golangci-lint/blob/master/pkg/golinters/nolintlint/README.md#purpose
+    - paralleltest
+    - prealloc # https://github.com/alexkohler/prealloc#purpose
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - stylecheck
+    - tparallel # https://github.com/moricho/tparallel
+    - unconvert # https://github.com/mdempsky/unconvert#usage
+    - unparam
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - wsl # https://github.com/bombsimon/wsl/blob/master/doc/rules.md
+
+issues:
+  exclude-use-default: false
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  exclude:
+    - ST1000 # ST1000: at least one file in a package should have a package comment
+  exclude-rules:
+    - linters:
+        - lll
+      source: "^//go:generate "
+    - linters:
+        - lll
+      source: "// ?TODO "
+    - path: _test\.go
+      linters:
+        - wsl
+      text: "only cuddled expressions if assigning variable or using from line above"
+    - &internal_text
+      path: ^internal
+      text: "var-naming: don't use an underscore in package name"
+    - <<: *internal_text
+      text: "package-comments: should have a package comment"
+    - <<: *internal_text
+      text: "ST1003: should not use underscores in package names"
+    - path: (_test\.go|^internal)
+      linters:
+        - funlen
+        - gochecknoglobals
+        - goconst
+        - gomnd
+        - containedctx
+        - goerr113
+        - errcheck
+        - nolintlint
+        - forcetypeassert
