@@ -22,3 +22,6 @@ vendor/
 
 # Database
 *.db
+
+# Code coverage
+coverage.*
