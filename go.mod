@@ -1,6 +1,6 @@
 module github.com/avito-tech/go-transaction-manager
 
-go 1.10
+go 1.16
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0

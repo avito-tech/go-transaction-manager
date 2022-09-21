@@ -1,5 +1,14 @@
+CVPKG=go list ./... | grep -v mocks | grep -v /internal/
+GO_TEST=go test `$(CVPKG)` -race
+COVERAGE_FILE="coverage.out"
+COVERAGE_TMP_FILE="coverage.out.tmp"
+
 test:
-	go test ./... -race
+	$(GO_TEST)
+
+test.coverage:
+	$(GO_TEST) -covermode=atomic -coverprofile=$(COVERAGE_TMP_FILE)
+
 
 lint:
 	golangci-lint run -v
