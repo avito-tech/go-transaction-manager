@@ -9,11 +9,11 @@ Transaction manager is an abstraction to coordinate database transaction boundar
 
 ## Supported implementations
 
-* [sqlx](https://github.com/jmoiron/sqlx) (Go 1.10)
+* [sqlx](https://github.com/jmoiron/sqlx) (Go 1.16)
 
 <!-- #TODO: 
-* [sql](https://pkg.go.dev/database/sql) (Go 1.10)
-* [mongo-go-driver](https://github.com/mongodb/mongo-go-driver) (Go 1.10)
+* [sql](https://pkg.go.dev/database/sql) (Go 1.16)
+* [mongo-go-driver](https://github.com/mongodb/mongo-go-driver) (Go 1.16)
 -->
 
 ## Installation
