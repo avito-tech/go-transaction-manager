@@ -10,7 +10,7 @@ import (
 )
 
 // NewDefaultFactory creates default transaction.Transaction(sqlx.Tx).
-func NewDefaultFactory(db *sql.DB) transaction.Factory {
+func NewDefaultFactory(db *sql.DB) transaction.TrFactory {
 	return func() (transaction.Transaction, error) {
 		return NewTransaction(context.Background(), nil, db)
 	}

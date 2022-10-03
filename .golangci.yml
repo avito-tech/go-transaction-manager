@@ -69,6 +69,9 @@ issues:
       source: "^//go:generate "
     - linters:
         - lll
+      source: "(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+"
+    - linters:
+        - lll
       source: "// ?TODO "
     - path: _test\.go
       linters:
