@@ -7,6 +7,7 @@ import (
 	"database/sql"
 
 	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/transaction/settings"
 )
 
 // TrOrDBFromCtx returns the opened Tr from the context.Context or sql.DB.
@@ -21,7 +22,7 @@ func TrOrDBFromCtx(ctx context.Context, db Tr) Tr {
 
 // TrFromCtx returns the opened Tr from the context.Context.
 func TrFromCtx(ctx context.Context) (Tr, bool) {
-	if tr := transaction.TrFromCtx(ctx, transaction.DefaultCtxKey); tr != nil {
+	if tr := transaction.TrFromCtx(ctx, settings.DefaultCtxKey); tr != nil {
 		tx, ok := tr.Transaction().(*sql.Tx)
 
 		return tx, ok

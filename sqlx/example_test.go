@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	trsqlx "github.com/avito-tech/go-transaction-manager/sqlx"
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/transaction/manager"
 )
 
 type repo struct {
@@ -109,7 +109,7 @@ func Example() {
 	}
 
 	ctx := context.Background()
-	trManager := transaction.NewManager(trsqlx.NewDefaultFactory(db))
+	trManager := manager.New(trsqlx.NewDefaultFactory(db))
 
 	err = trManager.Do(ctx, func(ctx context.Context) error {
 		if err := r.Save(ctx, u); err != nil {

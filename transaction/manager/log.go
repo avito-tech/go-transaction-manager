@@ -1,12 +1,12 @@
-package transaction
+package manager
 
 type logger interface {
 	Printf(format string, a ...interface{})
 }
 
-// WithLog sets logger for ManagerImpl.
-func WithLog(l logger) ManagerOpt {
-	return func(m *ManagerImpl) {
+// WithLog sets logger for Manager.
+func WithLog(l logger) Opt {
+	return func(m *Manager) {
 		if l == nil {
 			l = defaultLog
 		}

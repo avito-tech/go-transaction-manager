@@ -1,18 +1,20 @@
-package transaction
+package manager
 
 import (
 	"context"
 
 	"go.uber.org/multierr"
+
+	"github.com/avito-tech/go-transaction-manager/transaction"
 )
 
 type trCloser struct {
-	tr Transaction
+	tr transaction.Transaction
 	// cancel context.CancelFunc
 	log logger
 }
 
-func newTxCommit(tr Transaction, l logger) closer {
+func newTxCommit(tr transaction.Transaction, l logger) closer {
 	return (&trCloser{
 		tr:  tr,
 		log: l,
@@ -31,12 +33,12 @@ func (c *trCloser) close(ctx context.Context, errInProcessTr *error) error {
 
 	if *errInProcessTr != nil {
 		if errRollback := c.tr.Rollback(); errRollback != nil {
-			return multierr.Combine(*errInProcessTr, ErrRollback, errRollback)
+			return multierr.Combine(*errInProcessTr, transaction.ErrRollback, errRollback)
 		}
 	}
 
 	if err := c.tr.Commit(); err != nil {
-		return multierr.Combine(ErrCommit, err)
+		return multierr.Combine(transaction.ErrCommit, err)
 	}
 
 	return nil

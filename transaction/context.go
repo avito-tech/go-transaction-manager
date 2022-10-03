@@ -2,14 +2,15 @@ package transaction
 
 import "context"
 
-// CtxKey is a type for context.Context keys.
+// CtxKey is a type to identify transaction.Transaction in a context.Context.
 type CtxKey interface{}
 
-func ctxWithTr(ctx context.Context, key CtxKey, tr Transaction) context.Context {
+// CtxWithTr returns Transaction by CtxKey.
+func CtxWithTr(ctx context.Context, key CtxKey, tr Transaction) context.Context {
 	return context.WithValue(ctx, key, tr)
 }
 
-// TrFromCtx returns Transaction.
+// TrFromCtx returns Transaction by CtxKey.
 func TrFromCtx(ctx context.Context, key CtxKey) Transaction { //nolint:ireturn
 	if tr, ok := ctx.Value(key).(Transaction); ok {
 		return tr

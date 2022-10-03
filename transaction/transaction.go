@@ -3,32 +3,26 @@
 package transaction
 
 import (
-	"context"
 	"errors"
 	"fmt"
 )
 
-// ErrTransaction is an error while working with a transaction.
 var (
+	// ErrTransaction is an error while working with a transaction.
 	ErrTransaction = errors.New("transaction")
-	ErrBegin       = errTransaction("begin")
-	ErrCommit      = errTransaction("close")
-	ErrRollback    = errTransaction("rollback")
+	// ErrCommit occurs when commit finished with an error.
+	ErrCommit = errTransaction("close")
+	// ErrRollback occurs when rollback finished with an error.
+	ErrRollback = errTransaction("rollback")
 )
 
 func errTransaction(msg string) error {
 	return fmt.Errorf("%w: %s", ErrTransaction, msg)
 }
 
-// Manager manages a transaction from Begin to Commit or Rollback.
-type Manager interface {
-	// Do processes a transaction inside a closure.
-	Do(ctx context.Context, fn func(ctx context.Context) error) error
-}
-
-// Factory is used in Manager to creates Transaction.
+// TrFactory is used in Manager to creates Transaction.
 // TODO probably Settings is required as the func argument.
-type Factory func() (Transaction, error)
+type TrFactory func() (Transaction, error)
 
 // Transaction wraps different transaction implementations.
 type Transaction interface {
@@ -42,21 +36,13 @@ type Transaction interface {
 	IsActive() bool
 }
 
-// Settings is configuration for Manager.
-// TODO probably needs to separate Transaction and Manager settings.
-type Settings interface {
-	CtxKey() CtxKey
-	IsReadOnly() bool
-	Propagation() Propagation
-}
-
 // Propagation is a type for transaction propagation rules.
 type Propagation int8
 
 // TODO fix description and implement
 // now is copy of
 //
-//nolint:lll https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Propagation.html
+// https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Propagation.html //nolint:lll
 const (
 	// PropagationRequired supports a current transaction, create a new one if none exists.
 	PropagationRequired Propagation = iota
