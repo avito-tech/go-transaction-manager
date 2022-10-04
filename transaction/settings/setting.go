@@ -1,6 +1,8 @@
 package settings
 
 import (
+	"time"
+
 	"github.com/avito-tech/go-transaction-manager/transaction"
 )
 
@@ -13,11 +15,11 @@ type ctxKey struct{}
 type Opt func(s *Settings)
 
 // Settings is an implementation of transaction.Settings.
-// Settings stores data to configure the transaction.Transaction.
 type Settings struct {
 	ctxKey      transaction.CtxKey
 	isReadOnly  bool
 	propagation transaction.Propagation
+	timeout     time.Duration
 }
 
 // New creates Settings.
@@ -50,4 +52,9 @@ func (s Settings) IsReadOnly() bool {
 // Propagation returns transaction.Propagation.
 func (s Settings) Propagation() transaction.Propagation {
 	return s.propagation
+}
+
+// Timeout returns time.Duration of the transaction.Transaction.
+func (s Settings) Timeout() time.Duration {
+	return s.timeout
 }
