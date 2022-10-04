@@ -7,10 +7,6 @@ type logger interface {
 // WithLog sets logger for Manager.
 func WithLog(l logger) Opt {
 	return func(m *Manager) {
-		if l == nil {
-			l = defaultLog
-		}
-
 		m.log = l
 	}
 }

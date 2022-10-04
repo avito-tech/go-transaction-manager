@@ -21,7 +21,6 @@ func errTransaction(msg string) error {
 }
 
 // TrFactory is used in Manager to creates Transaction.
-// TODO probably Settings is required as the func argument.
 type TrFactory func() (Transaction, error)
 
 // Transaction wraps different transaction implementations.
@@ -39,7 +38,7 @@ type Transaction interface {
 // Propagation is a type for transaction propagation rules.
 type Propagation int8
 
-// TODO fix description and implement
+// TODO fix description and implement, there is not for NoSQL
 // now is copy of
 //
 // https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Propagation.html //nolint:lll
@@ -53,7 +52,7 @@ const (
 	PropagationsMandatory
 	// PropagationNever executes non-transactionally, throw an exception if a transaction exists.
 	PropagationNever
-	// PropagationNotSupported executes non-transactionally, suspend the current transaction if one exists..
+	// PropagationNotSupported executes non-transactionally, suspend the current transaction if one exists.
 	PropagationNotSupported
 	// PropagationRequiresNew creates a new transaction, and suspend the current transaction if one exists.
 	PropagationRequiresNew
