@@ -16,8 +16,12 @@ var (
 	ErrRollback = errTransaction("rollback")
 )
 
+func errNested(err error, msg string) error {
+	return fmt.Errorf("%w: %s", err, msg)
+}
+
 func errTransaction(msg string) error {
-	return fmt.Errorf("%w: %s", ErrTransaction, msg)
+	return errNested(ErrTransaction, msg)
 }
 
 // TrFactory is used in Manager to creates Transaction.
@@ -34,6 +38,15 @@ type Transaction interface {
 	// IsActive returns true if the transaction started but not committed or rolled back.
 	IsActive() bool
 }
+
+var (
+	// ErrPropagation occurs because of Propagation setting.
+	ErrPropagation = errTransaction("propagation")
+	// TODO need implement.
+	ErrPropagationMandatory = errNested(ErrPropagation, "mandatory")
+	// TODO need implement.
+	ErrPropagationNever = errNested(ErrPropagation, "never")
+)
 
 // Propagation is a type for transaction propagation rules.
 type Propagation int8
