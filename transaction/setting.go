@@ -7,7 +7,6 @@ type Settings interface {
 	CtxKey() CtxKey
 	// TODO
 	IsReadOnly() bool
-	// TODO
 	Propagation() Propagation
 	// TODO
 	Timeout() time.Duration

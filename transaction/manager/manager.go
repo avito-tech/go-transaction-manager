@@ -57,17 +57,48 @@ func (m *Manager) Do(ctx context.Context, fn func(ctx context.Context) error) (e
 type closer func(context.Context, *error) error
 
 func (m *Manager) init(ctx context.Context) (context.Context, closer, error) {
-	// TODO add propagation
 	tr := transaction.TrFromCtx(ctx, m.settings.CtxKey())
+	isOpened := tr == nil
 
-	if tr == nil {
-		tr, err := m.factory()
-		if err != nil {
-			return nil, nil, multierr.Combine(transaction.ErrBegin, err)
+	switch m.settings.Propagation() {
+	case transaction.PropagationNever:
+		if isOpened {
+			return ctx, nil, transaction.ErrPropagationNever
 		}
 
-		return transaction.CtxWithTr(ctx, m.settings.CtxKey(), tr), newTxCommit(tr, m.log), nil
+		return ctx, newNilClose(), nil
+	case transaction.PropagationsMandatory:
+		if isOpened {
+			return ctx, nil, transaction.ErrPropagationMandatory
+		}
+	case transaction.PropagationRequired:
+		if isOpened {
+			return ctx, newNilClose(), nil
+		}
+	case transaction.PropagationNotSupported:
+		if isOpened {
+			// TODO remove transaction from ctx
+			panic("todo")
+		}
+
+		return ctx, newNilClose(), nil
+	case transaction.PropagationRequiresNew:
+		if isOpened {
+			// TODO remove transaction from ctx
+			panic("todo")
+		}
+	case transaction.PropagationSupports:
+		// TODO
+		panic("todo")
+	case transaction.PropagationNested:
+		// TODO create nested transaction
+		panic("todo")
 	}
 
-	return ctx, newNilClose(), nil
+	tr, err := m.factory()
+	if err != nil {
+		return nil, nil, multierr.Combine(transaction.ErrBegin, err)
+	}
+
+	return transaction.CtxWithTr(ctx, m.settings.CtxKey(), tr), newTxCommit(tr, m.log), nil
 }
