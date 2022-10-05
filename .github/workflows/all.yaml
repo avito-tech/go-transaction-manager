@@ -2,9 +2,11 @@ on:
   push:
     branches:
       - main
+      - v1
   pull_request:
     branches:
       - main
+      - v1
 name: Test
 env:
   GO_TARGET_VERSION: 1.19

@@ -1,21 +1,21 @@
-package sqlx_test
+package sql_test
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 
-	trsqlx "github.com/avito-tech/go-transaction-manager/sqlx"
+	trsql "github.com/avito-tech/go-transaction-manager/sql"
 	"github.com/avito-tech/go-transaction-manager/transaction/manager"
 )
 
 type repo struct {
-	db *sqlx.DB
+	db *sql.DB
 }
 
-func newRepo(db *sqlx.DB) *repo {
+func newRepo(db *sql.DB) *repo {
 	return &repo{
 		db: db,
 	}
@@ -26,38 +26,34 @@ type user struct {
 	Username string
 }
 
-type userRow struct {
-	ID       int64  `db:"user_id"`
-	Username string `db:"username"`
-}
-
 func (r *repo) GetByID(ctx context.Context, id int64) (*user, error) {
 	query := "SELECT * FROM user WHERE user_id = ?;"
 
-	row := userRow{}
+	u := &user{}
 
-	err := trsqlx.TrOrDBFromCtx(ctx, r.db).GetContext(ctx, &row, r.db.Rebind(query), id)
+	err := trsql.TrOrDBFromCtx(ctx, r.db).QueryRowContext(ctx, query, id).Scan(&u.ID, &u.Username)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.toModel(row), nil
+	return u, nil
 }
 
 func (r *repo) Save(ctx context.Context, u *user) error {
 	isNew := u.ID == 0
 
-	query := `UPDATE user SET username = :username WHERE user_id = :user_id;`
-	if isNew {
-		query = `INSERT INTO user (username) VALUES (:username);`
+	args := []interface{}{
+		sql.Named("username", u.Username),
+	}
+	query := `INSERT INTO user (username) VALUES (:username);`
+
+	if !isNew {
+		query = `UPDATE user SET username = :username WHERE user_id = :user_id;`
+
+		args = append(args, sql.Named("user_id", u.ID))
 	}
 
-	res, err := sqlx.NamedExecContext(
-		ctx,
-		trsqlx.TrOrDBFromCtx(ctx, r.db),
-		r.db.Rebind(query),
-		r.toRow(u),
-	)
+	res, err := trsql.TrOrDBFromCtx(ctx, r.db).ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	} else if !isNew {
@@ -77,23 +73,9 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 	return nil
 }
 
-func (r *repo) toRow(model *user) userRow {
-	return userRow{
-		ID:       model.ID,
-		Username: model.Username,
-	}
-}
-
-func (r *repo) toModel(row userRow) *user {
-	return &user{
-		ID:       row.ID,
-		Username: row.Username,
-	}
-}
-
 // Example demonstrates the implementation of the Repository pattern by TrManager.
 func Example() {
-	db, err := sqlx.Open("sqlite3", "file:test?mode=memory")
+	db, err := sql.Open("sqlite3", "file:test?mode=memory")
 	checkErr(err)
 
 	defer db.Close() //nolint:errcheck
@@ -109,7 +91,7 @@ func Example() {
 	}
 
 	ctx := context.Background()
-	trManager := manager.New(trsqlx.NewDefaultFactory(db))
+	trManager := manager.New(trsql.NewDefaultFactory(db))
 
 	err = trManager.Do(ctx, func(ctx context.Context) error {
 		if err := r.Save(ctx, u); err != nil {
