@@ -9,6 +9,8 @@ test:
 test.coverage:
 	$(GO_TEST) -covermode=atomic -coverprofile=$(COVERAGE_TMP_FILE)
 
+fmt:
+	go fmt ./...
 
 lint:
 	golangci-lint run -v
