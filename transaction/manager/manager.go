@@ -15,17 +15,17 @@ type Opt func(*Manager)
 
 // Manager is an implementation of Manager based on storing Transaction in context.Context.
 type Manager struct {
-	factory  transaction.TrFactory
-	settings transaction.Settings
-	log      logger
+	getTransaction transaction.TrFactory
+	settings       transaction.Settings
+	log            logger
 }
 
 // New creates Manager.
 func New(f transaction.TrFactory, oo ...Opt) *Manager {
 	m := &Manager{
-		factory:  f,
-		log:      defaultLog,
-		settings: settings.New(),
+		getTransaction: f,
+		log:            defaultLog,
+		settings:       settings.New(),
 	}
 
 	for _, o := range oo {
@@ -44,7 +44,12 @@ func WithSettings(s transaction.Settings) Opt {
 
 // Do processes a transaction inside a closure.
 func (m *Manager) Do(ctx context.Context, fn func(ctx context.Context) error) (err error) {
-	ctx, closer, err := m.init(ctx)
+	return m.DoWithSettings(ctx, m.settings, fn)
+}
+
+// DoWithSettings processes a transaction inside a closure with custom transaction.Settings.
+func (m *Manager) DoWithSettings(ctx context.Context, s transaction.Settings, fn func(ctx context.Context) error) (err error) {
+	ctx, closer, err := m.init(ctx, s.EnrichBy(m.settings))
 	if err != nil {
 		return err
 	}
@@ -56,49 +61,62 @@ func (m *Manager) Do(ctx context.Context, fn func(ctx context.Context) error) (e
 
 type closer func(context.Context, *error) error
 
-func (m *Manager) init(ctx context.Context) (context.Context, closer, error) {
-	tr := transaction.TrFromCtx(ctx, m.settings.CtxKey())
+func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Context, closer, error) {
+	tr := transaction.TrFromCtx(ctx, s.CtxKey())
 	isOpened := tr == nil
 
 	switch m.settings.Propagation() {
+	case transaction.PropagationRequired:
+		if isOpened {
+			return ctx, newNilClose(), nil
+		}
+	case transaction.PropagationNested:
+		if isOpened {
+			spFactor, ok := tr.(transaction.SPFactory)
+			if ok {
+				tr, err := spFactor.SavePoint(ctx, s)
+				if err != nil {
+					return ctx, nil, err
+				}
+
+				return transaction.CtxWithTr(ctx, s.CtxKey(), tr),
+					newTxCommit(tr, m.log),
+					nil
+			}
+
+			return ctx, newNilClose(), nil
+		}
+	case transaction.PropagationsMandatory:
+		if isOpened {
+			return ctx, newNilClose(), nil
+		}
+
+		return ctx, nil, transaction.ErrPropagationMandatory
 	case transaction.PropagationNever:
 		if isOpened {
 			return ctx, nil, transaction.ErrPropagationNever
 		}
 
 		return ctx, newNilClose(), nil
-	case transaction.PropagationsMandatory:
-		if isOpened {
-			return ctx, nil, transaction.ErrPropagationMandatory
-		}
-	case transaction.PropagationRequired:
-		if isOpened {
-			return ctx, newNilClose(), nil
-		}
 	case transaction.PropagationNotSupported:
 		if isOpened {
-			// TODO remove transaction from ctx
-			panic("todo")
+			return transaction.CtxWithTr(ctx, s.CtxKey(), nil),
+				newNilClose(),
+				nil
 		}
 
 		return ctx, newNilClose(), nil
 	case transaction.PropagationRequiresNew:
-		if isOpened {
-			// TODO remove transaction from ctx
-			panic("todo")
-		}
 	case transaction.PropagationSupports:
-		// TODO
-		panic("todo")
-	case transaction.PropagationNested:
-		// TODO create nested transaction
-		panic("todo")
+		return ctx, newNilClose(), nil
 	}
 
-	tr, err := m.factory()
+	tr, err := m.getTransaction(ctx)
 	if err != nil {
 		return nil, nil, multierr.Combine(transaction.ErrBegin, err)
 	}
 
-	return transaction.CtxWithTr(ctx, m.settings.CtxKey(), tr), newTxCommit(tr, m.log), nil
+	return transaction.CtxWithTr(ctx, s.CtxKey(), tr),
+		newTxCommit(tr, m.log),
+		nil
 }

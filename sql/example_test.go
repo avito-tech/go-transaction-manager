@@ -64,6 +64,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 
 	// For PostgreSql need to use NamedQueryContext with RETURNING
 	// DO UPDATE SET username = EXCLUDED.username RETURNING id;
+	// defer res.Next()
 	// if u.ID == 0 && res.Next() {
 	//		if err = res.Scan(&u.ID); err != nil {
 	//			return err
@@ -91,7 +92,7 @@ func Example() {
 	}
 
 	ctx := context.Background()
-	trManager := manager.New(trsql.NewDefaultFactory(db))
+	trManager := manager.New(trsql.NewFactory(db))
 
 	err = trManager.Do(ctx, func(ctx context.Context) error {
 		if err := r.Save(ctx, u); err != nil {

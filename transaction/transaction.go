@@ -3,6 +3,7 @@
 package transaction
 
 import (
+	"context"
 	"errors"
 	"fmt"
 )
@@ -25,7 +26,12 @@ func errTransaction(msg string) error {
 }
 
 // TrFactory is used in Manager to creates Transaction.
-type TrFactory func() (Transaction, error)
+type TrFactory func(ctx context.Context) (Transaction, error)
+
+// SPFactory creates save points for Transaction.
+type SPFactory interface {
+	SavePoint(ctx context.Context, s Settings) (Transaction, error)
+}
 
 // Transaction wraps different transaction implementations.
 type Transaction interface {
@@ -42,32 +48,28 @@ type Transaction interface {
 var (
 	// ErrPropagation occurs because of Propagation setting.
 	ErrPropagation = errTransaction("propagation")
-	// TODO need implement.
+	// ErrPropagationMandatory occurs when the transaction doesn't exist.
 	ErrPropagationMandatory = errNested(ErrPropagation, "mandatory")
-	// TODO need implement.
+	// ErrPropagationNever occurs when the transaction already exists.
 	ErrPropagationNever = errNested(ErrPropagation, "never")
 )
 
 // Propagation is a type for transaction propagation rules.
 type Propagation int8
 
-// TODO fix description and implement, there is not for NoSQL
-// now is copy of
-//
-// https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Propagation.html //nolint:lll
 const (
-	// PropagationRequired supports a current transaction, create a new one if none exists.
+	// PropagationRequired supports a current transaction, create a new one if none exists. This is default setting.
 	PropagationRequired Propagation = iota
 	// PropagationNested executes within a nested transaction
-	// if a current transaction exists, behave like REQUIRED otherwise.
+	// if a current transaction exists, create a new one if none exists.
 	PropagationNested
-	// PropagationsMandatory supports a current transaction.
+	// PropagationsMandatory supports a current transaction, throws an exception if none exists.
 	PropagationsMandatory
-	// PropagationNever executes non-transactionally, throw an exception if a transaction exists.
+	// PropagationNever executes non-transactionally, throws an exception if a transaction exists.
 	PropagationNever
-	// PropagationNotSupported executes non-transactionally, suspend the current transaction if one exists.
+	// PropagationNotSupported executes non-transactionally, suspends the current transaction if one exists.
 	PropagationNotSupported
-	// PropagationRequiresNew creates a new transaction, and suspend the current transaction if one exists.
+	// PropagationRequiresNew creates a new transaction, suspends the current transaction if one exists.
 	PropagationRequiresNew
 	// PropagationSupports supports a current transaction, execute non-transactionally if none exists.
 	PropagationSupports
