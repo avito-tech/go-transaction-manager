@@ -10,13 +10,6 @@ import (
 	"github.com/avito-tech/go-transaction-manager/transaction"
 )
 
-// NewDefaultFactory creates default transaction.Transaction(sqlx.Tx).
-func NewDefaultFactory(db *sqlx.DB) transaction.TrFactory {
-	return func() (transaction.Transaction, error) {
-		return NewTransaction(context.Background(), nil, db)
-	}
-}
-
 // Transaction is transaction.Transaction for sqlx.Tx.
 type Transaction struct {
 	tr       *sqlx.Tx
