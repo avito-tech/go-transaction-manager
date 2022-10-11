@@ -63,9 +63,9 @@ type closer func(context.Context, *error) error
 
 func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Context, closer, error) {
 	tr := transaction.TrFromCtx(ctx, s.CtxKey())
-	isOpened := tr == nil
+	isOpened := tr != nil
 
-	switch m.settings.Propagation() {
+	switch s.Propagation() {
 	case transaction.PropagationRequired:
 		if isOpened {
 			return ctx, newNilClose(), nil
