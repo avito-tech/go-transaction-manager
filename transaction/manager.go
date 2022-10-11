@@ -1,5 +1,7 @@
 package transaction
 
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
+
 import "context"
 
 // ErrBegin occurs when a transaction started with an error.

@@ -15,7 +15,7 @@ import (
 type Transaction struct {
 	tx        *sql.Tx
 	savePoint transaction.SavePoint
-	saves     *int64
+	saves     int64
 	isActive  bool
 }
 
@@ -93,21 +93,21 @@ func (tr *Transaction) IsActive() bool {
 }
 
 func (tr *Transaction) hasSavePoint() bool {
-	return atomic.LoadInt64(tr.saves) > 0
+	return atomic.LoadInt64(&tr.saves) > 0
 }
 
 func (tr *Transaction) incrementID() string {
-	atomic.AddInt64(tr.saves, 1)
+	atomic.AddInt64(&tr.saves, 1)
 
 	return tr.id()
 }
 
 func (tr *Transaction) decrementID() string {
-	atomic.AddInt64(tr.saves, -1)
+	atomic.AddInt64(&tr.saves, -1)
 
 	return tr.id()
 }
 
 func (tr *Transaction) id() string {
-	return fmt.Sprintf("tx_%d", atomic.LoadInt64(tr.saves))
+	return fmt.Sprintf("tx_%d", atomic.LoadInt64(&tr.saves))
 }

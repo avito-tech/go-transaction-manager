@@ -2,6 +2,8 @@
 // in the Application layer.
 package transaction
 
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
+
 import (
 	"context"
 	"errors"
@@ -43,6 +45,14 @@ type Transaction interface {
 	Rollback() error
 	// IsActive returns true if the transaction started but not committed or rolled back.
 	IsActive() bool
+}
+
+// transactionWithSP is used for tests.
+//
+//nolint:unused
+type transactionWithSP interface {
+	Transaction
+	SPFactory
 }
 
 var (

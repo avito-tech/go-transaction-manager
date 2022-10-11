@@ -1,5 +1,7 @@
 package transaction
 
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
+
 import "fmt"
 
 // This file copies an interface from https://github.com/DATA-DOG/go-txdb

@@ -103,7 +103,7 @@ func (s settings) SetIsReadOnly(b *bool) transaction.Settings {
 
 // Propagation returns transaction.Propagation.
 func (s settings) Propagation() transaction.Propagation {
-	if s.isReadOnly == nil {
+	if s.propagation == nil {
 		return defaultPropagation
 	}
 

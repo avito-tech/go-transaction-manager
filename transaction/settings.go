@@ -1,5 +1,7 @@
 package transaction
 
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
+
 import "time"
 
 // Settings is the configuration of the Manager.
