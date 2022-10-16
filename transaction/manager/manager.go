@@ -49,17 +49,22 @@ func (m *Manager) Do(ctx context.Context, fn func(ctx context.Context) error) (e
 
 // DoWithSettings processes a transaction inside a closure with custom transaction.Settings.
 func (m *Manager) DoWithSettings(ctx context.Context, s transaction.Settings, fn func(ctx context.Context) error) (err error) {
-	ctx, closer, err := m.init(ctx, s.EnrichBy(m.settings))
+	ctx, closer, err := m.init(ctx, s)
 	if err != nil {
 		return err
 	}
+
 	// Pointer to error is required for recovery and subsequent Transaction.Rollback call.
-	defer closer(ctx, &err) //nolint:errcheck // The error will be processed by the caller of Manager.Do.
+	defer func() {
+		if closerErr := closer(ctx, recover(), &err); closerErr != nil {
+			err = closerErr
+		}
+	}()
 
 	return fn(ctx)
 }
 
-type closer func(context.Context, *error) error
+type closer func(context.Context, interface{}, *error) error
 
 func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Context, closer, error) {
 	tr := transaction.TrFromCtx(ctx, s.CtxKey())
@@ -107,6 +112,7 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 
 		return ctx, newNilClose(), nil
 	case transaction.PropagationRequiresNew:
+		// do nothing
 	case transaction.PropagationSupports:
 		return ctx, newNilClose(), nil
 	}
