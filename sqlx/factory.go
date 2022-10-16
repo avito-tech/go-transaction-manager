@@ -11,6 +11,6 @@ import (
 // NewDefaultFactory creates default transaction.Transaction(sqlx.Tx).
 func NewDefaultFactory(db *sqlx.DB) transaction.TrFactory {
 	return func(ctx context.Context) (transaction.Transaction, error) {
-		return NewTransaction(ctx, nil, db)
+		return NewTransaction(ctx, transaction.NewSavePoint(), nil, db)
 	}
 }
