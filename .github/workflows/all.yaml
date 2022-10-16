@@ -19,9 +19,9 @@ jobs:
           # - '1.10' doesn't have go module
           # - 1.11
           # - 1.12 doesn't have errors pkg
-          # - 1.13 problem with recovery and defer
-          # - 1.14
-          # - 1.15
+          - 1.13
+          - 1.14
+          - 1.15
           - 1.16
           - 1.17
           - 1.18
