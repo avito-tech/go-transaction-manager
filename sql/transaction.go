@@ -12,6 +12,7 @@ import (
 )
 
 // Transaction is transaction.Transaction for sql.Tx.
+// transaction.SavePoint has IsActive as true while transaction.Transaction is opened.
 type Transaction struct {
 	tx        *sql.Tx
 	savePoint transaction.SavePoint
@@ -20,38 +21,43 @@ type Transaction struct {
 }
 
 // NewTransaction creates transaction.Transaction for sql.Tx.
-func NewTransaction(ctx context.Context, sp transaction.SavePoint, opts *sql.TxOptions, db *sql.DB) (*Transaction, error) {
-	tr, err := db.BeginTx(ctx, opts)
+func NewTransaction(
+	ctx context.Context,
+	sp transaction.SavePoint,
+	opts *sql.TxOptions,
+	db *sql.DB,
+) (*Transaction, error) {
+	tx, err := db.BeginTx(ctx, opts)
 	if err != nil {
 		return nil, multierr.Combine(transaction.ErrTransaction, err)
 	}
 
-	return &Transaction{tx: tr, savePoint: sp, isActive: true}, nil
+	return &Transaction{tx: tx, savePoint: sp, isActive: true}, nil
 }
 
 // Transaction returns the real transaction sqlx.Tx.
-func (tr *Transaction) Transaction() interface{} {
-	return tr.tx
+func (t *Transaction) Transaction() interface{} {
+	return t.tx
 }
 
 // SavePoint creates nested transaction by save point.
-func (tr *Transaction) SavePoint(ctx context.Context, _ transaction.Settings) (*Transaction, error) {
+func (t *Transaction) SavePoint(ctx context.Context, _ transaction.Settings) (*Transaction, error) {
 	// TODO check that is transaction.Settings necessary
-	_, err := tr.tx.ExecContext(ctx, tr.savePoint.Create(tr.incrementID()))
+	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
 	if err != nil {
 		return nil, multierr.Combine(transaction.ErrTransaction, err)
 	}
 
-	return tr, nil
+	return t, nil
 }
 
 // Commit calls close for a database.
-func (tr *Transaction) Commit() error {
-	tr.isActive = false
+func (t *Transaction) Commit() error {
+	t.isActive = false
 
-	if tr.hasSavePoint() {
-		_, err := tr.tx.Exec(tr.savePoint.Release(tr.id()))
-		tr.decrementID()
+	if t.hasSavePoint() {
+		_, err := t.tx.Exec(t.savePoint.Release(t.id()))
+		t.decrementID()
 
 		if err != nil {
 			return multierr.Combine(transaction.ErrCommit, err)
@@ -60,7 +66,7 @@ func (tr *Transaction) Commit() error {
 		return nil
 	}
 
-	if err := tr.tx.Commit(); err != nil {
+	if err := t.tx.Commit(); err != nil {
 		return multierr.Combine(transaction.ErrCommit, err)
 	}
 
@@ -68,11 +74,9 @@ func (tr *Transaction) Commit() error {
 }
 
 // Rollback calls close for a database.
-func (tr *Transaction) Rollback() error {
-	tr.isActive = false
-
-	if tr.hasSavePoint() {
-		_, err := tr.tx.Exec(tr.savePoint.Rollback(tr.id()))
+func (t *Transaction) Rollback() error {
+	if t.hasSavePoint() {
+		_, err := t.tx.Exec(t.savePoint.Rollback(t.id()))
 		if err != nil {
 			return multierr.Combine(transaction.ErrCommit, err)
 		}
@@ -80,7 +84,9 @@ func (tr *Transaction) Rollback() error {
 		return nil
 	}
 
-	if err := tr.tx.Rollback(); err != nil {
+	t.isActive = false
+
+	if err := t.tx.Rollback(); err != nil {
 		return multierr.Combine(transaction.ErrRollback, err)
 	}
 
@@ -88,26 +94,26 @@ func (tr *Transaction) Rollback() error {
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
-func (tr *Transaction) IsActive() bool {
-	return tr.isActive
+func (t *Transaction) IsActive() bool {
+	return t.isActive
 }
 
-func (tr *Transaction) hasSavePoint() bool {
-	return atomic.LoadInt64(&tr.saves) > 0
+func (t *Transaction) hasSavePoint() bool {
+	return atomic.LoadInt64(&t.saves) > 0
 }
 
-func (tr *Transaction) incrementID() string {
-	atomic.AddInt64(&tr.saves, 1)
+func (t *Transaction) incrementID() string {
+	atomic.AddInt64(&t.saves, 1)
 
-	return tr.id()
+	return t.id()
 }
 
-func (tr *Transaction) decrementID() string {
-	atomic.AddInt64(&tr.saves, -1)
+func (t *Transaction) decrementID() string {
+	atomic.AddInt64(&t.saves, -1)
 
-	return tr.id()
+	return t.id()
 }
 
-func (tr *Transaction) id() string {
-	return fmt.Sprintf("tx_%d", atomic.LoadInt64(&tr.saves))
+func (t *Transaction) id() string {
+	return fmt.Sprintf("tx_%d", atomic.LoadInt64(&t.saves))
 }
