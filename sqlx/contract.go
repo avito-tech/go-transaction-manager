@@ -23,8 +23,6 @@ type Tr interface {
 	NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
 	NamedExec(query string, arg interface{}) (sql.Result, error)
 
-	QueryxContext(ctx context.Context, query string, args ...interface{}) (*sqlx.Rows, error)
-	QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row
 	Queryx(query string, args ...interface{}) (*sqlx.Rows, error)
 	QueryRowx(query string, args ...interface{}) *sqlx.Row
 	NamedQuery(query string, arg interface{}) (*sqlx.Rows, error)
@@ -34,8 +32,4 @@ type Tr interface {
 
 	Get(dest interface{}, query string, args ...interface{}) error
 	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
-
-	DriverName() string
-	Rebind(query string) string
-	BindNamed(query string, arg interface{}) (string, []interface{}, error)
 }

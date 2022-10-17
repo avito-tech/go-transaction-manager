@@ -14,3 +14,6 @@ fmt:
 
 lint:
 	golangci-lint run -v
+
+generate:
+	go generate ./...

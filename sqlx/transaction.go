@@ -1,8 +1,12 @@
 package sqlx
 
+// TODO move common solutions for sqlx and sql in one place.
+
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"sync/atomic"
 
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/multierr"
@@ -10,39 +14,61 @@ import (
 	"github.com/avito-tech/go-transaction-manager/transaction"
 )
 
-// NewDefaultFactory creates default transaction.Transaction(sqlx.Tx).
-func NewDefaultFactory(db *sqlx.DB) transaction.TrFactory {
-	return func() (transaction.Transaction, error) {
-		return NewTransaction(context.Background(), nil, db)
-	}
-}
-
 // Transaction is transaction.Transaction for sqlx.Tx.
 type Transaction struct {
-	tr       *sqlx.Tx
-	isActive bool
+	tx        *sqlx.Tx
+	savePoint transaction.SavePoint
+	saves     int64
+	isActive  bool
 }
 
 // NewTransaction creates transaction.Transaction for sqlx.Tx.
-func NewTransaction(ctx context.Context, opts *sql.TxOptions, db *sqlx.DB) (*Transaction, error) {
-	tr, err := db.BeginTxx(ctx, opts)
+func NewTransaction(
+	ctx context.Context,
+	sp transaction.SavePoint,
+	opts *sql.TxOptions,
+	db *sqlx.DB,
+) (*Transaction, error) {
+	tx, err := db.BeginTxx(ctx, opts)
 	if err != nil {
 		return nil, multierr.Combine(transaction.ErrTransaction, err)
 	}
 
-	return &Transaction{tr: tr, isActive: true}, nil
+	return &Transaction{tx: tx, savePoint: sp, isActive: true}, nil
 }
 
 // Transaction returns the real transaction sqlx.Tx.
 func (t *Transaction) Transaction() interface{} {
-	return t.tr
+	return t.tx
+}
+
+// SavePoint creates nested transaction by save point.
+func (t *Transaction) SavePoint(ctx context.Context, _ transaction.Settings) (*Transaction, error) {
+	// TODO check that is transaction.Settings necessary
+	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
+	if err != nil {
+		return nil, multierr.Combine(transaction.ErrTransaction, err)
+	}
+
+	return t, nil
 }
 
 // Commit calls close for a database.
 func (t *Transaction) Commit() error {
 	t.isActive = false
 
-	if err := t.tr.Commit(); err != nil {
+	if t.hasSavePoint() {
+		_, err := t.tx.Exec(t.savePoint.Release(t.id()))
+		t.decrementID()
+
+		if err != nil {
+			return multierr.Combine(transaction.ErrCommit, err)
+		}
+
+		return nil
+	}
+
+	if err := t.tx.Commit(); err != nil {
 		return multierr.Combine(transaction.ErrCommit, err)
 	}
 
@@ -51,9 +77,18 @@ func (t *Transaction) Commit() error {
 
 // Rollback calls close for a database.
 func (t *Transaction) Rollback() error {
+	if t.hasSavePoint() {
+		_, err := t.tx.Exec(t.savePoint.Rollback(t.id()))
+		if err != nil {
+			return multierr.Combine(transaction.ErrCommit, err)
+		}
+
+		return nil
+	}
+
 	t.isActive = false
 
-	if err := t.tr.Rollback(); err != nil {
+	if err := t.tx.Rollback(); err != nil {
 		return multierr.Combine(transaction.ErrRollback, err)
 	}
 
@@ -63,4 +98,24 @@ func (t *Transaction) Rollback() error {
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
 	return t.isActive
+}
+
+func (t *Transaction) hasSavePoint() bool {
+	return atomic.LoadInt64(&t.saves) > 0
+}
+
+func (t *Transaction) incrementID() string {
+	atomic.AddInt64(&t.saves, 1)
+
+	return t.id()
+}
+
+func (t *Transaction) decrementID() string {
+	atomic.AddInt64(&t.saves, -1)
+
+	return t.id()
+}
+
+func (t *Transaction) id() string {
+	return fmt.Sprintf("tx_%d", atomic.LoadInt64(&t.saves))
 }

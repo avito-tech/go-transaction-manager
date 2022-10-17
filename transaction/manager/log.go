@@ -1,5 +1,7 @@
 package manager
 
+//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
+
 type logger interface {
 	Printf(format string, a ...interface{})
 }

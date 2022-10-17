@@ -21,9 +21,10 @@ func newTxCommit(tr transaction.Transaction, l logger) closer {
 	}).close
 }
 
-func (c *trCloser) close(ctx context.Context, errInProcessTr *error) error {
+func (c *trCloser) close(_ context.Context, p interface{}, errInProcessTr *error) error {
 	// defer c.cancel()
-	if p := recover(); p != nil {
+	// recover from panic
+	if p != nil {
 		if err := c.tr.Rollback(); err != nil {
 			c.log.Printf("%v, %v", err, p)
 		}
@@ -35,6 +36,8 @@ func (c *trCloser) close(ctx context.Context, errInProcessTr *error) error {
 		if errRollback := c.tr.Rollback(); errRollback != nil {
 			return multierr.Combine(*errInProcessTr, transaction.ErrRollback, errRollback)
 		}
+
+		return *errInProcessTr
 	}
 
 	if err := c.tr.Commit(); err != nil {
@@ -45,7 +48,11 @@ func (c *trCloser) close(ctx context.Context, errInProcessTr *error) error {
 }
 
 func newNilClose() closer {
-	return func(ctx context.Context, err *error) error {
+	return func(ctx context.Context, p interface{}, err *error) error {
+		if p != nil {
+			panic(p)
+		}
+
 		if *err != nil {
 			return *err
 		}
