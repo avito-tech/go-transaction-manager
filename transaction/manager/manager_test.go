@@ -9,8 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	tmmock "github.com/avito-tech/go-transaction-manager/internal/mock"
+	trmmock "github.com/avito-tech/go-transaction-manager/internal/mock"
 	"github.com/avito-tech/go-transaction-manager/transaction"
+	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
 	mock_log "github.com/avito-tech/go-transaction-manager/transaction/manager/mock"
 	"github.com/avito-tech/go-transaction-manager/transaction/mock"
 	"github.com/avito-tech/go-transaction-manager/transaction/settings"
@@ -30,6 +31,8 @@ func Test_transactionManager_Do(t *testing.T) {
 		settings       transaction.Settings
 		nestedSettings transaction.Settings
 	}
+
+	ctxManager := trmcontext.DefaultManager
 
 	emptyFactory := func(ctx context.Context) (transaction.Transaction, error) {
 		return nil, nil
@@ -95,7 +98,7 @@ func Test_transactionManager_Do(t *testing.T) {
 		},
 		"PropagationsMandatory_success_commit": {
 			args: args{
-				ctx: transaction.CtxWithTr(
+				ctx: ctxManager.SetByKey(
 					context.Background(),
 					settings.DefaultCtxKey,
 					mock.NewMockTransaction(nil),
@@ -343,9 +346,9 @@ func Test_transactionManager_Do(t *testing.T) {
 						tt.args.nestedSettings,
 						func(ctx context.Context) error {
 							if tt.wantEmptyCtx {
-								require.Nil(t, transaction.TrFromCtx(ctx, settings.DefaultCtxKey))
+								require.Nil(t, ctxManager.Default(ctx))
 							} else {
-								require.NotNil(t, transaction.TrFromCtx(ctx, settings.DefaultCtxKey))
+								require.NotNil(t, ctxManager.Default(ctx))
 							}
 
 							return nil
@@ -470,7 +473,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	testPanic := "panic"
 	testRollbackErr := errors.New("rollback error")
 
-	log := tmmock.NewLog()
+	log := trmmock.NewLog()
 	factory := func(ctx context.Context) (transaction.Transaction, error) {
 		tx := mock.NewMockTransaction(ctrl)
 
@@ -480,6 +483,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	}
 
 	m := New(factory, WithLog(log))
+	ctxManager := trmcontext.DefaultManager
 
 	defer func() {
 		p := recover()
@@ -492,7 +496,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 		return m.Do(ctx, func(ctx context.Context) error {
 			assert.NotNil(
 				t,
-				transaction.TrFromCtx(ctx, settings.DefaultCtxKey),
+				ctxManager.Default(ctx),
 			)
 
 			panic(testPanic)

@@ -7,17 +7,26 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 
-	trsqlx "github.com/avito-tech/go-transaction-manager/sqlx"
+	trmsqlx "github.com/avito-tech/go-transaction-manager/sqlx"
 	"github.com/avito-tech/go-transaction-manager/transaction/manager"
 )
 
-type repo struct {
-	db *sqlx.DB
+func newDB() *sqlx.DB {
+	db, err := sqlx.Open("sqlite3", "file:test?mode=memory")
+	checkErr(err)
+
+	return db
 }
 
-func newRepo(db *sqlx.DB) *repo {
+type repo struct {
+	db     *sqlx.DB
+	getter *trmsqlx.CtxGetter
+}
+
+func newRepo(db *sqlx.DB, c *trmsqlx.CtxGetter) *repo {
 	return &repo{
-		db: db,
+		db:     db,
+		getter: c,
 	}
 }
 
@@ -36,7 +45,7 @@ func (r *repo) GetByID(ctx context.Context, id int64) (*user, error) {
 
 	row := userRow{}
 
-	err := trsqlx.TrOrDBFromCtx(ctx, r.db).GetContext(ctx, &row, r.db.Rebind(query), id)
+	err := r.getter.DefaultTrOrDB(ctx, r.db).GetContext(ctx, &row, r.db.Rebind(query), id)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +63,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 
 	res, err := sqlx.NamedExecContext(
 		ctx,
-		trsqlx.TrOrDBFromCtx(ctx, r.db),
+		r.getter.DefaultTrOrDB(ctx, r.db),
 		r.db.Rebind(query),
 		r.toRow(u),
 	)
@@ -94,23 +103,22 @@ func (r *repo) toModel(row userRow) *user {
 
 // Example demonstrates the implementation of the Repository pattern by TrManager.
 func Example() {
-	db, err := sqlx.Open("sqlite3", "file:test?mode=memory")
-	checkErr(err)
+	db := newDB()
 
 	defer db.Close() //nolint:errcheck
 
 	sqlStmt := `CREATE TABLE IF NOT EXISTS user (user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, username TEXT);`
-	_, err = db.Exec(sqlStmt)
+	_, err := db.Exec(sqlStmt)
 	checkErr(err, sqlStmt)
 
-	r := newRepo(db)
+	r := newRepo(db, trmsqlx.DefaultCtxGetter)
 
 	u := &user{
 		Username: "username",
 	}
 
 	ctx := context.Background()
-	trManager := manager.New(trsqlx.NewDefaultFactory(db))
+	trManager := manager.New(trmsqlx.NewFactory(db))
 
 	err = trManager.Do(ctx, func(ctx context.Context) error {
 		if err := r.Save(ctx, u); err != nil {
@@ -125,16 +133,14 @@ func Example() {
 			return err
 		}
 
-		userFromDB, err := r.GetByID(ctx, u.ID)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(userFromDB)
-
 		return nil
 	})
 	checkErr(err)
+
+	userFromDB, err := r.GetByID(ctx, u.ID)
+	checkErr(err)
+
+	fmt.Println(userFromDB)
 
 	// Output: &{1 new_username}
 }
