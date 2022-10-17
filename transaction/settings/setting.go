@@ -20,19 +20,20 @@ const (
 
 type ctxKey struct{}
 
-// Opt is type to set settings' properties.
-type Opt func(s *settings)
+// Opt is type to set Settings' properties.
+type Opt func(s *Settings)
 
-type settings struct {
+// Settings is an implementation of transaction.Settings.
+type Settings struct {
 	ctxKey      *transaction.CtxKey
 	isReadOnly  *bool
 	propagation *transaction.Propagation
 	timeout     *time.Duration
 }
 
-// New creates settings.
-func New(oo ...Opt) transaction.Settings {
-	s := &settings{}
+// New creates transaction.Settings.
+func New(oo ...Opt) Settings {
+	s := &Settings{}
 
 	for _, o := range oo {
 		o(s)
@@ -41,7 +42,8 @@ func New(oo ...Opt) transaction.Settings {
 	return *s
 }
 
-func (s settings) EnrichBy(external transaction.Settings) transaction.Settings {
+//revive:disable:exported
+func (s Settings) EnrichBy(external transaction.Settings) transaction.Settings {
 	if s.ctxKey == nil {
 		s.SetCtxKey(external.CtxKeyOrNil())
 	}
@@ -64,7 +66,7 @@ func (s settings) EnrichBy(external transaction.Settings) transaction.Settings {
 // CtxKey returns transaction.CtxKey for the transaction.Transaction.
 //
 //nolint:ireturn,nolintlint
-func (s settings) CtxKey() transaction.CtxKey { //nolint:ireturn,nolintlint
+func (s Settings) CtxKey() transaction.CtxKey { //nolint:ireturn,nolintlint
 	if s.ctxKey == nil {
 		return DefaultCtxKey
 	}
@@ -72,18 +74,18 @@ func (s settings) CtxKey() transaction.CtxKey { //nolint:ireturn,nolintlint
 	return *s.ctxKey
 }
 
-func (s settings) CtxKeyOrNil() *transaction.CtxKey {
+func (s Settings) CtxKeyOrNil() *transaction.CtxKey {
 	return s.ctxKey
 }
 
-func (s settings) SetCtxKey(key *transaction.CtxKey) transaction.Settings {
+func (s Settings) SetCtxKey(key *transaction.CtxKey) transaction.Settings {
 	s.ctxKey = key
 
 	return s
 }
 
 // IsReadOnly defined that the transaction.Transaction can or cannot write data to a database.
-func (s settings) IsReadOnly() bool {
+func (s Settings) IsReadOnly() bool {
 	if s.isReadOnly == nil {
 		return defaultIsReadOnly
 	}
@@ -91,18 +93,18 @@ func (s settings) IsReadOnly() bool {
 	return *s.isReadOnly
 }
 
-func (s settings) IsReadOnlyOrNil() *bool {
+func (s Settings) IsReadOnlyOrNil() *bool {
 	return s.isReadOnly
 }
 
-func (s settings) SetIsReadOnly(b *bool) transaction.Settings {
+func (s Settings) SetIsReadOnly(b *bool) transaction.Settings {
 	s.isReadOnly = b
 
 	return s
 }
 
 // Propagation returns transaction.Propagation.
-func (s settings) Propagation() transaction.Propagation {
+func (s Settings) Propagation() transaction.Propagation {
 	if s.propagation == nil {
 		return defaultPropagation
 	}
@@ -110,18 +112,18 @@ func (s settings) Propagation() transaction.Propagation {
 	return *s.propagation
 }
 
-func (s settings) PropagationOrNil() *transaction.Propagation {
+func (s Settings) PropagationOrNil() *transaction.Propagation {
 	return s.propagation
 }
 
-func (s settings) SetPropagation(p *transaction.Propagation) transaction.Settings {
+func (s Settings) SetPropagation(p *transaction.Propagation) transaction.Settings {
 	s.propagation = p
 
 	return s
 }
 
 // Timeout returns time.Duration of the transaction.Transaction.
-func (s settings) Timeout() time.Duration {
+func (s Settings) Timeout() time.Duration {
 	if s.timeout == nil {
 		return defaultTimeout
 	}
@@ -129,11 +131,11 @@ func (s settings) Timeout() time.Duration {
 	return *s.timeout
 }
 
-func (s settings) TimeoutOrNil() *time.Duration {
+func (s Settings) TimeoutOrNil() *time.Duration {
 	return s.timeout
 }
 
-func (s settings) SetTimeout(t *time.Duration) transaction.Settings {
+func (s Settings) SetTimeout(t *time.Duration) transaction.Settings {
 	s.timeout = t
 
 	return s

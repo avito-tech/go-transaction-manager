@@ -43,11 +43,11 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // SavePoint creates nested transaction by save point.
-func (t *Transaction) SavePoint(ctx context.Context, _ transaction.Settings) (*Transaction, error) {
-	// TODO check that is transaction.Settings necessary
+func (t *Transaction) SavePoint(ctx context.Context, _ transaction.Settings) (transaction.Transaction, error) { //nolint:ireturn
+	// TODO check that is transaction.Settings necessary.
 	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
 	if err != nil {
-		return nil, multierr.Combine(transaction.ErrTransaction, err)
+		return nil, multierr.Combine(transaction.ErrSPBegin, err)
 	}
 
 	return t, nil
@@ -55,18 +55,16 @@ func (t *Transaction) SavePoint(ctx context.Context, _ transaction.Settings) (*T
 
 // Commit calls close for a database.
 func (t *Transaction) Commit() error {
-	t.isActive = false
-
 	if t.hasSavePoint() {
-		_, err := t.tx.Exec(t.savePoint.Release(t.id()))
-		t.decrementID()
-
+		_, err := t.tx.Exec(t.savePoint.Release(t.decrementID()))
 		if err != nil {
-			return multierr.Combine(transaction.ErrCommit, err)
+			return multierr.Combine(transaction.ErrSPCommit, err)
 		}
 
 		return nil
 	}
+
+	t.isActive = false
 
 	if err := t.tx.Commit(); err != nil {
 		return multierr.Combine(transaction.ErrCommit, err)
@@ -78,9 +76,9 @@ func (t *Transaction) Commit() error {
 // Rollback calls close for a database.
 func (t *Transaction) Rollback() error {
 	if t.hasSavePoint() {
-		_, err := t.tx.Exec(t.savePoint.Rollback(t.id()))
+		_, err := t.tx.Exec(t.savePoint.Rollback(t.decrementID()))
 		if err != nil {
-			return multierr.Combine(transaction.ErrCommit, err)
+			return multierr.Combine(transaction.ErrSPRollback, err)
 		}
 
 		return nil
@@ -111,7 +109,7 @@ func (t *Transaction) incrementID() string {
 }
 
 func (t *Transaction) decrementID() string {
-	atomic.AddInt64(&t.saves, -1)
+	defer atomic.AddInt64(&t.saves, -1)
 
 	return t.id()
 }

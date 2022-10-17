@@ -7,26 +7,44 @@ import (
 	"database/sql"
 
 	"github.com/avito-tech/go-transaction-manager/transaction"
-	"github.com/avito-tech/go-transaction-manager/transaction/settings"
+	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
 )
 
-// TrOrDBFromCtx returns the opened Tr from the context.Context or sql.DB.
-// TODO add ability to set ctxKey.
-func TrOrDBFromCtx(ctx context.Context, db Tr) Tr {
-	if tr, ok := TrFromCtx(ctx); ok {
-		return tr
+// DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
+//
+//nolint:gochecknoglobals
+var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
+
+// CtxGetter gets Tr from transaction.СtxManager by casting transaction.Transaction to Tr.
+type CtxGetter struct {
+	ctxManager transaction.СtxManager
+}
+
+//revive:disable:exported
+func NewCtxGetter(c transaction.СtxManager) *CtxGetter {
+	return &CtxGetter{ctxManager: c}
+}
+
+func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db Tr) Tr {
+	if tr := c.ctxManager.Default(ctx); tr != nil {
+		return c.convert(tr)
 	}
 
 	return db
 }
 
-// TrFromCtx returns the opened Tr from the context.Context.
-func TrFromCtx(ctx context.Context) (Tr, bool) {
-	if tr := transaction.TrFromCtx(ctx, settings.DefaultCtxKey); tr != nil {
-		tx, ok := tr.Transaction().(*sql.Tx)
-
-		return tx, ok
+func (c *CtxGetter) TrOrDB(ctx context.Context, key transaction.CtxKey, db Tr) Tr {
+	if tr := c.ctxManager.ByKey(ctx, key); tr != nil {
+		return c.convert(tr)
 	}
 
-	return nil, false
+	return db
+}
+
+func (c *CtxGetter) convert(tr transaction.Transaction) Tr {
+	if tx, ok := tr.Transaction().(*sql.Tx); ok {
+		return tx
+	}
+
+	return nil
 }
