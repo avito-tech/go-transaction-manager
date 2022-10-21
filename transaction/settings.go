@@ -6,6 +6,8 @@ import "time"
 
 // Settings is the configuration of the Manager.
 // Preferable to implement as an immutable struct.
+//
+// settings.Settings is a default implementation of Settings.
 type Settings interface {
 	// EnrichBy fills nil properties from external Settings.
 	EnrichBy(external Settings) Settings

@@ -7,6 +7,7 @@ import (
 	"go.uber.org/multierr"
 
 	"github.com/avito-tech/go-transaction-manager/transaction"
+	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
 	"github.com/avito-tech/go-transaction-manager/transaction/settings"
 )
 
@@ -17,6 +18,7 @@ type Opt func(*Manager)
 type Manager struct {
 	getTransaction transaction.TrFactory
 	settings       transaction.Settings
+	ctxManager     transaction.СtxManager
 	log            logger
 }
 
@@ -25,6 +27,7 @@ func New(f transaction.TrFactory, oo ...Opt) *Manager {
 	m := &Manager{
 		getTransaction: f,
 		log:            defaultLog,
+		ctxManager:     trmcontext.DefaultManager,
 		settings:       settings.New(),
 	}
 
@@ -33,13 +36,6 @@ func New(f transaction.TrFactory, oo ...Opt) *Manager {
 	}
 
 	return m
-}
-
-// WithSettings sets transaction.Settings for Manager.
-func WithSettings(s transaction.Settings) Opt {
-	return func(m *Manager) {
-		m.settings = s
-	}
 }
 
 // Do processes a transaction inside a closure.
@@ -55,11 +51,7 @@ func (m *Manager) DoWithSettings(ctx context.Context, s transaction.Settings, fn
 	}
 
 	// Pointer to error is required for recovery and subsequent Transaction.Rollback call.
-	defer func() {
-		if closerErr := closer(ctx, recover(), &err); closerErr != nil {
-			err = closerErr
-		}
-	}()
+	defer func() { err = closer(ctx, recover(), &err) }()
 
 	return fn(ctx)
 }
@@ -67,7 +59,7 @@ func (m *Manager) DoWithSettings(ctx context.Context, s transaction.Settings, fn
 type closer func(context.Context, interface{}, *error) error
 
 func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Context, closer, error) {
-	tr := transaction.TrFromCtx(ctx, s.CtxKey())
+	tr := m.ctxManager.ByKey(ctx, s.CtxKey())
 	isOpened := tr != nil
 
 	switch s.Propagation() {
@@ -84,7 +76,7 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 					return ctx, nil, err
 				}
 
-				return transaction.CtxWithTr(ctx, s.CtxKey(), tr),
+				return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
 					newTxCommit(tr, m.log),
 					nil
 			}
@@ -105,7 +97,7 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 		return ctx, newNilClose(), nil
 	case transaction.PropagationNotSupported:
 		if isOpened {
-			return transaction.CtxWithTr(ctx, s.CtxKey(), nil),
+			return m.ctxManager.SetByKey(ctx, s.CtxKey(), nil),
 				newNilClose(),
 				nil
 		}
@@ -122,7 +114,7 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 		return nil, nil, multierr.Combine(transaction.ErrBegin, err)
 	}
 
-	return transaction.CtxWithTr(ctx, s.CtxKey(), tr),
+	return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
 		newTxCommit(tr, m.log),
 		nil
 }

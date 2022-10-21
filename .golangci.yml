@@ -77,6 +77,14 @@ issues:
       linters:
         - wsl
       text: "only cuddled expressions if assigning variable or using from line above"
+    - path: _test\.go
+      linters:
+        - revive
+      text: "context-keys-type: should not use basic type string as key in context.WithValue"
+    - path: _test\.go
+      linters:
+        - staticcheck
+      text: "SA1029: should not use built-in type string as key for value; define your own type to avoid collisions"
     - &internal_text
       path: ^internal
       text: "var-naming: don't use an underscore in package name"

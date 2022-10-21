@@ -13,10 +13,20 @@ import (
 var (
 	// ErrTransaction is an error while working with a transaction.
 	ErrTransaction = errors.New("transaction")
+
+	// ErrBegin occurs when a transaction started with an error.
+	ErrBegin = errTransaction("begin")
 	// ErrCommit occurs when commit finished with an error.
-	ErrCommit = errTransaction("close")
+	ErrCommit = errTransaction("commit")
 	// ErrRollback occurs when rollback finished with an error.
 	ErrRollback = errTransaction("rollback")
+
+	// ErrSPBegin occurs when a savepoint started with an error.
+	ErrSPBegin = errNested(ErrBegin, "savepoint")
+	// ErrSPCommit occurs when release savepoint finished with an error.
+	ErrSPCommit = errNested(ErrCommit, "savepoint")
+	// ErrSPRollback occurs when rollback savepoint finished with an error.
+	ErrSPRollback = errNested(ErrRollback, "savepoint")
 )
 
 func errNested(err error, msg string) error {

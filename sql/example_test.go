@@ -7,17 +7,19 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	trsql "github.com/avito-tech/go-transaction-manager/sql"
+	trmsql "github.com/avito-tech/go-transaction-manager/sql"
 	"github.com/avito-tech/go-transaction-manager/transaction/manager"
 )
 
 type repo struct {
-	db *sql.DB
+	db     *sql.DB
+	getter *trmsql.CtxGetter
 }
 
-func newRepo(db *sql.DB) *repo {
+func newRepo(db *sql.DB, c *trmsql.CtxGetter) *repo {
 	return &repo{
-		db: db,
+		db:     db,
+		getter: c,
 	}
 }
 
@@ -31,7 +33,7 @@ func (r *repo) GetByID(ctx context.Context, id int64) (*user, error) {
 
 	u := &user{}
 
-	err := trsql.TrOrDBFromCtx(ctx, r.db).QueryRowContext(ctx, query, id).Scan(&u.ID, &u.Username)
+	err := r.getter.DefaultTrOrDB(ctx, r.db).QueryRowContext(ctx, query, id).Scan(&u.ID, &u.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +55,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 		args = append(args, sql.Named("user_id", u.ID))
 	}
 
-	res, err := trsql.TrOrDBFromCtx(ctx, r.db).ExecContext(ctx, query, args...)
+	res, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	} else if !isNew {
@@ -85,14 +87,14 @@ func Example() {
 	_, err = db.Exec(sqlStmt)
 	checkErr(err, sqlStmt)
 
-	r := newRepo(db)
+	r := newRepo(db, trmsql.DefaultCtxGetter)
 
 	u := &user{
 		Username: "username",
 	}
 
 	ctx := context.Background()
-	trManager := manager.New(trsql.NewFactory(db))
+	trManager := manager.New(trmsql.NewFactory(db))
 
 	err = trManager.Do(ctx, func(ctx context.Context) error {
 		if err := r.Save(ctx, u); err != nil {
@@ -107,16 +109,14 @@ func Example() {
 			return err
 		}
 
-		userFromDB, err := r.GetByID(ctx, u.ID)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(userFromDB)
-
 		return nil
 	})
 	checkErr(err)
+
+	userFromDB, err := r.GetByID(ctx, u.ID)
+	checkErr(err)
+
+	fmt.Println(userFromDB)
 
 	// Output: &{1 new_username}
 }
