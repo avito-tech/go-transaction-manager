@@ -8,8 +8,8 @@ import (
 	"github.com/avito-tech/go-transaction-manager/transaction"
 )
 
-// NewDefaultFactory creates default transaction.Transaction(sqlx.Tx).
-func NewDefaultFactory(db *sqlx.DB) transaction.TrFactory {
+// NewFactory creates default transaction.Transaction(sqlx.Tx).
+func NewFactory(db *sqlx.DB) transaction.TrFactory {
 	return func(ctx context.Context) (transaction.Transaction, error) {
 		return NewTransaction(ctx, transaction.NewSavePoint(), nil, db)
 	}
