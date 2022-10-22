@@ -18,15 +18,13 @@ func Generate() transaction.CtxKey {
 
 // KeyGenerator is a generator of transaction.CtxKey.
 type KeyGenerator struct {
-	key *int64
+	key int64
 }
 
 // NewKeyGenerator creates KeyGenerator.
 func NewKeyGenerator() *KeyGenerator {
-	initKey := int64(1)
-
 	return &KeyGenerator{
-		key: &initKey,
+		key: 1,
 	}
 }
 
@@ -34,7 +32,7 @@ func NewKeyGenerator() *KeyGenerator {
 //
 //nolint:ireturn,nolintlint
 func (g *KeyGenerator) Generate() transaction.CtxKey {
-	defer atomic.AddInt64(g.key, 1)
+	defer atomic.AddInt64(&g.key, 1)
 
-	return atomic.LoadInt64(g.key)
+	return atomic.LoadInt64(&g.key)
 }

@@ -35,14 +35,14 @@ func Example_chained() {
 	// init manager
 	ctxKey1 := trmcontext.Generate()
 	m1 := manager.New(
-		trmsqlx.NewFactory(db1),
+		trmsqlx.NewDefaultFactory(db1),
 		manager.WithSettings(settings.New(settings.WithCtxKey(ctxKey1))),
 	)
 	r1 := newRepo(db1, trmsqlx.NewCtxGetter(trmcontext.New(ctxKey1)))
 
 	ctxKey2 := trmcontext.Generate()
 	m2 := manager.New(
-		trmsqlx.NewFactory(db2),
+		trmsqlx.NewDefaultFactory(db2),
 		manager.WithSettings(settings.New(settings.WithCtxKey(ctxKey2))),
 	)
 	r2 := newRepo(db2, trmsqlx.NewCtxGetter(trmcontext.New(ctxKey2)))

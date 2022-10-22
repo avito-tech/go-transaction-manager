@@ -100,6 +100,7 @@ func TestChainedMW_Do(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
 			c := NewChained(tt.mm(t, ctrl))
 
@@ -200,6 +201,7 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
 			c := NewChained(tt.mm(t, ctrl))
 
