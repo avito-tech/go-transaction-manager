@@ -13,6 +13,8 @@ import (
 var (
 	// ErrTransaction is an error while working with a transaction.
 	ErrTransaction = errors.New("transaction")
+	// ErrAlreadyClosed occurs if the transaction was closed outside the Manager.
+	ErrAlreadyClosed = errTransaction("already closed")
 
 	// ErrBegin occurs when a transaction started with an error.
 	ErrBegin = errTransaction("begin")

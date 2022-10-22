@@ -7,15 +7,9 @@ import (
 	"github.com/avito-tech/go-transaction-manager/transaction"
 )
 
-type l struct{}
-
-func (l l) Printf(format string, a ...interface{}) {
-	panic("implement me")
-}
-
 type s struct{}
 
-func (s s) EnrichBy(external transaction.Settings) transaction.Settings {
+func (s s) EnrichBy(_ transaction.Settings) transaction.Settings {
 	panic("implement me")
 }
 
@@ -27,7 +21,7 @@ func (s s) CtxKeyOrNil() *transaction.CtxKey {
 	panic("implement me")
 }
 
-func (s s) SetCtxKey(key *transaction.CtxKey) transaction.Settings {
+func (s s) SetCtxKey(_ *transaction.CtxKey) transaction.Settings {
 	panic("implement me")
 }
 
@@ -51,7 +45,19 @@ func (s s) PropagationOrNil() *transaction.Propagation {
 	panic("implement me")
 }
 
-func (s s) SetPropagation(propagation *transaction.Propagation) transaction.Settings {
+func (s s) SetPropagation(_ *transaction.Propagation) transaction.Settings {
+	panic("implement me")
+}
+
+func (s s) Cancelable() bool {
+	panic("implement me")
+}
+
+func (s s) CancelableOrNil() *bool {
+	panic("implement me")
+}
+
+func (s s) SetCancelable(_ *bool) transaction.Settings {
 	panic("implement me")
 }
 
@@ -63,6 +69,6 @@ func (s s) TimeoutOrNil() *time.Duration {
 	panic("implement me")
 }
 
-func (s s) SetTimeout(duration *time.Duration) transaction.Settings {
+func (s s) SetTimeout(_ *time.Duration) transaction.Settings {
 	panic("implement me")
 }

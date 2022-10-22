@@ -176,7 +176,7 @@ func TestTransaction(t *testing.T) {
 				settings.WithPropagation(transaction.PropagationNested),
 			)
 			m := manager.New(
-				NewFactory(sqlx.NewDb(db, "sqlmock")),
+				NewDefaultFactory(sqlx.NewDb(db, "sqlmock")),
 				manager.WithLog(log),
 				manager.WithSettings(s),
 			)

@@ -35,6 +35,34 @@ func (m *MockSettings) EXPECT() *MockSettingsMockRecorder {
 	return m.recorder
 }
 
+// Cancelable mocks base method.
+func (m *MockSettings) Cancelable() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Cancelable")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// Cancelable indicates an expected call of Cancelable.
+func (mr *MockSettingsMockRecorder) Cancelable() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Cancelable", reflect.TypeOf((*MockSettings)(nil).Cancelable))
+}
+
+// CancelableOrNil mocks base method.
+func (m *MockSettings) CancelableOrNil() *bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CancelableOrNil")
+	ret0, _ := ret[0].(*bool)
+	return ret0
+}
+
+// CancelableOrNil indicates an expected call of CancelableOrNil.
+func (mr *MockSettingsMockRecorder) CancelableOrNil() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelableOrNil", reflect.TypeOf((*MockSettings)(nil).CancelableOrNil))
+}
+
 // CtxKey mocks base method.
 func (m *MockSettings) CtxKey() transaction.CtxKey {
 	m.ctrl.T.Helper()
@@ -131,6 +159,20 @@ func (m *MockSettings) PropagationOrNil() *transaction.Propagation {
 func (mr *MockSettingsMockRecorder) PropagationOrNil() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PropagationOrNil", reflect.TypeOf((*MockSettings)(nil).PropagationOrNil))
+}
+
+// SetCancelable mocks base method.
+func (m *MockSettings) SetCancelable(arg0 *bool) transaction.Settings {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetCancelable", arg0)
+	ret0, _ := ret[0].(transaction.Settings)
+	return ret0
+}
+
+// SetCancelable indicates an expected call of SetCancelable.
+func (mr *MockSettingsMockRecorder) SetCancelable(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCancelable", reflect.TypeOf((*MockSettings)(nil).SetCancelable), arg0)
 }
 
 // SetCtxKey mocks base method.
