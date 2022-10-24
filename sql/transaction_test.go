@@ -175,7 +175,7 @@ func TestTransaction(t *testing.T) {
 				settings.WithPropagation(transaction.PropagationNested),
 			)
 			m := manager.New(
-				NewFactory(db),
+				NewDefaultFactory(db),
 				manager.WithLog(log),
 				manager.WithSettings(s),
 			)

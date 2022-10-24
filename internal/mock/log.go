@@ -3,7 +3,9 @@
 //revive:disable:unexported-return
 package mock
 
-import "fmt"
+import (
+	"context"
+)
 
 type log struct {
 	Logged []string
@@ -14,8 +16,8 @@ func NewLog() *log {
 	return &log{}
 }
 
-func (l *log) Printf(format string, a ...interface{}) {
-	l.Logged = append(l.Logged, fmt.Sprintf(format, a...))
+func (l *log) Warning(_ context.Context, msg string) {
+	l.Logged = append(l.Logged, msg)
 }
 
 type zeroLog struct{}
@@ -25,6 +27,6 @@ func NewZeroLog() *zeroLog {
 	return &zeroLog{}
 }
 
-func (l *zeroLog) Printf(_ string, _ ...interface{}) {
+func (l *zeroLog) Warning(_ context.Context, _ string) {
 	panic("logger should not be called")
 }

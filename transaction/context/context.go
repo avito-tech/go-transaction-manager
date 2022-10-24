@@ -1,6 +1,6 @@
 // Package context implement a setter and getter to put and get transaction.Transaction from context.Context.
 //
-//nolint:ireturn
+//nolint:ireturn,nolintlint
 package context
 
 import (

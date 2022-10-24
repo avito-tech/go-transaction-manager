@@ -3,7 +3,9 @@ package manager
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -55,6 +57,7 @@ func Test_transactionManager_Do(t *testing.T) {
 					factory: func(ctx context.Context) (transaction.Transaction, error) {
 						tx := mock.NewMockTransaction(ctrl)
 
+						tx.EXPECT().IsActive().Return(true)
 						tx.EXPECT().Commit().Return(nil)
 
 						return tx, nil
@@ -82,8 +85,8 @@ func Test_transactionManager_Do(t *testing.T) {
 					factory: func(ctx context.Context) (transaction.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
+						txSP.EXPECT().IsActive().Return(true).Times(2)
 						txSP.EXPECT().SavePoint(gomock.Any(), a.settings).Return(txSP, nil)
-
 						txSP.EXPECT().Commit().Return(nil).Times(2)
 
 						return txSP, nil
@@ -113,8 +116,8 @@ func Test_transactionManager_Do(t *testing.T) {
 					factory: func(ctx context.Context) (transaction.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
+						txSP.EXPECT().IsActive().Return(true)
 						txSP.EXPECT().SavePoint(gomock.Any(), a.settings).Return(txSP, nil)
-
 						txSP.EXPECT().Commit().Return(nil).Times(2)
 
 						return txSP, nil
@@ -182,6 +185,7 @@ func Test_transactionManager_Do(t *testing.T) {
 					factory: func(ctx context.Context) (transaction.Transaction, error) {
 						tx := mock.NewMockTransaction(ctrl)
 
+						tx.EXPECT().IsActive().Return(true)
 						tx.EXPECT().Rollback().Return(nil)
 
 						return tx, nil
@@ -231,6 +235,7 @@ func Test_transactionManager_Do(t *testing.T) {
 					factory: func(ctx context.Context) (transaction.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
+						txSP.EXPECT().IsActive().Return(true)
 						txSP.EXPECT().Commit().Return(nil)
 
 						return txSP, nil
@@ -259,6 +264,7 @@ func Test_transactionManager_Do(t *testing.T) {
 					factory: func() func(ctx context.Context) (transaction.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
+						txSP.EXPECT().IsActive().Return(true).Times(2)
 						txSP.EXPECT().Commit().Return(nil).Times(2)
 
 						return func(ctx context.Context) (transaction.Transaction, error) {
@@ -310,6 +316,7 @@ func Test_transactionManager_Do(t *testing.T) {
 					factory: func() func(ctx context.Context) (transaction.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
+						txSP.EXPECT().IsActive().Return(true)
 						txSP.EXPECT().Commit().Return(nil)
 
 						return func(ctx context.Context) (transaction.Transaction, error) {
@@ -379,6 +386,10 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 	testErr := errors.New("error test")
 	testCommitErr := errors.New("error Commit test")
 	testRollbackErr := errors.New("error rollback test")
+	defaultArgs := args{
+		ctx:      context.Background(),
+		settings: settings.New(),
+	}
 
 	tests := map[string]struct {
 		args    args
@@ -387,15 +398,13 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		"transaction_factory_&_rollback_error": {
-			args: args{
-				ctx:      context.Background(),
-				settings: settings.New(),
-			},
+			args: defaultArgs,
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				return fields{
 					factory: func(ctx context.Context) (transaction.Transaction, error) {
 						tx := mock.NewMockTransaction(ctrl)
 
+						tx.EXPECT().IsActive().Return(true)
 						tx.EXPECT().Rollback().Return(testRollbackErr)
 
 						return tx, nil
@@ -411,15 +420,13 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			},
 		},
 		"commit_error": {
-			args: args{
-				ctx:      context.Background(),
-				settings: settings.New(),
-			},
+			args: defaultArgs,
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				return fields{
 					factory: func(ctx context.Context) (transaction.Transaction, error) {
 						tx := mock.NewMockTransaction(ctrl)
 
+						tx.EXPECT().IsActive().Return(true)
 						tx.EXPECT().Commit().Return(testCommitErr)
 
 						return tx, nil
@@ -469,6 +476,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
 	testPanic := "panic"
 	testRollbackErr := errors.New("rollback error")
@@ -477,6 +485,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	factory := func(ctx context.Context) (transaction.Transaction, error) {
 		tx := mock.NewMockTransaction(ctrl)
 
+		tx.EXPECT().IsActive().Return(true)
 		tx.EXPECT().Rollback().Return(testRollbackErr)
 
 		return tx, nil
@@ -506,15 +515,174 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	assert.NoError(t, errors.New("should not be here"))
 }
 
+//nolint:tparallel // there is not t.Cleanup in go 1.13 and less.
+func Test_transactionManager_Do_ClosedTransaction(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	testErr := errors.New("test error")
+
+	tests := map[string]struct {
+		ret     error
+		wantErr require.ErrorAssertionFunc
+	}{
+		"without_error": {
+			ret: nil,
+			wantErr: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, transaction.ErrAlreadyClosed, err)
+			},
+		},
+		"with_error": {
+			ret: testErr,
+			wantErr: func(t require.TestingT, err error, i ...interface{}) {
+				require.ErrorIs(t, err, testErr)
+				require.ErrorIs(t, err, transaction.ErrAlreadyClosed)
+			},
+		},
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			tx := mock.NewMockTransaction(ctrl)
+			tx.EXPECT().IsActive().Return(false).MinTimes(2)
+
+			factory := func(ctx context.Context) (transaction.Transaction, error) {
+				return tx, nil
+			}
+
+			m := New(
+				factory,
+				WithSettings(settings.New(settings.WithPropagation(transaction.PropagationRequiresNew))),
+			)
+
+			err := m.Do(context.Background(), func(ctx context.Context) error {
+				return m.Do(ctx, func(ctx context.Context) error {
+					return tt.ret
+				})
+			})
+
+			tt.wantErr(t, err)
+		})
+	}
+}
+
+//nolint:tparallel // there is not t.Cleanup in go 1.13 and less.
+func Test_transactionManager_Do_Cancel(t *testing.T) {
+	type fields struct {
+		settings transaction.Settings
+		factory  transaction.TrFactory
+	}
+
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	tests := map[string]struct {
+		fields  fields
+		ctx     func(ctx context.Context) (context.Context, context.CancelFunc)
+		do      func(t *testing.T, ctx context.Context)
+		wantErr require.ErrorAssertionFunc
+	}{
+		"cancel": {
+			fields: fields{
+				factory: func(ctx context.Context) (transaction.Transaction, error) {
+					tr := mock.NewMockTransaction(ctrl)
+					tr.EXPECT().IsActive().Return(false)
+
+					return tr, nil
+				},
+				settings: settings.New(
+					settings.WithCancelable(true),
+					settings.WithPropagation(transaction.PropagationRequiresNew),
+				),
+			},
+			ctx: context.WithCancel,
+			do: func(t *testing.T, ctx context.Context) {
+				assert.ErrorIs(t, ctx.Err(), context.Canceled)
+			},
+			wantErr: func(t require.TestingT, err error, i ...interface{}) {
+				assert.ErrorIs(t, err, context.Canceled)
+			},
+		},
+		"timeout": {
+			fields: fields{
+				factory: func(ctx context.Context) (transaction.Transaction, error) {
+					tr := mock.NewMockTransaction(ctrl)
+					tr.EXPECT().IsActive().Return(false)
+
+					return tr, nil
+				},
+				settings: settings.New(
+					settings.WithCancelable(true),
+					settings.WithTimeout(time.Millisecond),
+					settings.WithPropagation(transaction.PropagationRequiresNew),
+				),
+			},
+			ctx: func(ctx context.Context) (context.Context, context.CancelFunc) {
+				return ctx, func() {}
+			},
+			do: func(t *testing.T, ctx context.Context) {
+				time.Sleep(3 * time.Millisecond)
+
+				assert.ErrorIs(t, ctx.Err(), context.DeadlineExceeded)
+			},
+			wantErr: func(t require.TestingT, err error, i ...interface{}) {
+				assert.ErrorIs(t, err, context.DeadlineExceeded)
+			},
+		},
+	}
+	for name, tt := range tests {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			m := New(
+				tt.fields.factory,
+				WithSettings(tt.fields.settings),
+			)
+
+			wg := sync.WaitGroup{}
+			var err error
+
+			wg.Add(1)
+
+			ctx, cancel := tt.ctx(context.Background())
+			go func() {
+				err = m.Do(ctx, func(ctx context.Context) error {
+					return m.Do(ctx, func(ctx context.Context) error {
+						tt.do(t, ctx)
+
+						return nil
+					})
+				})
+
+				wg.Done()
+			}()
+
+			cancel()
+
+			wg.Wait()
+
+			tt.wantErr(t, err)
+		})
+	}
+}
+
 func TestManager_WithOpts(t *testing.T) {
 	t.Parallel()
 
 	t.Run("set", func(t *testing.T) {
 		t.Parallel()
 
-		m := New(nil, WithLog(l{}), WithSettings(s{}))
+		l := trmmock.NewZeroLog()
+		m := New(nil, WithLog(l), WithSettings(s{}))
 
-		assert.Equal(t, l{}, m.log)
+		assert.Equal(t, l, m.log)
 		assert.Equal(t, s{}, m.settings)
 	})
 

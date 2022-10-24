@@ -12,12 +12,12 @@ import (
 )
 
 // Transaction is transaction.Transaction for sql.Tx.
-// transaction.SavePoint has IsActive as true while transaction.Transaction is opened.
+// transaction.SavePoint returns IsActive as true while transaction.Transaction is opened.
 type Transaction struct {
 	tx        *sql.Tx
 	savePoint transaction.SavePoint
 	saves     int64
-	isActive  bool
+	isActive  int64
 }
 
 // NewTransaction creates transaction.Transaction for sql.Tx.
@@ -32,7 +32,21 @@ func NewTransaction(
 		return nil, multierr.Combine(transaction.ErrTransaction, err)
 	}
 
-	return &Transaction{tx: tx, savePoint: sp, isActive: true}, nil
+	tr := &Transaction{tx: tx, savePoint: sp, isActive: 1}
+
+	go tr.awaitDone(ctx)
+
+	return tr, nil
+}
+
+func (t *Transaction) awaitDone(ctx context.Context) {
+	if ctx.Done() == nil {
+		return
+	}
+
+	<-ctx.Done()
+
+	t.deactivate()
 }
 
 // Transaction returns the real transaction sqlx.Tx.
@@ -62,7 +76,7 @@ func (t *Transaction) Commit() error {
 		return nil
 	}
 
-	t.isActive = false
+	t.deactivate()
 
 	if err := t.tx.Commit(); err != nil {
 		return multierr.Combine(transaction.ErrCommit, err)
@@ -82,7 +96,7 @@ func (t *Transaction) Rollback() error {
 		return nil
 	}
 
-	t.isActive = false
+	t.deactivate()
 
 	if err := t.tx.Rollback(); err != nil {
 		return multierr.Combine(transaction.ErrRollback, err)
@@ -93,7 +107,11 @@ func (t *Transaction) Rollback() error {
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
-	return t.isActive
+	return atomic.LoadInt64(&t.isActive) == 1
+}
+
+func (t *Transaction) deactivate() {
+	atomic.SwapInt64(&t.isActive, 0)
 }
 
 func (t *Transaction) hasSavePoint() bool {

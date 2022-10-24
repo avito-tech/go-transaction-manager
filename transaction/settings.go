@@ -12,22 +12,28 @@ type Settings interface {
 	// EnrichBy fills nil properties from external Settings.
 	EnrichBy(external Settings) Settings
 
-	// TODO
+	// CtxKey returns transaction.CtxKey for the transaction.Transaction.
 	CtxKey() CtxKey
 	CtxKeyOrNil() *CtxKey
 	SetCtxKey(*CtxKey) Settings
 
 	// TODO
+	// IsReadOnly defines that the transaction.Transaction can or cannot write data to a database.
 	IsReadOnly() bool
 	IsReadOnlyOrNil() *bool
 	SetIsReadOnly(*bool) Settings
 
+	// Propagation returns transaction.Propagation.
 	Propagation() Propagation
 	PropagationOrNil() *Propagation
 	SetPropagation(*Propagation) Settings
 
-	// TODO
-	Timeout() time.Duration
+	// Cancelable defines that parent transaction.Transaction can cancel child transaction.Transaction or goroutines.
+	Cancelable() bool
+	CancelableOrNil() *bool
+	SetCancelable(*bool) Settings
+
+	// TimeoutOrNil returns time.Duration of the transaction.Transaction.
 	TimeoutOrNil() *time.Duration
 	SetTimeout(*time.Duration) Settings
 }
