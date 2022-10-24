@@ -603,6 +603,8 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 			},
 			ctx: context.WithCancel,
 			do: func(t *testing.T, ctx context.Context) {
+				time.Sleep(time.Millisecond)
+
 				assert.ErrorIs(t, ctx.Err(), context.Canceled)
 			},
 			wantErr: func(t require.TestingT, err error, i ...interface{}) {
