@@ -5,6 +5,7 @@
 package mock
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -33,19 +34,14 @@ func (m *Mocklogger) EXPECT() *MockloggerMockRecorder {
 	return m.recorder
 }
 
-// Printf mocks base method.
-func (m *Mocklogger) Printf(format string, a ...interface{}) {
+// Warning mocks base method.
+func (m *Mocklogger) Warning(ctx context.Context, msg string) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{format}
-	for _, a_2 := range a {
-		varargs = append(varargs, a_2)
-	}
-	m.ctrl.Call(m, "Printf", varargs...)
+	m.ctrl.Call(m, "Warning", ctx, msg)
 }
 
-// Printf indicates an expected call of Printf.
-func (mr *MockloggerMockRecorder) Printf(format interface{}, a ...interface{}) *gomock.Call {
+// Warning indicates an expected call of Warning.
+func (mr *MockloggerMockRecorder) Warning(ctx, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{format}, a...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Printf", reflect.TypeOf((*Mocklogger)(nil).Printf), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Warning", reflect.TypeOf((*Mocklogger)(nil).Warning), ctx, msg)
 }

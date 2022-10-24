@@ -45,7 +45,7 @@ func (m *Manager) Do(ctx context.Context, fn func(ctx context.Context) error) (e
 
 // DoWithSettings processes a transaction inside a closure with custom transaction.Settings.
 func (m *Manager) DoWithSettings(ctx context.Context, s transaction.Settings, fn func(ctx context.Context) error) (err error) {
-	ctx, closer, err := m.init(ctx, s)
+	ctx, closer, err := m.init(ctx, s.EnrichBy(m.settings))
 	if err != nil {
 		return err
 	}
@@ -62,30 +62,20 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 	tr := m.ctxManager.ByKey(ctx, s.CtxKey())
 	isOpened := tr != nil
 
+	ctx, cancel := m.withCancel(ctx, s)
+
 	switch s.Propagation() {
 	case transaction.PropagationRequired:
 		if isOpened {
-			return ctx, newNilClose(), nil
+			return ctx, newNilClose(cancel), nil
 		}
 	case transaction.PropagationNested:
 		if isOpened {
-			spFactor, ok := tr.(transaction.SPFactory)
-			if ok {
-				tr, err := spFactor.SavePoint(ctx, s)
-				if err != nil {
-					return ctx, nil, err
-				}
-
-				return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
-					newTxCommit(tr, m.log),
-					nil
-			}
-
-			return ctx, newNilClose(), nil
+			return m.propagationNested(ctx, s, tr, cancel)
 		}
 	case transaction.PropagationsMandatory:
 		if isOpened {
-			return ctx, newNilClose(), nil
+			return ctx, newNilClose(cancel), nil
 		}
 
 		return ctx, nil, transaction.ErrPropagationMandatory
@@ -94,19 +84,19 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 			return ctx, nil, transaction.ErrPropagationNever
 		}
 
-		return ctx, newNilClose(), nil
+		return ctx, newNilClose(cancel), nil
 	case transaction.PropagationNotSupported:
 		if isOpened {
 			return m.ctxManager.SetByKey(ctx, s.CtxKey(), nil),
-				newNilClose(),
+				newNilClose(cancel),
 				nil
 		}
 
-		return ctx, newNilClose(), nil
+		return ctx, newNilClose(cancel), nil
 	case transaction.PropagationRequiresNew:
 		// do nothing
 	case transaction.PropagationSupports:
-		return ctx, newNilClose(), nil
+		return ctx, newNilClose(cancel), nil
 	}
 
 	tr, err := m.getTransaction(ctx)
@@ -115,6 +105,37 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 	}
 
 	return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
-		newTxCommit(tr, m.log),
+		newTxCommit(tr, m.log, cancel),
 		nil
 }
+
+func (m *Manager) propagationNested(ctx context.Context, s transaction.Settings, tr transaction.Transaction, c context.CancelFunc) (context.Context, closer, error) {
+	spFactor, ok := tr.(transaction.SPFactory)
+	if ok {
+		tr, err := spFactor.SavePoint(ctx, s)
+		if err != nil {
+			return ctx, nil, err
+		}
+
+		return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
+			newTxCommit(tr, m.log, c),
+			nil
+	}
+
+	return ctx, newNilClose(c), nil
+}
+
+func (m *Manager) withCancel(ctx context.Context, s transaction.Settings) (context.Context, context.CancelFunc) {
+	t := s.TimeoutOrNil()
+	if t != nil {
+		return context.WithTimeout(ctx, *t)
+	}
+
+	if s.Cancelable() {
+		return context.WithCancel(ctx)
+	}
+
+	return ctx, nilCancel
+}
+
+func nilCancel() {}

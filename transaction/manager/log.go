@@ -1,9 +1,11 @@
 package manager
 
+import "context"
+
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
 
 type logger interface {
-	Printf(format string, a ...interface{})
+	Warning(ctx context.Context, msg string)
 }
 
 //nolint:gochecknoglobals // initializing default log, which does nothing
@@ -11,4 +13,4 @@ var defaultLog = log{}
 
 type log struct{}
 
-func (l log) Printf(_ string, _ ...interface{}) {}
+func (l log) Warning(context.Context, string) {}

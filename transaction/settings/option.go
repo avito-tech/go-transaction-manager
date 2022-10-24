@@ -1,24 +1,42 @@
 package settings
 
-import "github.com/avito-tech/go-transaction-manager/transaction"
+import (
+	"time"
+
+	"github.com/avito-tech/go-transaction-manager/transaction"
+)
 
 // WithCtxKey sets up transaction.CtxKey for the transaction.Settings.
 func WithCtxKey(key transaction.CtxKey) Opt {
 	return func(s *Settings) {
-		s.ctxKey = &key
+		*s = s.setCtxKey(&key)
 	}
 }
 
 // WithReadOnly sets up block to write to a database for the transaction.Settings.
 func WithReadOnly(is bool) Opt {
 	return func(s *Settings) {
-		s.isReadOnly = &is
+		*s = s.setIsReadOnly(&is)
 	}
 }
 
 // WithPropagation sets up a transaction.Propagation for the transaction.Settings.
 func WithPropagation(p transaction.Propagation) Opt {
 	return func(s *Settings) {
-		s.propagation = &p
+		*s = s.setPropagation(&p)
+	}
+}
+
+// WithCancelable sets up possibility to cancel child goroutines when parent transaction.Transaction was canceled.
+func WithCancelable(t bool) Opt {
+	return func(s *Settings) {
+		*s = s.setCancelable(&t)
+	}
+}
+
+// WithTimeout sets up a timeout for the transaction.Transaction.
+func WithTimeout(t time.Duration) Opt {
+	return func(s *Settings) {
+		*s = s.setTimeout(&t)
 	}
 }

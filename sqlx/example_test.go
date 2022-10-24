@@ -118,7 +118,7 @@ func Example() {
 	}
 
 	ctx := context.Background()
-	trManager := manager.New(trmsqlx.NewFactory(db))
+	trManager := manager.New(trmsqlx.NewDefaultFactory(db))
 
 	err = trManager.Do(ctx, func(ctx context.Context) error {
 		if err := r.Save(ctx, u); err != nil {
