@@ -99,7 +99,7 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 		return ctx, newNilClose(cancel), nil
 	}
 
-	tr, err := m.getTransaction(ctx)
+	ctx, tr, err := m.getTransaction(ctx, s)
 	if err != nil {
 		return nil, nil, multierr.Combine(transaction.ErrBegin, err)
 	}
@@ -112,7 +112,7 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 func (m *Manager) propagationNested(ctx context.Context, s transaction.Settings, tr transaction.Transaction, c context.CancelFunc) (context.Context, closer, error) {
 	spFactor, ok := tr.(transaction.SPFactory)
 	if ok {
-		tr, err := spFactor.SavePoint(ctx, s)
+		ctx, tr, err := spFactor.SavePoint(ctx, s)
 		if err != nil {
 			return ctx, nil, err
 		}

@@ -26,7 +26,6 @@ func TestSettings_EnrichBy(t *testing.T) {
 			args: args{
 				external: New(
 					WithCtxKey(1),
-					WithReadOnly(true),
 					WithPropagation(transaction.PropagationSupports),
 					WithCancelable(true),
 					WithTimeout(time.Second),
@@ -34,7 +33,6 @@ func TestSettings_EnrichBy(t *testing.T) {
 			},
 			want: New(
 				WithCtxKey(1),
-				WithReadOnly(true),
 				WithPropagation(transaction.PropagationSupports),
 				WithCancelable(true),
 				WithTimeout(time.Second),
@@ -43,7 +41,6 @@ func TestSettings_EnrichBy(t *testing.T) {
 		"without_update": {
 			settings: New(
 				WithCtxKey(1),
-				WithReadOnly(true),
 				WithPropagation(transaction.PropagationSupports),
 				WithCancelable(true),
 				WithTimeout(time.Second),
@@ -51,7 +48,6 @@ func TestSettings_EnrichBy(t *testing.T) {
 			args: args{
 				external: New(
 					WithCtxKey(2),
-					WithReadOnly(false),
 					WithPropagation(transaction.PropagationNever),
 					WithCancelable(false),
 					WithTimeout(time.Minute),
@@ -59,7 +55,6 @@ func TestSettings_EnrichBy(t *testing.T) {
 			},
 			want: New(
 				WithCtxKey(1),
-				WithReadOnly(true),
 				WithPropagation(transaction.PropagationSupports),
 				WithCancelable(true),
 				WithTimeout(time.Second),
@@ -96,7 +91,6 @@ func TestSettings_Getter(t *testing.T) {
 		"get": {
 			settings: New(
 				WithCtxKey(2),
-				WithReadOnly(true),
 				WithPropagation(transaction.PropagationRequiresNew),
 				WithCancelable(true),
 				WithTimeout(time.Millisecond),
@@ -143,7 +137,6 @@ func TestSettings_Getter(t *testing.T) {
 			want := tt.want()
 
 			assert.Equal(t, *want.ctxKey, tt.settings.CtxKey())
-			assert.Equal(t, *want.isReadOnly, tt.settings.IsReadOnly())
 			assert.Equal(t, *want.propagation, tt.settings.Propagation())
 			assert.Equal(t, *want.isCancelable, tt.settings.Cancelable())
 			assert.Equal(t, want.timeout, tt.settings.TimeoutOrNil())
