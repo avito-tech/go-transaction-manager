@@ -1,28 +1,29 @@
 // Package mock implements dependencies for testing.
 //
 //revive:disable:unexported-return
+//revive:disable:exported
 package mock
 
 import (
 	"context"
 )
 
-type log struct {
+type Log struct {
 	Logged []string
 }
 
-// NewLog create mock log.
-func NewLog() *log {
-	return &log{}
+// NewLog create mock Log.
+func NewLog() *Log {
+	return &Log{}
 }
 
-func (l *log) Warning(_ context.Context, msg string) {
+func (l *Log) Warning(_ context.Context, msg string) {
 	l.Logged = append(l.Logged, msg)
 }
 
 type zeroLog struct{}
 
-// NewZeroLog create mock log, which should not be called.
+// NewZeroLog create mock Log, which should not be called.
 func NewZeroLog() *zeroLog {
 	return &zeroLog{}
 }

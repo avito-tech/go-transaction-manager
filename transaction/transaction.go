@@ -40,21 +40,21 @@ func errTransaction(msg string) error {
 }
 
 // TrFactory is used in Manager to creates Transaction.
-type TrFactory func(ctx context.Context) (Transaction, error)
+type TrFactory func(ctx context.Context, s Settings) (context.Context, Transaction, error)
 
 // SPFactory creates save points for Transaction.
 type SPFactory interface {
-	SavePoint(ctx context.Context, s Settings) (Transaction, error)
+	SavePoint(ctx context.Context, s Settings) (context.Context, Transaction, error)
 }
 
 // Transaction wraps different transaction implementations.
 type Transaction interface {
 	// Transaction returns the real transaction sql.Tx, sqlx.Tx or another.
 	Transaction() interface{}
-	// Commit calls close for a database.
-	Commit() error
-	// Rollback calls close for a database.
-	Rollback() error
+	// Commit the transaction.Transaction.
+	Commit(context.Context) error
+	// Rollback the transaction.Transaction.
+	Rollback(context.Context) error
 	// IsActive returns true if the transaction started but not committed or rolled back.
 	IsActive() bool
 }

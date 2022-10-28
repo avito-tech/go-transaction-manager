@@ -62,8 +62,8 @@ func TestTransaction(t *testing.T) {
 				ctx: context.Background(),
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, testErr, err) &&
-					assert.Error(t, transaction.ErrBegin, err)
+				return assert.ErrorIs(t, err, testErr) &&
+					assert.ErrorIs(t, err, transaction.ErrBegin)
 			},
 		},
 		"commit_error": {
@@ -78,8 +78,8 @@ func TestTransaction(t *testing.T) {
 				ctx: context.Background(),
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, testCommitErr, err) &&
-					assert.Error(t, transaction.ErrCommit, err)
+				return assert.ErrorIs(t, err, testCommitErr) &&
+					assert.ErrorIs(t, err, transaction.ErrCommit)
 			},
 		},
 		"rollback_after_error": {
@@ -98,9 +98,9 @@ func TestTransaction(t *testing.T) {
 			},
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, testErr, err) &&
-					assert.Error(t, testRollbackErr, err) &&
-					assert.Error(t, transaction.ErrRollback, err)
+				return assert.ErrorIs(t, err, testErr) &&
+					assert.ErrorIs(t, err, testRollbackErr) &&
+					assert.ErrorIs(t, err, transaction.ErrRollback)
 			},
 		},
 		"begin_savepoint_error": {
@@ -114,9 +114,9 @@ func TestTransaction(t *testing.T) {
 				ctx: context.Background(),
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, testErr, err) &&
-					assert.Error(t, transaction.ErrBegin, err) &&
-					assert.Error(t, transaction.ErrSPBegin, err)
+				return assert.ErrorIs(t, err, testErr) &&
+					assert.ErrorIs(t, err, transaction.ErrBegin) &&
+					assert.ErrorIs(t, err, transaction.ErrSPBegin)
 			},
 		},
 		"commit_savepoint_error": {
@@ -134,9 +134,9 @@ func TestTransaction(t *testing.T) {
 				ctx: context.Background(),
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, testCommitErr, err) &&
-					assert.Error(t, transaction.ErrCommit, err) &&
-					assert.Error(t, transaction.ErrSPCommit, err)
+				return assert.ErrorIs(t, err, testCommitErr) &&
+					assert.ErrorIs(t, err, transaction.ErrCommit) &&
+					assert.ErrorIs(t, err, transaction.ErrSPCommit)
 			},
 		},
 		"rollback_savepoint_after_error": {
@@ -155,10 +155,10 @@ func TestTransaction(t *testing.T) {
 			},
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, testErr, err) &&
-					assert.Error(t, testRollbackErr, err) &&
-					assert.Error(t, transaction.ErrRollback, err) &&
-					assert.Error(t, transaction.ErrSPRollback, err)
+				return assert.ErrorIs(t, err, testErr) &&
+					assert.ErrorIs(t, err, testRollbackErr) &&
+					assert.ErrorIs(t, err, transaction.ErrRollback) &&
+					assert.ErrorIs(t, err, transaction.ErrSPRollback)
 			},
 		},
 	}
