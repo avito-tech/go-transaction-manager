@@ -30,7 +30,7 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 	// recovering from panic
 	if p != nil {
 		if c.tr.IsActive() {
-			if err := c.tr.Rollback(); err != nil {
+			if err := c.tr.Rollback(ctx); err != nil {
 				c.log.Warning(ctx, fmt.Sprintf("%v, %v", err, p))
 			}
 		}
@@ -71,14 +71,14 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 	}
 
 	if hasError {
-		if errRollback := c.tr.Rollback(); errRollback != nil {
+		if errRollback := c.tr.Rollback(ctx); errRollback != nil {
 			return multierr.Combine(*errInProcessTr, transaction.ErrRollback, errRollback)
 		}
 
 		return *errInProcessTr
 	}
 
-	if err := c.tr.Commit(); err != nil {
+	if err := c.tr.Commit(ctx); err != nil {
 		return multierr.Combine(transaction.ErrCommit, err)
 	}
 

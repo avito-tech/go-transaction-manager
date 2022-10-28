@@ -36,12 +36,13 @@ func (m *MockSPFactory) EXPECT() *MockSPFactoryMockRecorder {
 }
 
 // SavePoint mocks base method.
-func (m *MockSPFactory) SavePoint(ctx context.Context, s transaction.Settings) (transaction.Transaction, error) {
+func (m *MockSPFactory) SavePoint(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SavePoint", ctx, s)
-	ret0, _ := ret[0].(transaction.Transaction)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(transaction.Transaction)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // SavePoint indicates an expected call of SavePoint.
@@ -74,17 +75,17 @@ func (m *MockTransaction) EXPECT() *MockTransactionMockRecorder {
 }
 
 // Commit mocks base method.
-func (m *MockTransaction) Commit() error {
+func (m *MockTransaction) Commit(arg0 context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Commit")
+	ret := m.ctrl.Call(m, "Commit", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Commit indicates an expected call of Commit.
-func (mr *MockTransactionMockRecorder) Commit() *gomock.Call {
+func (mr *MockTransactionMockRecorder) Commit(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockTransaction)(nil).Commit))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockTransaction)(nil).Commit), arg0)
 }
 
 // IsActive mocks base method.
@@ -102,17 +103,17 @@ func (mr *MockTransactionMockRecorder) IsActive() *gomock.Call {
 }
 
 // Rollback mocks base method.
-func (m *MockTransaction) Rollback() error {
+func (m *MockTransaction) Rollback(arg0 context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Rollback")
+	ret := m.ctrl.Call(m, "Rollback", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Rollback indicates an expected call of Rollback.
-func (mr *MockTransactionMockRecorder) Rollback() *gomock.Call {
+func (mr *MockTransactionMockRecorder) Rollback(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockTransaction)(nil).Rollback))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockTransaction)(nil).Rollback), arg0)
 }
 
 // Transaction mocks base method.
@@ -153,17 +154,17 @@ func (m *MocktransactionWithSP) EXPECT() *MocktransactionWithSPMockRecorder {
 }
 
 // Commit mocks base method.
-func (m *MocktransactionWithSP) Commit() error {
+func (m *MocktransactionWithSP) Commit(arg0 context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Commit")
+	ret := m.ctrl.Call(m, "Commit", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Commit indicates an expected call of Commit.
-func (mr *MocktransactionWithSPMockRecorder) Commit() *gomock.Call {
+func (mr *MocktransactionWithSPMockRecorder) Commit(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MocktransactionWithSP)(nil).Commit))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MocktransactionWithSP)(nil).Commit), arg0)
 }
 
 // IsActive mocks base method.
@@ -181,26 +182,27 @@ func (mr *MocktransactionWithSPMockRecorder) IsActive() *gomock.Call {
 }
 
 // Rollback mocks base method.
-func (m *MocktransactionWithSP) Rollback() error {
+func (m *MocktransactionWithSP) Rollback(arg0 context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Rollback")
+	ret := m.ctrl.Call(m, "Rollback", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Rollback indicates an expected call of Rollback.
-func (mr *MocktransactionWithSPMockRecorder) Rollback() *gomock.Call {
+func (mr *MocktransactionWithSPMockRecorder) Rollback(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MocktransactionWithSP)(nil).Rollback))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MocktransactionWithSP)(nil).Rollback), arg0)
 }
 
 // SavePoint mocks base method.
-func (m *MocktransactionWithSP) SavePoint(ctx context.Context, s transaction.Settings) (transaction.Transaction, error) {
+func (m *MocktransactionWithSP) SavePoint(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SavePoint", ctx, s)
-	ret0, _ := ret[0].(transaction.Transaction)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(transaction.Transaction)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // SavePoint indicates an expected call of SavePoint.

@@ -24,7 +24,6 @@ type Opt func(s *Settings)
 // Settings is an implementation of transaction.Settings.
 type Settings struct {
 	ctxKey       *transaction.CtxKey
-	isReadOnly   *bool
 	propagation  *transaction.Propagation
 	isCancelable *bool
 	timeout      *time.Duration
@@ -42,15 +41,11 @@ func New(oo ...Opt) Settings {
 }
 
 //revive:disable:exported
-func (s Settings) EnrichBy(external transaction.Settings) (res transaction.Settings) { //nolint:ireturn
+func (s Settings) EnrichBy(external transaction.Settings) (res transaction.Settings) { //nolint:ireturn,nolintlint
 	res = s
 
 	if s.CtxKeyOrNil() == nil {
 		res = res.SetCtxKey(external.CtxKeyOrNil())
-	}
-
-	if s.IsReadOnlyOrNil() == nil {
-		res = res.SetIsReadOnly(external.IsReadOnlyOrNil())
 	}
 
 	if s.PropagationOrNil() == nil {
@@ -69,7 +64,7 @@ func (s Settings) EnrichBy(external transaction.Settings) (res transaction.Setti
 }
 
 // CtxKey returns transaction.CtxKey for the transaction.Transaction.
-func (s Settings) CtxKey() transaction.CtxKey { //nolint:ireturn
+func (s Settings) CtxKey() transaction.CtxKey { //nolint:ireturn,nolintlint
 	if s.ctxKey == nil {
 		return DefaultCtxKey
 	}
@@ -81,35 +76,12 @@ func (s Settings) CtxKeyOrNil() *transaction.CtxKey {
 	return s.ctxKey
 }
 
-func (s Settings) SetCtxKey(key *transaction.CtxKey) transaction.Settings { //nolint:ireturn
+func (s Settings) SetCtxKey(key *transaction.CtxKey) transaction.Settings { //nolint:ireturn,nolintlint
 	return s.setCtxKey(key)
 }
 
 func (s Settings) setCtxKey(key *transaction.CtxKey) Settings {
 	s.ctxKey = key
-
-	return s
-}
-
-// IsReadOnly defines that the transaction.Transaction can or cannot write data to a database.
-func (s Settings) IsReadOnly() bool {
-	if s.isReadOnly == nil {
-		return defaultIsReadOnly
-	}
-
-	return *s.isReadOnly
-}
-
-func (s Settings) IsReadOnlyOrNil() *bool {
-	return s.isReadOnly
-}
-
-func (s Settings) SetIsReadOnly(b *bool) transaction.Settings { //nolint:ireturn
-	return s.setIsReadOnly(b)
-}
-
-func (s Settings) setIsReadOnly(b *bool) Settings {
-	s.isReadOnly = b
 
 	return s
 }
