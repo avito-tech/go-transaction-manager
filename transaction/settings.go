@@ -17,12 +17,6 @@ type Settings interface {
 	CtxKeyOrNil() *CtxKey
 	SetCtxKey(*CtxKey) Settings
 
-	// TODO
-	// IsReadOnly defines that the transaction.Transaction can or cannot write data to a database.
-	IsReadOnly() bool
-	IsReadOnlyOrNil() *bool
-	SetIsReadOnly(*bool) Settings
-
 	// Propagation returns transaction.Propagation.
 	Propagation() Propagation
 	PropagationOrNil() *Propagation

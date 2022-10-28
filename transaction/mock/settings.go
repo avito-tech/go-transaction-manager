@@ -231,20 +231,6 @@ func (mr *MockSettingsMockRecorder) SetTimeout(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTimeout", reflect.TypeOf((*MockSettings)(nil).SetTimeout), arg0)
 }
 
-// Timeout mocks base method.
-func (m *MockSettings) Timeout() time.Duration {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Timeout")
-	ret0, _ := ret[0].(time.Duration)
-	return ret0
-}
-
-// Timeout indicates an expected call of Timeout.
-func (mr *MockSettingsMockRecorder) Timeout() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Timeout", reflect.TypeOf((*MockSettings)(nil).Timeout))
-}
-
 // TimeoutOrNil mocks base method.
 func (m *MockSettings) TimeoutOrNil() *time.Duration {
 	m.ctrl.T.Helper()

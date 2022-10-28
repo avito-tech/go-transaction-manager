@@ -13,13 +13,6 @@ func WithCtxKey(key transaction.CtxKey) Opt {
 	}
 }
 
-// WithReadOnly sets up block to write to a database for the transaction.Settings.
-func WithReadOnly(is bool) Opt {
-	return func(s *Settings) {
-		*s = s.setIsReadOnly(&is)
-	}
-}
-
 // WithPropagation sets up a transaction.Propagation for the transaction.Settings.
 func WithPropagation(p transaction.Propagation) Opt {
 	return func(s *Settings) {
