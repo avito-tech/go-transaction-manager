@@ -639,7 +639,10 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 				return ctx, func() {}
 			},
 			do: func(t *testing.T, ctx context.Context) {
-				time.Sleep(3 * time.Millisecond)
+				select {
+				case <-time.After(time.Second):
+				case <-ctx.Done():
+				}
 
 				assert.ErrorIs(t, ctx.Err(), context.DeadlineExceeded)
 			},
