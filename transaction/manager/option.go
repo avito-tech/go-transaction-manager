@@ -17,8 +17,8 @@ func WithSettings(s transaction.Settings) Opt {
 }
 
 // WithCtxManager sets transaction.Settings for Manager.
-func WithCtxManager(с transaction.СtxManager) Opt {
+func WithCtxManager(c transaction.СtxManager) Opt {
 	return func(m *Manager) {
-		m.ctxManager = с
+		m.ctxManager = c
 	}
 }

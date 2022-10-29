@@ -39,7 +39,7 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 	}
 
 	hasError := *errInProcessTr != nil
-	// TODO Not sure that context Errors should be propagated.
+	// TODO not sure that context errors should be propagated.
 	isCtxCanceled := errors.Is(*errInProcessTr, context.Canceled)
 	isCtxDeadlineExceeded := errors.Is(*errInProcessTr, context.DeadlineExceeded)
 	isCtxErr := isCtxCanceled || isCtxDeadlineExceeded

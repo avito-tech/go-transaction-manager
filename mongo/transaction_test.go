@@ -3,13 +3,17 @@ package mongo
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
 	"github.com/avito-tech/go-transaction-manager/transaction"
@@ -29,9 +33,20 @@ func TestTransaction(t *testing.T) {
 		ctx context.Context
 	}
 
+	type fields struct {
+		settings transaction.Settings
+	}
+
 	testErr := errors.New("error test")
 	doNil := func(mt *mtest.T, ctx context.Context) error {
 		return nil
+	}
+	defaultFields := func(mt *mtest.T) fields {
+		return fields{
+			settings: NewSettings(settings.New(
+				settings.WithPropagation(transaction.PropagationRequiresNew),
+			), WithSessionOpts(&options.SessionOptions{})),
+		}
 	}
 
 	mt := mtest.New(
@@ -41,21 +56,65 @@ func TestTransaction(t *testing.T) {
 	defer mt.Close()
 
 	tests := map[string]struct {
-		prepare func(mt *mtest.T)
+		fields  func(mt *mtest.T) fields
 		args    args
 		do      func(mt *mtest.T, ctx context.Context) error
 		wantErr assert.ErrorAssertionFunc
 	}{
 		"success": {
-			prepare: func(mt *mtest.T) {},
+			fields: defaultFields,
 			args: args{
 				ctx: context.Background(),
 			},
 			do:      doNil,
 			wantErr: assert.NoError,
 		},
+		"begin_session_error": {
+			fields: func(mt *mtest.T) fields {
+				return fields{
+					settings: NewSettings(settings.New(
+						settings.WithPropagation(transaction.PropagationNested),
+					), WithSessionOpts((&options.SessionOptions{}).
+						SetSnapshot(true).
+						SetCausalConsistency(true))),
+				}
+			},
+			args: args{
+				ctx: context.Background(),
+			},
+			do: func(mt *mtest.T, ctx context.Context) error {
+				require.NotNil(mt, 1, "should not be here")
+
+				return nil
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.ErrorIs(t, err, transaction.ErrBegin)
+			},
+		},
+		"begin_transaction_error": {
+			fields: func(mt *mtest.T) fields {
+				return fields{
+					settings: NewSettings(settings.New(
+						settings.WithPropagation(transaction.PropagationNested),
+					), WithTransactionOpts((&options.TransactionOptions{}).
+						SetWriteConcern(writeconcern.New(
+							writeconcern.W(0))))),
+				}
+			},
+			args: args{
+				ctx: context.Background(),
+			},
+			do: func(mt *mtest.T, ctx context.Context) error {
+				require.NotNil(mt, 1, "should not be here")
+
+				return nil
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.ErrorIs(t, err, transaction.ErrBegin)
+			},
+		},
 		"commit_error": {
-			prepare: func(mt *mtest.T) {},
+			fields: defaultFields,
 			args: args{
 				ctx: context.Background(),
 			},
@@ -69,11 +128,12 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				var divErr mongo.CommandError
 
-				return assert.ErrorAs(t, err, &divErr) && assert.ErrorIs(t, err, transaction.ErrCommit)
+				return assert.ErrorAs(t, err, &divErr) &&
+					assert.ErrorIs(t, err, transaction.ErrCommit)
 			},
 		},
 		"rollback_after_error": {
-			prepare: func(mt *mtest.T) {},
+			fields: defaultFields,
 			args: args{
 				ctx: context.Background(),
 			},
@@ -97,15 +157,12 @@ func TestTransaction(t *testing.T) {
 
 			log := mock.NewLog()
 
-			tt.prepare(mt)
+			f := tt.fields(mt)
 
-			s := settings.New(
-				settings.WithPropagation(transaction.PropagationNested),
-			)
 			m := manager.New(
 				NewDefaultFactory(mt.Client),
 				manager.WithLog(log),
-				manager.WithSettings(s),
+				manager.WithSettings(f.settings),
 			)
 
 			var tr Transaction
@@ -120,7 +177,7 @@ func TestTransaction(t *testing.T) {
 				})
 
 				if trNested != nil {
-					require.Equal(t, true, trNested.IsActive())
+					require.Equal(t, false, trNested.IsActive())
 				}
 
 				return err
@@ -132,4 +189,38 @@ func TestTransaction(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestTransaction_awaitDone(t *testing.T) {
+	t.Parallel()
+
+	mt := mtest.New(
+		t,
+		mtest.NewOptions().
+			ClientType(mtest.Mock).
+			ShareClient(true),
+	)
+	defer mt.Close()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	f := NewDefaultFactory(mt.Client)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		defer wg.Done()
+
+		_, tr, err := f(ctx, settings.New())
+
+		cancel()
+		<-time.After(time.Second)
+
+		<-ctx.Done()
+
+		require.NoError(mt, err)
+		require.False(mt, tr.IsActive())
+	}()
+
+	wg.Wait()
 }

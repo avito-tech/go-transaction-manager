@@ -8,9 +8,15 @@ import (
 )
 
 // NewDefaultFactory creates default transaction.Transaction(sql.Tx).
-// TODO add options.
 func NewDefaultFactory(db *sql.DB) transaction.TrFactory {
-	return func(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
-		return NewTransaction(ctx, transaction.NewSavePoint(), nil, db)
+	return NewFactory(db, NewSavePoint())
+}
+
+// NewFactory creates transaction.Transaction(sql.Tx).
+func NewFactory(db *sql.DB, sp SavePoint) transaction.TrFactory {
+	return func(ctx context.Context, trms transaction.Settings) (context.Context, transaction.Transaction, error) {
+		s, _ := trms.(Settings)
+
+		return NewTransaction(ctx, sp, s.TxOpts(), db)
 	}
 }
