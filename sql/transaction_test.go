@@ -3,7 +3,9 @@ package sql
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -115,7 +117,7 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, transaction.ErrBegin) &&
-					assert.ErrorIs(t, err, transaction.ErrSPBegin)
+					assert.ErrorIs(t, err, transaction.ErrNestedBegin)
 			},
 		},
 		"commit_savepoint_error": {
@@ -134,7 +136,7 @@ func TestTransaction(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
-					assert.ErrorIs(t, err, transaction.ErrSPCommit)
+					assert.ErrorIs(t, err, transaction.ErrNestedCommit)
 			},
 		},
 		"rollback_savepoint_after_error": {
@@ -156,7 +158,7 @@ func TestTransaction(t *testing.T) {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
 					assert.ErrorIs(t, err, transaction.ErrRollback) &&
-					assert.ErrorIs(t, err, transaction.ErrSPRollback)
+					assert.ErrorIs(t, err, transaction.ErrNestedRollback)
 			},
 		},
 	}
@@ -204,4 +206,33 @@ func TestTransaction(t *testing.T) {
 			assert.NoError(t, dbmock.ExpectationsWereMet())
 		})
 	}
+}
+
+func TestTransaction_awaitDone(t *testing.T) {
+	t.Parallel()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	db, dbmock, _ := sqlmock.New()
+	dbmock.ExpectBegin()
+
+	f := NewDefaultFactory(db)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		defer wg.Done()
+
+		_, tr, err := f(ctx, settings.New())
+
+		cancel()
+		<-time.After(time.Second)
+
+		<-ctx.Done()
+
+		require.NoError(t, err)
+		require.False(t, tr.IsActive())
+	}()
+
+	wg.Wait()
 }

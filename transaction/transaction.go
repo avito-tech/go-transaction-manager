@@ -23,28 +23,20 @@ var (
 	// ErrRollback occurs when rollback finished with an error.
 	ErrRollback = errTransaction("rollback")
 
-	// ErrSPBegin occurs when a savepoint started with an error.
-	ErrSPBegin = errNested(ErrBegin, "savepoint")
-	// ErrSPCommit occurs when release savepoint finished with an error.
-	ErrSPCommit = errNested(ErrCommit, "savepoint")
-	// ErrSPRollback occurs when rollback savepoint finished with an error.
-	ErrSPRollback = errNested(ErrRollback, "savepoint")
+	// ErrNestedBegin occurs when a savepoint started with an error.
+	ErrNestedBegin = errNested(ErrBegin, "nested")
+	// ErrNestedCommit occurs when release savepoint finished with an error.
+	ErrNestedCommit = errNested(ErrCommit, "nested")
+	// ErrNestedRollback occurs when rollback savepoint finished with an error.
+	ErrNestedRollback = errNested(ErrRollback, "nested")
 )
-
-func errNested(err error, msg string) error {
-	return fmt.Errorf("%w: %s", err, msg)
-}
-
-func errTransaction(msg string) error {
-	return errNested(ErrTransaction, msg)
-}
 
 // TrFactory is used in Manager to creates Transaction.
 type TrFactory func(ctx context.Context, s Settings) (context.Context, Transaction, error)
 
-// SPFactory creates save points for Transaction.
-type SPFactory interface {
-	SavePoint(ctx context.Context, s Settings) (context.Context, Transaction, error)
+// NestedFactory creates nested Transaction.
+type NestedFactory interface {
+	Begin(ctx context.Context, s Settings) (context.Context, Transaction, error)
 }
 
 // Transaction wraps different transaction implementations.
@@ -64,7 +56,7 @@ type Transaction interface {
 //nolint:unused
 type transactionWithSP interface {
 	Transaction
-	SPFactory
+	NestedFactory
 }
 
 var (
@@ -96,3 +88,11 @@ const (
 	// PropagationSupports supports a current transaction, execute non-transactionally if none exists.
 	PropagationSupports
 )
+
+func errNested(err error, msg string) error {
+	return fmt.Errorf("%w: %s", err, msg)
+}
+
+func errTransaction(msg string) error {
+	return errNested(ErrTransaction, msg)
+}
