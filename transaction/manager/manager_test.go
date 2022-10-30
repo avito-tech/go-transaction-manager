@@ -451,6 +451,35 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 					assert.ErrorIs(t, err, transaction.ErrCommit)
 			},
 		},
+		"PropagationNested_err_nested_begin": {
+			args: args{
+				ctx: context.Background(),
+				settings: settings.New(
+					settings.WithPropagation(transaction.PropagationNested),
+				),
+			},
+			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
+				f := fields{
+					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+						txSP := mock.NewMocktransactionWithSP(ctrl)
+
+						txSP.EXPECT().IsActive().Return(true).Times(1)
+						txSP.EXPECT().SavePoint(gomock.Any(), a.settings).Return(ctx, nil, testErr)
+						txSP.EXPECT().Rollback(gomock.Any()).Return(nil).Times(1)
+
+						return ctx, txSP, nil
+					},
+					settings: a.settings,
+					log:      mock_log.NewMocklogger(ctrl),
+				}
+
+				return f
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.ErrorIs(t, err, testErr) &&
+					assert.ErrorIs(t, err, transaction.ErrNestedBegin)
+			},
+		},
 	}
 	for name, tt := range tests {
 		tt := tt

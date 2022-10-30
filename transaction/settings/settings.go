@@ -99,7 +99,7 @@ func (s Settings) PropagationOrNil() *transaction.Propagation {
 	return s.propagation
 }
 
-func (s Settings) SetPropagation(p *transaction.Propagation) transaction.Settings { //nolint:ireturn
+func (s Settings) SetPropagation(p *transaction.Propagation) transaction.Settings { //nolint:ireturn,nolintlint
 	return s.setPropagation(p)
 }
 
@@ -122,7 +122,7 @@ func (s Settings) CancelableOrNil() *bool {
 	return s.isCancelable
 }
 
-func (s Settings) SetCancelable(t *bool) transaction.Settings { //nolint:ireturn
+func (s Settings) SetCancelable(t *bool) transaction.Settings { //nolint:ireturn,nolintlint
 	return s.setCancelable(t)
 }
 
@@ -137,7 +137,7 @@ func (s Settings) TimeoutOrNil() *time.Duration {
 	return s.timeout
 }
 
-func (s Settings) SetTimeout(t *time.Duration) transaction.Settings { //nolint:ireturn
+func (s Settings) SetTimeout(t *time.Duration) transaction.Settings { //nolint:ireturn,nolintlint
 	return s.setTimeout(t)
 }
 

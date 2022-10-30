@@ -110,11 +110,11 @@ func (m *Manager) init(ctx context.Context, s transaction.Settings) (context.Con
 }
 
 func (m *Manager) propagationNested(ctx context.Context, s transaction.Settings, tr transaction.Transaction, c context.CancelFunc) (context.Context, closer, error) {
-	spFactor, ok := tr.(transaction.SPFactory)
+	nestedFactory, ok := tr.(transaction.NestedFactory)
 	if ok {
-		ctx, tr, err := spFactor.SavePoint(ctx, s)
+		ctx, tr, err := nestedFactory.Begin(ctx, s)
 		if err != nil {
-			return ctx, nil, err
+			return ctx, nil, multierr.Combine(transaction.ErrNestedBegin, err)
 		}
 
 		return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),

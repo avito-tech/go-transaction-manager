@@ -15,7 +15,7 @@ import (
 // transaction.SavePoint returns IsActive as true while transaction.Transaction is opened.
 type Transaction struct {
 	tx        *sql.Tx
-	savePoint transaction.SavePoint
+	savePoint SavePoint
 	saves     int64
 	isActive  int64
 }
@@ -23,7 +23,7 @@ type Transaction struct {
 // NewTransaction creates transaction.Transaction for sql.Tx.
 func NewTransaction(
 	ctx context.Context,
-	sp transaction.SavePoint,
+	sp SavePoint,
 	opts *sql.TxOptions,
 	db *sql.DB,
 ) (context.Context, *Transaction, error) {
@@ -54,12 +54,11 @@ func (t *Transaction) Transaction() interface{} {
 	return t.tx
 }
 
-// SavePoint creates nested transaction by save point.
-func (t *Transaction) SavePoint(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) { //nolint:ireturn,nolintlint
-	// TODO check that is transaction.Settings necessary
+// Begin nested transaction by save point.
+func (t *Transaction) Begin(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) { //nolint:ireturn,nolintlint
 	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
 	if err != nil {
-		return ctx, nil, multierr.Combine(transaction.ErrSPBegin, err)
+		return ctx, nil, err
 	}
 
 	return ctx, t, nil
@@ -70,7 +69,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 	if t.hasSavePoint() {
 		_, err := t.tx.ExecContext(ctx, t.savePoint.Release(t.decrementID()))
 		if err != nil {
-			return multierr.Combine(transaction.ErrSPCommit, err)
+			return multierr.Combine(transaction.ErrNestedCommit, err)
 		}
 
 		return nil
@@ -90,7 +89,7 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 	if t.hasSavePoint() {
 		_, err := t.tx.ExecContext(ctx, t.savePoint.Rollback(t.decrementID()))
 		if err != nil {
-			return multierr.Combine(transaction.ErrSPRollback, err)
+			return multierr.Combine(transaction.ErrNestedRollback, err)
 		}
 
 		return nil
