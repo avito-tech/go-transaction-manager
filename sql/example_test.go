@@ -8,6 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	trmsql "github.com/avito-tech/go-transaction-manager/sql"
+	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
 	"github.com/avito-tech/go-transaction-manager/transaction/manager"
 )
 
@@ -94,7 +95,10 @@ func Example() {
 	}
 
 	ctx := context.Background()
-	trManager := manager.New(trmsql.NewDefaultFactory(db))
+	trManager := manager.New(
+		trmsql.NewDefaultFactory(db),
+		manager.WithCtxManager(trmcontext.DefaultManager),
+	)
 
 	err = trManager.Do(ctx, func(ctx context.Context) error {
 		if err := r.Save(ctx, u); err != nil {

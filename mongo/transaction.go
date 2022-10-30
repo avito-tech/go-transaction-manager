@@ -20,7 +20,7 @@ func NewTransaction(
 	ctx context.Context,
 	sessionOptions *options.SessionOptions,
 	trOpts *options.TransactionOptions,
-	client *mongo.Client,
+	client client,
 ) (context.Context, *Transaction, error) {
 	s, err := client.StartSession(sessionOptions)
 	if err != nil {
@@ -28,6 +28,8 @@ func NewTransaction(
 	}
 
 	if err = s.StartTransaction(trOpts); err != nil {
+		defer s.EndSession(ctx)
+
 		return ctx, nil, err
 	}
 
@@ -66,7 +68,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 	return nil
 }
 
-// Rollback the transaction.Transaction..
+// Rollback the transaction.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
 	t.deactivate()
 

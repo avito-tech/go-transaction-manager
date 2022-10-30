@@ -12,7 +12,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockSPFactory is a mock of SPFactory interface.
+// MockSPFactory is a mock of NestedFactory interface.
 type MockSPFactory struct {
 	ctrl     *gomock.Controller
 	recorder *MockSPFactoryMockRecorder
@@ -36,9 +36,9 @@ func (m *MockSPFactory) EXPECT() *MockSPFactoryMockRecorder {
 }
 
 // SavePoint mocks base method.
-func (m *MockSPFactory) SavePoint(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
+func (m *MockSPFactory) Begin(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SavePoint", ctx, s)
+	ret := m.ctrl.Call(m, "Begin", ctx, s)
 	ret0, _ := ret[0].(context.Context)
 	ret1, _ := ret[1].(transaction.Transaction)
 	ret2, _ := ret[2].(error)
@@ -48,7 +48,7 @@ func (m *MockSPFactory) SavePoint(ctx context.Context, s transaction.Settings) (
 // SavePoint indicates an expected call of SavePoint.
 func (mr *MockSPFactoryMockRecorder) SavePoint(ctx, s interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SavePoint", reflect.TypeOf((*MockSPFactory)(nil).SavePoint), ctx, s)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MockSPFactory)(nil).Begin), ctx, s)
 }
 
 // MockTransaction is a mock of Transaction interface.
@@ -196,9 +196,9 @@ func (mr *MocktransactionWithSPMockRecorder) Rollback(arg0 interface{}) *gomock.
 }
 
 // SavePoint mocks base method.
-func (m *MocktransactionWithSP) SavePoint(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
+func (m *MocktransactionWithSP) Begin(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SavePoint", ctx, s)
+	ret := m.ctrl.Call(m, "Begin", ctx, s)
 	ret0, _ := ret[0].(context.Context)
 	ret1, _ := ret[1].(transaction.Transaction)
 	ret2, _ := ret[2].(error)
@@ -208,7 +208,7 @@ func (m *MocktransactionWithSP) SavePoint(ctx context.Context, s transaction.Set
 // SavePoint indicates an expected call of SavePoint.
 func (mr *MocktransactionWithSPMockRecorder) SavePoint(ctx, s interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SavePoint", reflect.TypeOf((*MocktransactionWithSP)(nil).SavePoint), ctx, s)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MocktransactionWithSP)(nil).Begin), ctx, s)
 }
 
 // Transaction mocks base method.
