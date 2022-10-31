@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	transaction "github.com/avito-tech/go-transaction-manager/transaction"
+	trm "github.com/avito-tech/go-transaction-manager/trm"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -64,10 +64,10 @@ func (mr *MockSettingsMockRecorder) CancelableOrNil() *gomock.Call {
 }
 
 // CtxKey mocks base method.
-func (m *MockSettings) CtxKey() transaction.CtxKey {
+func (m *MockSettings) CtxKey() trm.CtxKey {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CtxKey")
-	ret0, _ := ret[0].(transaction.CtxKey)
+	ret0, _ := ret[0].(trm.CtxKey)
 	return ret0
 }
 
@@ -78,10 +78,10 @@ func (mr *MockSettingsMockRecorder) CtxKey() *gomock.Call {
 }
 
 // CtxKeyOrNil mocks base method.
-func (m *MockSettings) CtxKeyOrNil() *transaction.CtxKey {
+func (m *MockSettings) CtxKeyOrNil() *trm.CtxKey {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CtxKeyOrNil")
-	ret0, _ := ret[0].(*transaction.CtxKey)
+	ret0, _ := ret[0].(*trm.CtxKey)
 	return ret0
 }
 
@@ -92,10 +92,10 @@ func (mr *MockSettingsMockRecorder) CtxKeyOrNil() *gomock.Call {
 }
 
 // EnrichBy mocks base method.
-func (m *MockSettings) EnrichBy(external transaction.Settings) transaction.Settings {
+func (m *MockSettings) EnrichBy(external trm.Settings) trm.Settings {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EnrichBy", external)
-	ret0, _ := ret[0].(transaction.Settings)
+	ret0, _ := ret[0].(trm.Settings)
 	return ret0
 }
 
@@ -105,39 +105,11 @@ func (mr *MockSettingsMockRecorder) EnrichBy(external interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnrichBy", reflect.TypeOf((*MockSettings)(nil).EnrichBy), external)
 }
 
-// IsReadOnly mocks base method.
-func (m *MockSettings) IsReadOnly() bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsReadOnly")
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsReadOnly indicates an expected call of IsReadOnly.
-func (mr *MockSettingsMockRecorder) IsReadOnly() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsReadOnly", reflect.TypeOf((*MockSettings)(nil).IsReadOnly))
-}
-
-// IsReadOnlyOrNil mocks base method.
-func (m *MockSettings) IsReadOnlyOrNil() *bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsReadOnlyOrNil")
-	ret0, _ := ret[0].(*bool)
-	return ret0
-}
-
-// IsReadOnlyOrNil indicates an expected call of IsReadOnlyOrNil.
-func (mr *MockSettingsMockRecorder) IsReadOnlyOrNil() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsReadOnlyOrNil", reflect.TypeOf((*MockSettings)(nil).IsReadOnlyOrNil))
-}
-
 // Propagation mocks base method.
-func (m *MockSettings) Propagation() transaction.Propagation {
+func (m *MockSettings) Propagation() trm.Propagation {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Propagation")
-	ret0, _ := ret[0].(transaction.Propagation)
+	ret0, _ := ret[0].(trm.Propagation)
 	return ret0
 }
 
@@ -148,10 +120,10 @@ func (mr *MockSettingsMockRecorder) Propagation() *gomock.Call {
 }
 
 // PropagationOrNil mocks base method.
-func (m *MockSettings) PropagationOrNil() *transaction.Propagation {
+func (m *MockSettings) PropagationOrNil() *trm.Propagation {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PropagationOrNil")
-	ret0, _ := ret[0].(*transaction.Propagation)
+	ret0, _ := ret[0].(*trm.Propagation)
 	return ret0
 }
 
@@ -162,10 +134,10 @@ func (mr *MockSettingsMockRecorder) PropagationOrNil() *gomock.Call {
 }
 
 // SetCancelable mocks base method.
-func (m *MockSettings) SetCancelable(arg0 *bool) transaction.Settings {
+func (m *MockSettings) SetCancelable(arg0 *bool) trm.Settings {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetCancelable", arg0)
-	ret0, _ := ret[0].(transaction.Settings)
+	ret0, _ := ret[0].(trm.Settings)
 	return ret0
 }
 
@@ -176,10 +148,10 @@ func (mr *MockSettingsMockRecorder) SetCancelable(arg0 interface{}) *gomock.Call
 }
 
 // SetCtxKey mocks base method.
-func (m *MockSettings) SetCtxKey(arg0 *transaction.CtxKey) transaction.Settings {
+func (m *MockSettings) SetCtxKey(arg0 *trm.CtxKey) trm.Settings {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetCtxKey", arg0)
-	ret0, _ := ret[0].(transaction.Settings)
+	ret0, _ := ret[0].(trm.Settings)
 	return ret0
 }
 
@@ -189,25 +161,11 @@ func (mr *MockSettingsMockRecorder) SetCtxKey(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCtxKey", reflect.TypeOf((*MockSettings)(nil).SetCtxKey), arg0)
 }
 
-// SetIsReadOnly mocks base method.
-func (m *MockSettings) SetIsReadOnly(arg0 *bool) transaction.Settings {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetIsReadOnly", arg0)
-	ret0, _ := ret[0].(transaction.Settings)
-	return ret0
-}
-
-// SetIsReadOnly indicates an expected call of SetIsReadOnly.
-func (mr *MockSettingsMockRecorder) SetIsReadOnly(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetIsReadOnly", reflect.TypeOf((*MockSettings)(nil).SetIsReadOnly), arg0)
-}
-
 // SetPropagation mocks base method.
-func (m *MockSettings) SetPropagation(arg0 *transaction.Propagation) transaction.Settings {
+func (m *MockSettings) SetPropagation(arg0 *trm.Propagation) trm.Settings {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetPropagation", arg0)
-	ret0, _ := ret[0].(transaction.Settings)
+	ret0, _ := ret[0].(trm.Settings)
 	return ret0
 }
 
@@ -218,10 +176,10 @@ func (mr *MockSettingsMockRecorder) SetPropagation(arg0 interface{}) *gomock.Cal
 }
 
 // SetTimeout mocks base method.
-func (m *MockSettings) SetTimeout(arg0 *time.Duration) transaction.Settings {
+func (m *MockSettings) SetTimeout(arg0 *time.Duration) trm.Settings {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetTimeout", arg0)
-	ret0, _ := ret[0].(transaction.Settings)
+	ret0, _ := ret[0].(trm.Settings)
 	return ret0
 }
 

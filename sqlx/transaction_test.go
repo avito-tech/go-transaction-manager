@@ -13,10 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
-	"github.com/avito-tech/go-transaction-manager/transaction"
-	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
-	"github.com/avito-tech/go-transaction-manager/transaction/manager"
-	"github.com/avito-tech/go-transaction-manager/transaction/settings"
+	"github.com/avito-tech/go-transaction-manager/trm"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
+	"github.com/avito-tech/go-transaction-manager/trm/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
 
 func TestTransaction(t *testing.T) {
@@ -65,7 +65,7 @@ func TestTransaction(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.ErrorIs(t, err, transaction.ErrBegin)
+					assert.ErrorIs(t, err, trm.ErrBegin)
 			},
 		},
 		"commit_error": {
@@ -81,7 +81,7 @@ func TestTransaction(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
-					assert.ErrorIs(t, err, transaction.ErrCommit)
+					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 		},
 		"rollback_after_error": {
@@ -102,7 +102,7 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
-					assert.ErrorIs(t, err, transaction.ErrRollback)
+					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 		"begin_savepoint_error": {
@@ -117,8 +117,8 @@ func TestTransaction(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.ErrorIs(t, err, transaction.ErrBegin) &&
-					assert.ErrorIs(t, err, transaction.ErrNestedBegin)
+					assert.ErrorIs(t, err, trm.ErrBegin) &&
+					assert.ErrorIs(t, err, trm.ErrNestedBegin)
 			},
 		},
 		"commit_savepoint_error": {
@@ -137,8 +137,8 @@ func TestTransaction(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
-					assert.ErrorIs(t, err, transaction.ErrCommit) &&
-					assert.ErrorIs(t, err, transaction.ErrNestedCommit)
+					assert.ErrorIs(t, err, trm.ErrCommit) &&
+					assert.ErrorIs(t, err, trm.ErrNestedCommit)
 			},
 		},
 		"rollback_savepoint_after_error": {
@@ -159,8 +159,8 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
-					assert.ErrorIs(t, err, transaction.ErrRollback) &&
-					assert.ErrorIs(t, err, transaction.ErrNestedRollback)
+					assert.ErrorIs(t, err, trm.ErrRollback) &&
+					assert.ErrorIs(t, err, trm.ErrNestedRollback)
 			},
 		},
 	}
@@ -174,10 +174,10 @@ func TestTransaction(t *testing.T) {
 
 			tt.prepare(t, dbmock)
 
-			s := settings.New(
-				settings.WithPropagation(transaction.PropagationNested),
+			s := settings.Must(
+				settings.WithPropagation(trm.PropagationNested),
 			)
-			m := manager.New(
+			m := manager.Must(
 				NewDefaultFactory(sqlx.NewDb(db, "sqlmock")),
 				manager.WithLog(log),
 				manager.WithSettings(s),
@@ -185,7 +185,7 @@ func TestTransaction(t *testing.T) {
 
 			var tr Transaction
 			err := m.Do(tt.args.ctx, func(ctx context.Context) error {
-				var trNested transaction.Transaction
+				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
 
@@ -225,7 +225,7 @@ func TestTransaction_awaitDone(t *testing.T) {
 	go func() {
 		defer wg.Done()
 
-		_, tr, err := f(ctx, settings.New())
+		_, tr, err := f(ctx, settings.Must())
 
 		cancel()
 		<-time.After(time.Second)

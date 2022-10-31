@@ -1,4 +1,4 @@
-// Package sql is an implementation of transaction.Transaction interface by Transaction for sql.Tx.
+// Package sql is an implementation of trm.Transaction interface by Transaction for sql.Tx.
 package sql
 
 import (

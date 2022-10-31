@@ -8,7 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	transaction "github.com/avito-tech/go-transaction-manager/transaction"
+	trm "github.com/avito-tech/go-transaction-manager/trm"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -50,7 +50,7 @@ func (mr *MockManagerMockRecorder) Do(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // DoWithSettings mocks base method.
-func (m *MockManager) DoWithSettings(arg0 context.Context, arg1 transaction.Settings, arg2 func(context.Context) error) error {
+func (m *MockManager) DoWithSettings(arg0 context.Context, arg1 trm.Settings, arg2 func(context.Context) error) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DoWithSettings", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)

@@ -1,4 +1,4 @@
-package transaction
+package trm
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
 
@@ -12,22 +12,22 @@ type Settings interface {
 	// EnrichBy fills nil properties from external Settings.
 	EnrichBy(external Settings) Settings
 
-	// CtxKey returns transaction.CtxKey for the transaction.Transaction.
+	// CtxKey returns trm.CtxKey for the trm.Transaction.
 	CtxKey() CtxKey
 	CtxKeyOrNil() *CtxKey
 	SetCtxKey(*CtxKey) Settings
 
-	// Propagation returns transaction.Propagation.
+	// Propagation returns trm.Propagation.
 	Propagation() Propagation
 	PropagationOrNil() *Propagation
 	SetPropagation(*Propagation) Settings
 
-	// Cancelable defines that parent transaction.Transaction can cancel child transaction.Transaction or goroutines.
+	// Cancelable defines that parent trm.Transaction can cancel child trm.Transaction or goroutines.
 	Cancelable() bool
 	CancelableOrNil() *bool
 	SetCancelable(*bool) Settings
 
-	// TimeoutOrNil returns time.Duration of the transaction.Transaction.
+	// TimeoutOrNil returns time.Duration of the trm.Transaction.
 	TimeoutOrNil() *time.Duration
 	SetTimeout(*time.Duration) Settings
 }

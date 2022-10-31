@@ -17,7 +17,7 @@ type SavePoint interface {
 //revive:disable:exported
 type DefaultSavePoint struct{}
 
-// NewSavePoint is an implementation of transaction.SavePoint.
+// NewSavePoint is an implementation of trm.SavePoint.
 func NewSavePoint() DefaultSavePoint {
 	return DefaultSavePoint{}
 }

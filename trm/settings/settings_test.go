@@ -6,56 +6,56 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
 func TestSettings_EnrichBy(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
-		external transaction.Settings
+		external trm.Settings
 	}
 
 	tests := map[string]struct {
 		settings Settings
 		args     args
-		want     transaction.Settings
+		want     trm.Settings
 	}{
 		"update_default": {
-			settings: New(),
+			settings: Must(),
 			args: args{
-				external: New(
+				external: Must(
 					WithCtxKey(1),
-					WithPropagation(transaction.PropagationSupports),
+					WithPropagation(trm.PropagationSupports),
 					WithCancelable(true),
 					WithTimeout(time.Second),
 				),
 			},
-			want: New(
+			want: Must(
 				WithCtxKey(1),
-				WithPropagation(transaction.PropagationSupports),
+				WithPropagation(trm.PropagationSupports),
 				WithCancelable(true),
 				WithTimeout(time.Second),
 			),
 		},
 		"without_update": {
-			settings: New(
+			settings: Must(
 				WithCtxKey(1),
-				WithPropagation(transaction.PropagationSupports),
+				WithPropagation(trm.PropagationSupports),
 				WithCancelable(true),
 				WithTimeout(time.Second),
 			),
 			args: args{
-				external: New(
+				external: Must(
 					WithCtxKey(2),
-					WithPropagation(transaction.PropagationNever),
+					WithPropagation(trm.PropagationNever),
 					WithCancelable(false),
 					WithTimeout(time.Minute),
 				),
 			},
-			want: New(
+			want: Must(
 				WithCtxKey(1),
-				WithPropagation(transaction.PropagationSupports),
+				WithPropagation(trm.PropagationSupports),
 				WithCancelable(true),
 				WithTimeout(time.Second),
 			),
@@ -77,9 +77,9 @@ func TestSettings_Getter(t *testing.T) {
 	t.Parallel()
 
 	type want struct {
-		ctxKey       *transaction.CtxKey
+		ctxKey       *trm.CtxKey
 		isReadOnly   *bool
-		propagation  *transaction.Propagation
+		propagation  *trm.Propagation
 		isCancelable *bool
 		timeout      *time.Duration
 	}
@@ -89,16 +89,16 @@ func TestSettings_Getter(t *testing.T) {
 		want     func() want
 	}{
 		"get": {
-			settings: New(
+			settings: Must(
 				WithCtxKey(2),
-				WithPropagation(transaction.PropagationRequiresNew),
+				WithPropagation(trm.PropagationRequiresNew),
 				WithCancelable(true),
 				WithTimeout(time.Millisecond),
 			),
 			want: func() want {
-				ctxKey := transaction.CtxKey(2)
+				ctxKey := trm.CtxKey(2)
 				isReadOnly := true
-				propagation := transaction.PropagationRequiresNew
+				propagation := trm.PropagationRequiresNew
 				isCancelable := true
 				timeout := time.Millisecond
 
@@ -112,11 +112,11 @@ func TestSettings_Getter(t *testing.T) {
 			},
 		},
 		"get_default": {
-			settings: New(),
+			settings: Must(),
 			want: func() want {
-				ctxKey := transaction.CtxKey(ctxKey{})
+				ctxKey := trm.CtxKey(ctxKey{})
 				isReadOnly := false
-				propagation := transaction.PropagationRequired
+				propagation := trm.PropagationRequired
 				isCancelable := false
 
 				return want{

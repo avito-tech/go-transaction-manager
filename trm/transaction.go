@@ -1,6 +1,5 @@
-// Package transaction is an interface to create a transactional usecase
-// in the Application layer.
-package transaction
+// Package trm contains of interfaces to programmatic transaction management.
+package trm
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
 
@@ -23,19 +22,19 @@ var (
 	// ErrRollback occurs when rollback finished with an error.
 	ErrRollback = errTransaction("rollback")
 
-	// ErrNestedBegin occurs when a savepoint started with an error.
+	// ErrNestedBegin occurs when nested transaction started with an error.
 	ErrNestedBegin = errNested(ErrBegin, "nested")
-	// ErrNestedCommit occurs when release savepoint finished with an error.
+	// ErrNestedCommit occurs when nested transaction finished with an error.
 	ErrNestedCommit = errNested(ErrCommit, "nested")
-	// ErrNestedRollback occurs when rollback savepoint finished with an error.
+	// ErrNestedRollback occurs when rollback nested transaction finished with an error.
 	ErrNestedRollback = errNested(ErrRollback, "nested")
 )
 
 // TrFactory is used in Manager to creates Transaction.
 type TrFactory func(ctx context.Context, s Settings) (context.Context, Transaction, error)
 
-// NestedFactory creates nested Transaction.
-type NestedFactory interface {
+// NestedTrFactory creates nested Transaction.
+type NestedTrFactory interface {
 	Begin(ctx context.Context, s Settings) (context.Context, Transaction, error)
 }
 
@@ -43,9 +42,9 @@ type NestedFactory interface {
 type Transaction interface {
 	// Transaction returns the real transaction sql.Tx, sqlx.Tx or another.
 	Transaction() interface{}
-	// Commit the transaction.Transaction.
+	// Commit the trm.Transaction.
 	Commit(context.Context) error
-	// Rollback the transaction.Transaction.
+	// Rollback the trm.Transaction.
 	Rollback(context.Context) error
 	// IsActive returns true if the transaction started but not committed or rolled back.
 	IsActive() bool
@@ -56,7 +55,7 @@ type Transaction interface {
 //nolint:unused
 type transactionWithSP interface {
 	Transaction
-	NestedFactory
+	NestedTrFactory
 }
 
 var (

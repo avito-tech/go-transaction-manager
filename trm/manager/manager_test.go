@@ -12,31 +12,31 @@ import (
 	"github.com/stretchr/testify/require"
 
 	trmmock "github.com/avito-tech/go-transaction-manager/internal/mock"
-	"github.com/avito-tech/go-transaction-manager/transaction"
-	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
-	mock_log "github.com/avito-tech/go-transaction-manager/transaction/manager/mock"
-	"github.com/avito-tech/go-transaction-manager/transaction/mock"
-	"github.com/avito-tech/go-transaction-manager/transaction/settings"
+	"github.com/avito-tech/go-transaction-manager/trm"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
+	mock_log "github.com/avito-tech/go-transaction-manager/trm/manager/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
 
 func Test_transactionManager_Do(t *testing.T) {
 	t.Parallel()
 
 	type fields struct {
-		factory  transaction.TrFactory
-		settings transaction.Settings
+		factory  trm.TrFactory
+		settings trm.Settings
 		log      logger
 	}
 
 	type args struct {
 		ctx            context.Context
-		settings       transaction.Settings
-		nestedSettings transaction.Settings
+		settings       trm.Settings
+		nestedSettings trm.Settings
 	}
 
 	ctxManager := trmcontext.DefaultManager
 
-	emptyFactory := func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+	emptyFactory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 		return ctx, nil, nil
 	}
 
@@ -49,12 +49,12 @@ func Test_transactionManager_Do(t *testing.T) {
 		"PropagationRequired_success_commit": {
 			args: args{
 				ctx:            context.Background(),
-				settings:       settings.New(),
-				nestedSettings: settings.New(),
+				settings:       settings.Must(),
+				nestedSettings: settings.Must(),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
-					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						tx := mock.NewMockTransaction(ctrl)
 
 						tx.EXPECT().IsActive().Return(true)
@@ -73,20 +73,20 @@ func Test_transactionManager_Do(t *testing.T) {
 		"PropagationNested_success_commit": {
 			args: args{
 				ctx: context.Background(),
-				settings: settings.New(
-					settings.WithPropagation(transaction.PropagationNested),
+				settings: settings.Must(
+					settings.WithPropagation(trm.PropagationNested),
 				),
-				nestedSettings: settings.New(
-					settings.WithPropagation(transaction.PropagationNested),
+				nestedSettings: settings.Must(
+					settings.WithPropagation(trm.PropagationNested),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
-					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true).Times(2)
-						txSP.EXPECT().SavePoint(gomock.Any(), a.settings).Return(ctx, txSP, nil)
+						txSP.EXPECT().Begin(gomock.Any(), a.settings).Return(ctx, txSP, nil)
 						txSP.EXPECT().Commit(gomock.Any()).Return(nil).Times(2)
 
 						return ctx, txSP, nil
@@ -106,18 +106,18 @@ func Test_transactionManager_Do(t *testing.T) {
 					settings.DefaultCtxKey,
 					mock.NewMockTransaction(nil),
 				),
-				settings: settings.New(),
-				nestedSettings: settings.New(
-					settings.WithPropagation(transaction.PropagationsMandatory),
+				settings: settings.Must(),
+				nestedSettings: settings.Must(
+					settings.WithPropagation(trm.PropagationsMandatory),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
-					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true)
-						txSP.EXPECT().SavePoint(gomock.Any(), a.settings).Return(txSP, nil)
+						txSP.EXPECT().Begin(gomock.Any(), a.settings).Return(txSP, nil)
 						txSP.EXPECT().Commit(gomock.Any()).Return(nil).Times(2)
 
 						return ctx, txSP, nil
@@ -133,8 +133,8 @@ func Test_transactionManager_Do(t *testing.T) {
 		"PropagationsMandatory_error_without_open_transaction": {
 			args: args{
 				ctx: context.Background(),
-				settings: settings.New(
-					settings.WithPropagation(transaction.PropagationsMandatory),
+				settings: settings.Must(
+					settings.WithPropagation(trm.PropagationsMandatory),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
@@ -147,17 +147,17 @@ func Test_transactionManager_Do(t *testing.T) {
 				return f
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.ErrorIs(t, err, transaction.ErrPropagationMandatory)
+				return assert.ErrorIs(t, err, trm.ErrPropagationMandatory)
 			},
 		},
 		"PropagationNever_success": {
 			args: args{
 				ctx: context.Background(),
-				settings: settings.New(settings.WithPropagation(
-					transaction.PropagationNever,
+				settings: settings.Must(settings.WithPropagation(
+					trm.PropagationNever,
 				)),
-				nestedSettings: settings.New(settings.WithPropagation(
-					transaction.PropagationNever,
+				nestedSettings: settings.Must(settings.WithPropagation(
+					trm.PropagationNever,
 				)),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
@@ -175,14 +175,14 @@ func Test_transactionManager_Do(t *testing.T) {
 		"PropagationNever_error_transaction_is_opened": {
 			args: args{
 				ctx:      context.Background(),
-				settings: settings.New(),
-				nestedSettings: settings.New(settings.WithPropagation(
-					transaction.PropagationNever,
+				settings: settings.Must(),
+				nestedSettings: settings.Must(settings.WithPropagation(
+					trm.PropagationNever,
 				)),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
-					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						tx := mock.NewMockTransaction(ctrl)
 
 						tx.EXPECT().IsActive().Return(true)
@@ -197,17 +197,17 @@ func Test_transactionManager_Do(t *testing.T) {
 				return f
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.ErrorIs(t, err, transaction.ErrPropagationNever)
+				return assert.ErrorIs(t, err, trm.ErrPropagationNever)
 			},
 		},
 		"PropagationNotSupported_success_commit": {
 			args: args{
 				ctx: context.Background(),
-				settings: settings.New(
-					settings.WithPropagation(transaction.PropagationNotSupported),
+				settings: settings.Must(
+					settings.WithPropagation(trm.PropagationNotSupported),
 				),
-				nestedSettings: settings.New(
-					settings.WithPropagation(transaction.PropagationNotSupported),
+				nestedSettings: settings.Must(
+					settings.WithPropagation(trm.PropagationNotSupported),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
@@ -225,14 +225,14 @@ func Test_transactionManager_Do(t *testing.T) {
 		"PropagationNotSupported_nilling_ctx_success_commit": {
 			args: args{
 				ctx:      context.Background(),
-				settings: settings.New(),
-				nestedSettings: settings.New(
-					settings.WithPropagation(transaction.PropagationNotSupported),
+				settings: settings.Must(),
+				nestedSettings: settings.Must(
+					settings.WithPropagation(trm.PropagationNotSupported),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
-					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true)
@@ -252,22 +252,22 @@ func Test_transactionManager_Do(t *testing.T) {
 		"PropagationRequiresNew": {
 			args: args{
 				ctx: context.Background(),
-				settings: settings.New(
-					settings.WithPropagation(transaction.PropagationRequiresNew),
+				settings: settings.Must(
+					settings.WithPropagation(trm.PropagationRequiresNew),
 				),
-				nestedSettings: settings.New(
-					settings.WithPropagation(transaction.PropagationRequiresNew),
+				nestedSettings: settings.Must(
+					settings.WithPropagation(trm.PropagationRequiresNew),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
-					factory: func() transaction.TrFactory {
+					factory: func() trm.TrFactory {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true).Times(2)
 						txSP.EXPECT().Commit(gomock.Any()).Return(nil).Times(2)
 
-						return func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+						return func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 							return ctx, txSP, nil
 						}
 					}(),
@@ -282,11 +282,11 @@ func Test_transactionManager_Do(t *testing.T) {
 		"PropagationSupports_nil_transaction": {
 			args: args{
 				ctx: context.Background(),
-				settings: settings.New(
-					settings.WithPropagation(transaction.PropagationSupports),
+				settings: settings.Must(
+					settings.WithPropagation(trm.PropagationSupports),
 				),
-				nestedSettings: settings.New(
-					settings.WithPropagation(transaction.PropagationSupports),
+				nestedSettings: settings.Must(
+					settings.WithPropagation(trm.PropagationSupports),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
@@ -304,22 +304,22 @@ func Test_transactionManager_Do(t *testing.T) {
 		"PropagationSupports": {
 			args: args{
 				ctx: context.Background(),
-				settings: settings.New(
-					settings.WithPropagation(transaction.PropagationRequired),
+				settings: settings.Must(
+					settings.WithPropagation(trm.PropagationRequired),
 				),
-				nestedSettings: settings.New(
-					settings.WithPropagation(transaction.PropagationSupports),
+				nestedSettings: settings.Must(
+					settings.WithPropagation(trm.PropagationSupports),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
-					factory: func() func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func() func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true)
 						txSP.EXPECT().Commit(gomock.Any()).Return(nil)
 
-						return func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+						return func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 							return ctx, txSP, nil
 						}
 					}(),
@@ -342,7 +342,7 @@ func Test_transactionManager_Do(t *testing.T) {
 
 			f := tt.fields(t, ctrl, tt.args)
 
-			tr := New(f.factory, WithLog(f.log), WithSettings(f.settings))
+			tr := Must(f.factory, WithLog(f.log), WithSettings(f.settings))
 
 			err := tr.DoWithSettings(
 				tt.args.ctx,
@@ -373,14 +373,14 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 	t.Parallel()
 
 	type fields struct {
-		factory  transaction.TrFactory
-		settings transaction.Settings
+		factory  trm.TrFactory
+		settings trm.Settings
 		log      logger
 	}
 
 	type args struct {
 		ctx      context.Context
-		settings transaction.Settings
+		settings trm.Settings
 	}
 
 	testErr := errors.New("error test")
@@ -388,7 +388,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 	testRollbackErr := errors.New("error rollback test")
 	defaultArgs := args{
 		ctx:      context.Background(),
-		settings: settings.New(),
+		settings: settings.Must(),
 	}
 
 	tests := map[string]struct {
@@ -402,7 +402,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			args: defaultArgs,
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				return fields{
-					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						tx := mock.NewMockTransaction(ctrl)
 
 						tx.EXPECT().
@@ -421,7 +421,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.ErrorIs(t, err, transaction.ErrRollback)
+					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 		//nolint:dupl
@@ -429,7 +429,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			args: defaultArgs,
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				return fields{
-					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						tx := mock.NewMockTransaction(ctrl)
 
 						tx.EXPECT().
@@ -448,23 +448,23 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			ret: nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
-					assert.ErrorIs(t, err, transaction.ErrCommit)
+					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 		},
 		"PropagationNested_err_nested_begin": {
 			args: args{
 				ctx: context.Background(),
-				settings: settings.New(
-					settings.WithPropagation(transaction.PropagationNested),
+				settings: settings.Must(
+					settings.WithPropagation(trm.PropagationNested),
 				),
 			},
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
-					factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 						txSP := mock.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true).Times(1)
-						txSP.EXPECT().SavePoint(gomock.Any(), a.settings).Return(ctx, nil, testErr)
+						txSP.EXPECT().Begin(gomock.Any(), a.settings).Return(ctx, nil, testErr)
 						txSP.EXPECT().Rollback(gomock.Any()).Return(nil).Times(1)
 
 						return ctx, txSP, nil
@@ -477,7 +477,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.ErrorIs(t, err, transaction.ErrNestedBegin)
+					assert.ErrorIs(t, err, trm.ErrNestedBegin)
 			},
 		},
 	}
@@ -491,7 +491,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 
 			f := tt.fields(t, ctrl, tt.args)
 
-			tr := New(f.factory, WithLog(f.log), WithSettings(f.settings))
+			tr := Must(f.factory, WithLog(f.log), WithSettings(f.settings))
 
 			err := tr.DoWithSettings(
 				tt.args.ctx,
@@ -521,7 +521,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	testRollbackErr := errors.New("rollback error")
 
 	log := trmmock.NewLog()
-	factory := func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+	factory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 		tx := mock.NewMockTransaction(ctrl)
 
 		tx.EXPECT().IsActive().Return(true)
@@ -530,7 +530,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 		return ctx, tx, nil
 	}
 
-	m := New(factory, WithLog(log))
+	m := Must(factory, WithLog(log))
 	ctxManager := trmcontext.DefaultManager
 
 	defer func() {
@@ -570,14 +570,14 @@ func Test_transactionManager_Do_ClosedTransaction(t *testing.T) {
 		"without_error": {
 			ret: nil,
 			wantErr: func(t require.TestingT, err error, i ...interface{}) {
-				require.Equal(t, transaction.ErrAlreadyClosed, err)
+				require.Equal(t, trm.ErrAlreadyClosed, err)
 			},
 		},
 		"with_error": {
 			ret: testErr,
 			wantErr: func(t require.TestingT, err error, i ...interface{}) {
 				require.ErrorIs(t, err, testErr)
-				require.ErrorIs(t, err, transaction.ErrAlreadyClosed)
+				require.ErrorIs(t, err, trm.ErrAlreadyClosed)
 			},
 		},
 	}
@@ -589,13 +589,13 @@ func Test_transactionManager_Do_ClosedTransaction(t *testing.T) {
 			tx := mock.NewMockTransaction(ctrl)
 			tx.EXPECT().IsActive().Return(false).MinTimes(2)
 
-			factory := func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+			factory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 				return ctx, tx, nil
 			}
 
-			m := New(
+			m := Must(
 				factory,
-				WithSettings(settings.New(settings.WithPropagation(transaction.PropagationRequiresNew))),
+				WithSettings(settings.Must(settings.WithPropagation(trm.PropagationRequiresNew))),
 			)
 
 			err := m.Do(context.Background(), func(ctx context.Context) error {
@@ -612,8 +612,8 @@ func Test_transactionManager_Do_ClosedTransaction(t *testing.T) {
 //nolint:tparallel // there is not t.Cleanup in go 1.13 and less.
 func Test_transactionManager_Do_Cancel(t *testing.T) {
 	type fields struct {
-		settings transaction.Settings
-		factory  transaction.TrFactory
+		settings trm.Settings
+		factory  trm.TrFactory
 	}
 
 	t.Parallel()
@@ -629,15 +629,15 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 	}{
 		"cancel": {
 			fields: fields{
-				factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+				factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 					tr := mock.NewMockTransaction(ctrl)
 					tr.EXPECT().IsActive().Return(false)
 
 					return ctx, tr, nil
 				},
-				settings: settings.New(
+				settings: settings.Must(
 					settings.WithCancelable(true),
-					settings.WithPropagation(transaction.PropagationRequiresNew),
+					settings.WithPropagation(trm.PropagationRequiresNew),
 				),
 			},
 			ctx: context.WithCancel,
@@ -652,16 +652,16 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 		},
 		"timeout": {
 			fields: fields{
-				factory: func(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) {
+				factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 					tr := mock.NewMockTransaction(ctrl)
 					tr.EXPECT().IsActive().Return(false)
 
 					return ctx, tr, nil
 				},
-				settings: settings.New(
+				settings: settings.Must(
 					settings.WithCancelable(true),
 					settings.WithTimeout(time.Millisecond),
-					settings.WithPropagation(transaction.PropagationRequiresNew),
+					settings.WithPropagation(trm.PropagationRequiresNew),
 				),
 			},
 			ctx: func(ctx context.Context) (context.Context, context.CancelFunc) {
@@ -685,7 +685,7 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			m := New(
+			m := Must(
 				tt.fields.factory,
 				WithSettings(tt.fields.settings),
 			)
@@ -724,7 +724,7 @@ func TestManager_WithOpts(t *testing.T) {
 		t.Parallel()
 
 		l := trmmock.NewZeroLog()
-		m := New(nil, WithLog(l), WithSettings(s{}))
+		m := Must(nil, WithLog(l), WithSettings(s{}))
 
 		assert.Equal(t, l, m.log)
 		assert.Equal(t, s{}, m.settings)
@@ -733,9 +733,9 @@ func TestManager_WithOpts(t *testing.T) {
 	t.Run("default", func(t *testing.T) {
 		t.Parallel()
 
-		m := New(nil)
+		m := Must(nil)
 
 		assert.Equal(t, defaultLog, m.log)
-		assert.Equal(t, settings.New(), m.settings)
+		assert.Equal(t, settings.Must(), m.settings)
 	})
 }

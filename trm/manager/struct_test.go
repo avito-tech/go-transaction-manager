@@ -4,24 +4,24 @@ package manager
 import (
 	"time"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
 type s struct{}
 
-func (s s) EnrichBy(_ transaction.Settings) transaction.Settings {
+func (s s) EnrichBy(_ trm.Settings) trm.Settings {
 	panic("implement me")
 }
 
-func (s s) CtxKey() transaction.CtxKey {
+func (s s) CtxKey() trm.CtxKey {
 	panic("implement me")
 }
 
-func (s s) CtxKeyOrNil() *transaction.CtxKey {
+func (s s) CtxKeyOrNil() *trm.CtxKey {
 	panic("implement me")
 }
 
-func (s s) SetCtxKey(_ *transaction.CtxKey) transaction.Settings {
+func (s s) SetCtxKey(_ *trm.CtxKey) trm.Settings {
 	panic("implement me")
 }
 
@@ -33,19 +33,19 @@ func (s s) IsReadOnlyOrNil() *bool {
 	panic("implement me")
 }
 
-func (s s) SetIsReadOnly(b *bool) transaction.Settings {
+func (s s) SetIsReadOnly(b *bool) trm.Settings {
 	panic("implement me")
 }
 
-func (s s) Propagation() transaction.Propagation {
+func (s s) Propagation() trm.Propagation {
 	panic("implement me")
 }
 
-func (s s) PropagationOrNil() *transaction.Propagation {
+func (s s) PropagationOrNil() *trm.Propagation {
 	panic("implement me")
 }
 
-func (s s) SetPropagation(_ *transaction.Propagation) transaction.Settings {
+func (s s) SetPropagation(_ *trm.Propagation) trm.Settings {
 	panic("implement me")
 }
 
@@ -57,7 +57,7 @@ func (s s) CancelableOrNil() *bool {
 	panic("implement me")
 }
 
-func (s s) SetCancelable(_ *bool) transaction.Settings {
+func (s s) SetCancelable(_ *bool) trm.Settings {
 	panic("implement me")
 }
 
@@ -69,6 +69,6 @@ func (s s) TimeoutOrNil() *time.Duration {
 	panic("implement me")
 }
 
-func (s s) SetTimeout(_ *time.Duration) transaction.Settings {
+func (s s) SetTimeout(_ *time.Duration) trm.Settings {
 	panic("implement me")
 }

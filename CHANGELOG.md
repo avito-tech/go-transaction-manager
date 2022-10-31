@@ -5,31 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.0.0] - 2022-10-24
+## [1.0.0-beta] - 2022-11-05
 
 ### Added
 
-- timeout and canceling of transaction
+- badges.
+- examples.
+- test with real mongo db.
 
-## [0.0.0] - 2022-10-20
-
-### Added
-
-- chained transaction
-
-## [0.0.0] - 2022-10-17
+## [1.0.0-beta] - 2022-10-24
 
 ### Added
 
-- Propagation
-- Settings
+- timeout and canceling of transaction.
+
+## [1.0.0-beta] - 2022-10-20
+
+### Added
+
+- chained transaction.
+
+## [1.0.0-beta] - 2022-10-17
+
+### Added
+
+- propagation.
+- settings.
 
 ## [0.0.0] - 2022-09-08
 
 ### Added
 
-- Manager interface.
-- Transaction interface.
-- sqlx implementation.
+- manager interface.
+- transaction interface.
+- mongo, sql implementations.
 
 [0.0.0]: https://github.com/avito-tech/go-transaction-manager/
