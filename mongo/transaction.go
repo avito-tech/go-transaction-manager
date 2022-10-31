@@ -1,4 +1,4 @@
-// Package mongo is an implementation of transaction.Transaction interface by Transaction for mongo.Client.
+// Package mongo is an implementation of trm.Transaction interface by Transaction for mongo.Client.
 package mongo
 
 import (
@@ -9,13 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Transaction is transaction.Transaction for mongo.Client.
+// Transaction is trm.Transaction for mongo.Client.
 type Transaction struct {
 	session  mongo.Session
 	isActive int64
 }
 
-// NewTransaction creates transaction.Transaction for mongo.Client.
+// NewTransaction creates trm.Transaction for mongo.Client.
 func NewTransaction(
 	ctx context.Context,
 	sessionOptions *options.SessionOptions,
@@ -55,7 +55,7 @@ func (t *Transaction) Transaction() interface{} {
 	return t.session
 }
 
-// Commit the transaction.Transaction.
+// Commit the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
 	t.deactivate()
 
@@ -68,7 +68,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 	return nil
 }
 
-// Rollback the transaction.Transaction.
+// Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
 	t.deactivate()
 

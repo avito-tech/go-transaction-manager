@@ -8,9 +8,57 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	trmsql "github.com/avito-tech/go-transaction-manager/sql"
-	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
-	"github.com/avito-tech/go-transaction-manager/transaction/manager"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
+	"github.com/avito-tech/go-transaction-manager/trm/manager"
 )
+
+// Example demonstrates the implementation of the Repository pattern by trm.Manager.
+func Example() {
+	db, err := sql.Open("sqlite3", "file:test?mode=memory")
+	checkErr(err)
+
+	defer db.Close() //nolint:errcheck
+
+	sqlStmt := `CREATE TABLE IF NOT EXISTS user (user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, username TEXT);`
+	_, err = db.Exec(sqlStmt)
+	checkErr(err, sqlStmt)
+
+	r := newRepo(db, trmsql.DefaultCtxGetter)
+
+	u := &user{
+		Username: "username",
+	}
+
+	ctx := context.Background()
+	trManager := manager.Must(
+		trmsql.NewDefaultFactory(db),
+		manager.WithCtxManager(trmcontext.DefaultManager),
+	)
+
+	err = trManager.Do(ctx, func(ctx context.Context) error {
+		if err := r.Save(ctx, u); err != nil {
+			return err
+		}
+
+		if err := trManager.Do(ctx, func(ctx context.Context) error {
+			u.Username = "new_username"
+
+			return r.Save(ctx, u)
+		}); err != nil {
+			return err
+		}
+
+		return nil
+	})
+	checkErr(err)
+
+	userFromDB, err := r.GetByID(ctx, u.ID)
+	checkErr(err)
+
+	fmt.Println(userFromDB)
+
+	// Output: &{1 new_username}
+}
 
 type repo struct {
 	db     *sql.DB
@@ -75,54 +123,6 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 	//	}
 
 	return nil
-}
-
-// Example demonstrates the implementation of the Repository pattern by TrManager.
-func Example() {
-	db, err := sql.Open("sqlite3", "file:test?mode=memory")
-	checkErr(err)
-
-	defer db.Close() //nolint:errcheck
-
-	sqlStmt := `CREATE TABLE IF NOT EXISTS user (user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, username TEXT);`
-	_, err = db.Exec(sqlStmt)
-	checkErr(err, sqlStmt)
-
-	r := newRepo(db, trmsql.DefaultCtxGetter)
-
-	u := &user{
-		Username: "username",
-	}
-
-	ctx := context.Background()
-	trManager := manager.New(
-		trmsql.NewDefaultFactory(db),
-		manager.WithCtxManager(trmcontext.DefaultManager),
-	)
-
-	err = trManager.Do(ctx, func(ctx context.Context) error {
-		if err := r.Save(ctx, u); err != nil {
-			return err
-		}
-
-		if err := trManager.Do(ctx, func(ctx context.Context) error {
-			u.Username = "new_username"
-
-			return r.Save(ctx, u)
-		}); err != nil {
-			return err
-		}
-
-		return nil
-	})
-	checkErr(err)
-
-	userFromDB, err := r.GetByID(ctx, u.ID)
-	checkErr(err)
-
-	fmt.Println(userFromDB)
-
-	// Output: &{1 new_username}
 }
 
 func checkErr(err error, args ...interface{}) {

@@ -3,12 +3,12 @@ package mongo
 import (
 	"context"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
-// NewDefaultFactory creates default transaction.Transaction(mongo.Session).
-func NewDefaultFactory(client client) transaction.TrFactory {
-	return func(ctx context.Context, trms transaction.Settings) (context.Context, transaction.Transaction, error) {
+// NewDefaultFactory creates default trm.Transaction(mongo.Session).
+func NewDefaultFactory(client client) trm.TrFactory {
+	return func(ctx context.Context, trms trm.Settings) (context.Context, trm.Transaction, error) {
 		s, _ := trms.(Settings)
 
 		return NewTransaction(ctx, s.SessionOpts(), s.TransactionOpts(), client)

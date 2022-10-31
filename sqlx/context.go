@@ -7,8 +7,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
-	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
+	"github.com/avito-tech/go-transaction-manager/trm"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
 )
 
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
@@ -16,13 +16,13 @@ import (
 //nolint:gochecknoglobals
 var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
 
-// CtxGetter gets Tr from transaction.СtxManager by casting transaction.Transaction to Tr.
+// CtxGetter gets Tr from trm.СtxManager by casting trm.Transaction to Tr.
 type CtxGetter struct {
-	ctxManager transaction.СtxManager
+	ctxManager trm.СtxManager
 }
 
 //revive:disable:exported
-func NewCtxGetter(c transaction.СtxManager) *CtxGetter {
+func NewCtxGetter(c trm.СtxManager) *CtxGetter {
 	return &CtxGetter{ctxManager: c}
 }
 
@@ -34,7 +34,7 @@ func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db Tr) Tr {
 	return db
 }
 
-func (c *CtxGetter) TrOrDB(ctx context.Context, key transaction.CtxKey, db Tr) Tr {
+func (c *CtxGetter) TrOrDB(ctx context.Context, key trm.CtxKey, db Tr) Tr {
 	if tr := c.ctxManager.ByKey(ctx, key); tr != nil {
 		return c.convert(tr)
 	}
@@ -42,7 +42,7 @@ func (c *CtxGetter) TrOrDB(ctx context.Context, key transaction.CtxKey, db Tr) T
 	return db
 }
 
-func (c *CtxGetter) convert(tr transaction.Transaction) Tr {
+func (c *CtxGetter) convert(tr trm.Transaction) Tr {
 	if tx, ok := tr.Transaction().(*sqlx.Tx); ok {
 		return tx
 	}

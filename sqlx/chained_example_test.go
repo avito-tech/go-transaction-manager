@@ -7,21 +7,19 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	trmsqlx "github.com/avito-tech/go-transaction-manager/sqlx"
-	"github.com/avito-tech/go-transaction-manager/transaction"
-	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
-	"github.com/avito-tech/go-transaction-manager/transaction/manager"
-	"github.com/avito-tech/go-transaction-manager/transaction/settings"
+	"github.com/avito-tech/go-transaction-manager/trm"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
+	"github.com/avito-tech/go-transaction-manager/trm/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
 
 // Example demonstrates a work of manager.ChainedMW.
 func Example_chained() {
 	// connect DB
 	db1 := newDB()
-
 	defer db1.Close() //nolint:errcheck
 
 	db2 := newDB()
-
 	defer db2.Close() //nolint:errcheck
 
 	// create DB
@@ -34,25 +32,22 @@ func Example_chained() {
 
 	// init manager
 	ctxKey1 := trmcontext.Generate()
-	m1 := manager.New(
+	m1 := manager.Must(
 		trmsqlx.NewDefaultFactory(db1),
-		manager.WithSettings(settings.New(settings.WithCtxKey(ctxKey1))),
+		manager.WithSettings(settings.Must(settings.WithCtxKey(ctxKey1))),
 	)
 	r1 := newRepo(db1, trmsqlx.NewCtxGetter(trmcontext.New(ctxKey1)))
 
 	ctxKey2 := trmcontext.Generate()
-	m2 := manager.New(
+	m2 := manager.Must(
 		trmsqlx.NewDefaultFactory(db2),
-		manager.WithSettings(settings.New(settings.WithCtxKey(ctxKey2))),
+		manager.WithSettings(settings.Must(settings.WithCtxKey(ctxKey2))),
 	)
 	r2 := newRepo(db2, trmsqlx.NewCtxGetter(trmcontext.New(ctxKey2)))
 
-	chainedManager := manager.NewChained([]transaction.Manager{m1, m2})
+	chainedManager := manager.MustChained([]trm.Manager{m1, m2})
 
-	u := &user{
-		Username: "username",
-	}
-
+	u := &user{Username: "username"}
 	ctx := context.Background()
 
 	err = chainedManager.Do(ctx, func(ctx context.Context) error {

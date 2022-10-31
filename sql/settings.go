@@ -3,38 +3,52 @@ package sql
 import (
 	"database/sql"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
 // Opt is a type to configure Settings.
-type Opt func(s *Settings)
+type Opt func(*Settings) error
 
 // WithTxOptions sets up sql.TxOptions for the Settings.
 func WithTxOptions(opts *sql.TxOptions) Opt {
-	return func(s *Settings) {
+	return func(s *Settings) error {
 		*s = s.setTrOpts(opts)
+
+		return nil
 	}
 }
 
 // Settings contains settings for mongo.Transaction.
 type Settings struct {
-	transaction.Settings
+	trm.Settings
 	txOpts *sql.TxOptions
 }
 
 // NewSettings creates Settings.
-func NewSettings(trms transaction.Settings, oo ...Opt) Settings {
+func NewSettings(trms trm.Settings, oo ...Opt) (Settings, error) {
 	s := &Settings{Settings: trms}
 
 	for _, o := range oo {
-		o(s)
+		if err := o(s); err != nil {
+			return Settings{}, err
+		}
 	}
 
-	return *s
+	return *s, nil
+}
+
+// MustSettings returns Settings if err is nil and panics otherwise.
+func MustSettings(trms trm.Settings, oo ...Opt) Settings {
+	s, err := NewSettings(trms, oo...)
+	if err != nil {
+		panic(err)
+	}
+
+	return s
 }
 
 //revive:disable:exported
-func (s Settings) EnrichBy(in transaction.Settings) (res transaction.Settings) { //nolint:ireturn,nolintlint
+func (s Settings) EnrichBy(in trm.Settings) (res trm.Settings) { //nolint:ireturn,nolintlint
 	external, ok := in.(Settings)
 	if ok {
 		if s.TxOpts() == nil {
@@ -47,7 +61,7 @@ func (s Settings) EnrichBy(in transaction.Settings) (res transaction.Settings) {
 	return s
 }
 
-// TxOpts returns transaction.CtxKey for the transaction.Transaction.
+// TxOpts returns trm.CtxKey for the trm.Transaction.
 func (s Settings) TxOpts() *sql.TxOptions {
 	return s.txOpts
 }

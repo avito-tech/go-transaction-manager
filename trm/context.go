@@ -1,10 +1,10 @@
-package transaction
+package trm
 
 import (
 	"context"
 )
 
-// CtxKey is a type to identify transaction.Transaction in a context.Context.
+// CtxKey is a type to identify trm.Transaction in a context.Context.
 type CtxKey interface{}
 
 // CtxGetter gets Transaction from context.Context.

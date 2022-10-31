@@ -3,20 +3,20 @@ package context
 import (
 	"sync/atomic"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
 //nolint:gochecknoglobals
 var defaultKeyGenerator = NewKeyGenerator()
 
-// Generate unique transaction.CtxKey by KeyGenerator.
+// Generate unique trm.CtxKey by KeyGenerator.
 //
 //nolint:ireturn,nolintlint
-func Generate() transaction.CtxKey {
+func Generate() trm.CtxKey {
 	return defaultKeyGenerator.Generate()
 }
 
-// KeyGenerator is a generator of transaction.CtxKey.
+// KeyGenerator is a generator of trm.CtxKey.
 type KeyGenerator struct {
 	key int64
 }
@@ -28,10 +28,10 @@ func NewKeyGenerator() *KeyGenerator {
 	}
 }
 
-// Generate unique transaction.CtxKey.
+// Generate unique trm.CtxKey.
 //
 //nolint:ireturn,nolintlint
-func (g *KeyGenerator) Generate() transaction.CtxKey {
+func (g *KeyGenerator) Generate() trm.CtxKey {
 	defer atomic.AddInt64(&g.key, 1)
 
 	return atomic.LoadInt64(&g.key)

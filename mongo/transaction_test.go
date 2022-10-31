@@ -16,10 +16,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
-	"github.com/avito-tech/go-transaction-manager/transaction"
-	trmcontext "github.com/avito-tech/go-transaction-manager/transaction/context"
-	"github.com/avito-tech/go-transaction-manager/transaction/manager"
-	"github.com/avito-tech/go-transaction-manager/transaction/settings"
+	"github.com/avito-tech/go-transaction-manager/trm"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
+	"github.com/avito-tech/go-transaction-manager/trm/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
 
 type user struct {
@@ -34,7 +34,7 @@ func TestTransaction(t *testing.T) {
 	}
 
 	type fields struct {
-		settings transaction.Settings
+		settings trm.Settings
 	}
 
 	testErr := errors.New("error test")
@@ -43,8 +43,8 @@ func TestTransaction(t *testing.T) {
 	}
 	defaultFields := func(mt *mtest.T) fields {
 		return fields{
-			settings: NewSettings(settings.New(
-				settings.WithPropagation(transaction.PropagationRequiresNew),
+			settings: MustSettings(settings.Must(
+				settings.WithPropagation(trm.PropagationRequiresNew),
 			), WithSessionOpts(&options.SessionOptions{})),
 		}
 	}
@@ -72,8 +72,8 @@ func TestTransaction(t *testing.T) {
 		"begin_session_error": {
 			fields: func(mt *mtest.T) fields {
 				return fields{
-					settings: NewSettings(settings.New(
-						settings.WithPropagation(transaction.PropagationNested),
+					settings: MustSettings(settings.Must(
+						settings.WithPropagation(trm.PropagationNested),
 					), WithSessionOpts((&options.SessionOptions{}).
 						SetSnapshot(true).
 						SetCausalConsistency(true))),
@@ -88,14 +88,14 @@ func TestTransaction(t *testing.T) {
 				return nil
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.ErrorIs(t, err, transaction.ErrBegin)
+				return assert.ErrorIs(t, err, trm.ErrBegin)
 			},
 		},
 		"begin_transaction_error": {
 			fields: func(mt *mtest.T) fields {
 				return fields{
-					settings: NewSettings(settings.New(
-						settings.WithPropagation(transaction.PropagationNested),
+					settings: MustSettings(settings.Must(
+						settings.WithPropagation(trm.PropagationNested),
 					), WithTransactionOpts((&options.TransactionOptions{}).
 						SetWriteConcern(writeconcern.New(
 							writeconcern.W(0))))),
@@ -110,7 +110,7 @@ func TestTransaction(t *testing.T) {
 				return nil
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.ErrorIs(t, err, transaction.ErrBegin)
+				return assert.ErrorIs(t, err, trm.ErrBegin)
 			},
 		},
 		"commit_error": {
@@ -129,7 +129,7 @@ func TestTransaction(t *testing.T) {
 				var divErr mongo.CommandError
 
 				return assert.ErrorAs(t, err, &divErr) &&
-					assert.ErrorIs(t, err, transaction.ErrCommit)
+					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 		},
 		"rollback_after_error": {
@@ -146,7 +146,7 @@ func TestTransaction(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.ErrorIs(t, err, transaction.ErrRollback)
+					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 	}
@@ -159,7 +159,7 @@ func TestTransaction(t *testing.T) {
 
 			f := tt.fields(mt)
 
-			m := manager.New(
+			m := manager.Must(
 				NewDefaultFactory(mt.Client),
 				manager.WithLog(log),
 				manager.WithSettings(f.settings),
@@ -167,7 +167,7 @@ func TestTransaction(t *testing.T) {
 
 			var tr Transaction
 			err := m.Do(tt.args.ctx, func(ctx context.Context) error {
-				var trNested transaction.Transaction
+				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
 
@@ -211,7 +211,7 @@ func TestTransaction_awaitDone(t *testing.T) {
 	go func() {
 		defer wg.Done()
 
-		_, tr, err := f(ctx, settings.New())
+		_, tr, err := f(ctx, settings.Must())
 
 		cancel()
 		<-time.After(time.Second)
