@@ -25,6 +25,7 @@ type Tr interface {
 
 	Queryx(query string, args ...interface{}) (*sqlx.Rows, error)
 	QueryRowx(query string, args ...interface{}) *sqlx.Row
+	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 	NamedQuery(query string, arg interface{}) (*sqlx.Rows, error)
 
 	Select(dest interface{}, query string, args ...interface{}) error
