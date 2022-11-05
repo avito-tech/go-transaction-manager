@@ -3,7 +3,7 @@ package manager
 import (
 	"context"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
 // ChainedMW starts transactions in the order given and commit/rollback in reverse order.
@@ -16,13 +16,13 @@ type ChainedMW struct {
 	doWithSettings nextDoWithSettings
 }
 
-// NewChained creates *ChainedMW or chained transaction.Manager.
-func NewChained(mm []transaction.Manager) *ChainedMW {
+// NewChained creates *ChainedMW or chained trm.Manager.
+func NewChained(mm []trm.Manager, _ ...Opt) (*ChainedMW, error) {
 	if len(mm) == 0 {
 		return &ChainedMW{
 			do:             nilNextDo,
 			doWithSettings: nilNextDoWithSettings,
-		}
+		}, nil
 	}
 
 	last := len(mm) - 1
@@ -37,7 +37,17 @@ func NewChained(mm []transaction.Manager) *ChainedMW {
 	return &ChainedMW{
 		do:             do,
 		doWithSettings: doWithSettings,
+	}, nil
+}
+
+// MustChained returns ChainedMW if err is nil and panics otherwise.
+func MustChained(mm []trm.Manager, oo ...Opt) *ChainedMW {
+	s, err := NewChained(mm, oo...)
+	if err != nil {
+		panic(err)
 	}
+
+	return s
 }
 
 //revive:disable:exported
@@ -56,7 +66,7 @@ func nilNextDo(ctx context.Context, fn callback) error {
 	return fn(ctx)
 }
 
-func newNextDo(m transaction.Manager, n nextDo) nextDo {
+func newNextDo(m trm.Manager, n nextDo) nextDo {
 	return func(ctx context.Context, fn callback) error {
 		return m.Do(ctx, func(ctx context.Context) error {
 			return n(ctx, fn)
@@ -64,37 +74,37 @@ func newNextDo(m transaction.Manager, n nextDo) nextDo {
 	}
 }
 
-func newLastDo(m transaction.Manager) nextDo {
+func newLastDo(m trm.Manager) nextDo {
 	return func(ctx context.Context, fn callback) error {
 		return m.Do(ctx, fn)
 	}
 }
 
-// DoWithSettings is an implementation of transaction.Manager.
+// DoWithSettings is an implementation of trm.Manager.
 //
-// WARNING: transaction.CtxKey should not be set in transaction.Settings otherwise all transaction.Manager would get same transaction.Transaction from context.Context.
+// WARNING: trm.CtxKey should not be set in trm.Settings otherwise all trm.Manager would get same trm.Transaction from context.Context.
 func (c *ChainedMW) DoWithSettings(
 	ctx context.Context,
-	s transaction.Settings,
+	s trm.Settings,
 	fn func(ctx context.Context) error,
 ) error {
 	return c.doWithSettings(ctx, s, fn)
 }
 
-type nextDoWithSettings func(context.Context, transaction.Settings, callback) error
+type nextDoWithSettings func(context.Context, trm.Settings, callback) error
 
 func nilNextDoWithSettings(
 	ctx context.Context,
-	_ transaction.Settings,
+	_ trm.Settings,
 	fn callback,
 ) error {
 	return fn(ctx)
 }
 
-func newNextDoWithSettings(m transaction.Manager, n nextDoWithSettings) nextDoWithSettings {
+func newNextDoWithSettings(m trm.Manager, n nextDoWithSettings) nextDoWithSettings {
 	return func(
 		ctx context.Context,
-		s transaction.Settings,
+		s trm.Settings,
 		fn callback,
 	) error {
 		return m.DoWithSettings(ctx, s, func(ctx context.Context) error {
@@ -103,10 +113,10 @@ func newNextDoWithSettings(m transaction.Manager, n nextDoWithSettings) nextDoWi
 	}
 }
 
-func newLastDoWithSettings(m transaction.Manager) nextDoWithSettings {
+func newLastDoWithSettings(m trm.Manager) nextDoWithSettings {
 	return func(
 		ctx context.Context,
-		s transaction.Settings,
+		s trm.Settings,
 		fn callback,
 	) error {
 		return m.DoWithSettings(ctx, s, fn)

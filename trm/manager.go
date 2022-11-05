@@ -1,4 +1,4 @@
-package transaction
+package trm
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
 
@@ -8,6 +8,6 @@ import "context"
 type Manager interface {
 	// Do processes a transaction inside a closure.
 	Do(context.Context, func(ctx context.Context) error) error
-	// DoWithSettings processes a transaction inside a closure with custom transaction.Settings.
+	// DoWithSettings processes a transaction inside a closure with custom trm.Settings.
 	DoWithSettings(context.Context, Settings, func(ctx context.Context) error) error
 }

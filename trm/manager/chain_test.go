@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
-	"github.com/avito-tech/go-transaction-manager/transaction/mock"
-	"github.com/avito-tech/go-transaction-manager/transaction/settings"
+	"github.com/avito-tech/go-transaction-manager/trm"
+	"github.com/avito-tech/go-transaction-manager/trm/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
 
 func TestChainedMW_Do(t *testing.T) {
@@ -26,12 +26,12 @@ func TestChainedMW_Do(t *testing.T) {
 	ctx2LVL := context.WithValue(ctxSource, "k2", "v2")
 
 	tests := map[string]struct {
-		mm      func(t *testing.T, ctrl *gomock.Controller) []transaction.Manager
+		mm      func(t *testing.T, ctrl *gomock.Controller) []trm.Manager
 		args    args
 		wantErr assert.ErrorAssertionFunc
 	}{
 		"empty": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []transaction.Manager {
+			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
 				return nil
 			},
 			args: args{
@@ -45,7 +45,7 @@ func TestChainedMW_Do(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		"one": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []transaction.Manager {
+			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
 				m := mock.NewMockManager(ctrl)
 
 				m.EXPECT().Do(ctxSource, gomock.Any()).
@@ -55,7 +55,7 @@ func TestChainedMW_Do(t *testing.T) {
 						return fn(ctx1LVL)
 					})
 
-				return []transaction.Manager{m}
+				return []trm.Manager{m}
 			},
 			args: args{
 				ctx: context.Background(),
@@ -68,7 +68,7 @@ func TestChainedMW_Do(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		"two": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []transaction.Manager {
+			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
 				m1LVL := mock.NewMockManager(ctrl)
 				m1LVL.EXPECT().Do(ctxSource, gomock.Any()).
 					DoAndReturn(func(ctx context.Context, fn func(ctx context.Context) error) error {
@@ -81,7 +81,7 @@ func TestChainedMW_Do(t *testing.T) {
 						return fn(ctx2LVL)
 					})
 
-				return []transaction.Manager{m1LVL, m2LVL}
+				return []trm.Manager{m1LVL, m2LVL}
 			},
 			args: args{
 				ctx: context.Background(),
@@ -102,7 +102,7 @@ func TestChainedMW_Do(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			c := NewChained(tt.mm(t, ctrl))
+			c := MustChained(tt.mm(t, ctrl))
 
 			tt.wantErr(t, c.Do(tt.args.ctx, tt.args.fn))
 		})
@@ -114,22 +114,22 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 
 	type args struct {
 		ctx      context.Context
-		settings transaction.Settings
+		settings trm.Settings
 		fn       func(ctx context.Context) error
 	}
 
-	s := settings.New()
+	s := settings.Must()
 	ctxSource := context.Background()
 	ctx1LVL := context.WithValue(ctxSource, "k1", "v1")
 	ctx2LVL := context.WithValue(ctxSource, "k2", "v2")
 
 	tests := map[string]struct {
-		mm      func(t *testing.T, ctrl *gomock.Controller) []transaction.Manager
+		mm      func(t *testing.T, ctrl *gomock.Controller) []trm.Manager
 		args    args
 		wantErr assert.ErrorAssertionFunc
 	}{
 		"empty": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []transaction.Manager {
+			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
 				return nil
 			},
 			args: args{
@@ -144,7 +144,7 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		"one": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []transaction.Manager {
+			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
 				m := mock.NewMockManager(ctrl)
 
 				m.EXPECT().DoWithSettings(ctxSource, s, gomock.Any()).
@@ -154,11 +154,11 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 						return fn(ctx1LVL)
 					})
 
-				return []transaction.Manager{m}
+				return []trm.Manager{m}
 			},
 			args: args{
 				ctx:      context.Background(),
-				settings: settings.New(),
+				settings: settings.Must(),
 				fn: func(ctx context.Context) error {
 					require.Equal(t, ctx1LVL, ctx)
 
@@ -168,7 +168,7 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		"two": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []transaction.Manager {
+			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
 				m1LVL := mock.NewMockManager(ctrl)
 				m1LVL.EXPECT().DoWithSettings(ctxSource, s, gomock.Any()).
 					DoAndReturn(func(ctx context.Context, _ settings.Settings, fn func(ctx context.Context) error) error {
@@ -181,7 +181,7 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 						return fn(ctx2LVL)
 					})
 
-				return []transaction.Manager{m1LVL, m2LVL}
+				return []trm.Manager{m1LVL, m2LVL}
 			},
 			args: args{
 				ctx:      context.Background(),
@@ -203,7 +203,7 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			c := NewChained(tt.mm(t, ctrl))
+			c := MustChained(tt.mm(t, ctrl))
 
 			err := c.DoWithSettings(tt.args.ctx, tt.args.settings, tt.args.fn)
 

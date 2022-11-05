@@ -3,46 +3,62 @@ package mongo
 import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
 // Opt is a type to configure Settings.
-type Opt func(s *Settings)
+type Opt func(*Settings) error
 
 // WithSessionOpts sets up options.SessionOptions for the Settings.
 func WithSessionOpts(opts *options.SessionOptions) Opt {
-	return func(s *Settings) {
+	return func(s *Settings) error {
 		*s = s.setSessionOpts(opts)
+
+		return nil
 	}
 }
 
 // WithTransactionOpts sets up options.TransactionOptions for the Settings.
 func WithTransactionOpts(opts *options.TransactionOptions) Opt {
-	return func(s *Settings) {
+	return func(s *Settings) error {
 		*s = s.setTransactionOpts(opts)
+
+		return nil
 	}
 }
 
 // Settings contains settings for mongo.Transaction.
 type Settings struct {
-	transaction.Settings
+	trm.Settings
 	sessionOpts     *options.SessionOptions
 	transactionOpts *options.TransactionOptions
 }
 
 // NewSettings creates Settings.
-func NewSettings(trms transaction.Settings, oo ...Opt) Settings {
+func NewSettings(trms trm.Settings, oo ...Opt) (Settings, error) {
 	s := &Settings{Settings: trms}
 
 	for _, o := range oo {
-		o(s)
+		if err := o(s); err != nil {
+			return Settings{}, err
+		}
 	}
 
-	return *s
+	return *s, nil
+}
+
+// MustSettings returns Settings if err is nil and panics otherwise.
+func MustSettings(trms trm.Settings, oo ...Opt) Settings {
+	s, err := NewSettings(trms, oo...)
+	if err != nil {
+		panic(err)
+	}
+
+	return s
 }
 
 //revive:disable:exported
-func (s Settings) EnrichBy(in transaction.Settings) (res transaction.Settings) { //nolint:ireturn,nolintlint
+func (s Settings) EnrichBy(in trm.Settings) (res trm.Settings) { //nolint:ireturn,nolintlint
 	external, ok := in.(Settings)
 	if ok {
 		if s.SessionOpts() == nil {
@@ -59,7 +75,7 @@ func (s Settings) EnrichBy(in transaction.Settings) (res transaction.Settings) {
 	return s
 }
 
-// SessionOpts returns *options.SessionOptions for the transaction.Transaction.
+// SessionOpts returns *options.SessionOptions for the trm.Transaction.
 func (s Settings) SessionOpts() *options.SessionOptions {
 	return s.sessionOpts
 }
@@ -70,7 +86,7 @@ func (s Settings) setSessionOpts(opts *options.SessionOptions) Settings {
 	return s
 }
 
-// TransactionOpts returns transaction.CtxKey for the transaction.Transaction.
+// TransactionOpts returns trm.CtxKey for the trm.Transaction.
 func (s Settings) TransactionOpts() *options.TransactionOptions {
 	return s.transactionOpts
 }

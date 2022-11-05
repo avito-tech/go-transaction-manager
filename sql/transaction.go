@@ -8,11 +8,11 @@ import (
 
 	"go.uber.org/multierr"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
-// Transaction is transaction.Transaction for sql.Tx.
-// transaction.SavePoint returns IsActive as true while transaction.Transaction is opened.
+// Transaction is trm.Transaction for sql.Tx.
+// trm.NestedTrFactory returns IsActive as true while trm.Transaction is opened.
 type Transaction struct {
 	tx        *sql.Tx
 	savePoint SavePoint
@@ -20,7 +20,7 @@ type Transaction struct {
 	isActive  int64
 }
 
-// NewTransaction creates transaction.Transaction for sql.Tx.
+// NewTransaction creates trm.Transaction for sql.Tx.
 func NewTransaction(
 	ctx context.Context,
 	sp SavePoint,
@@ -55,7 +55,7 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // Begin nested transaction by save point.
-func (t *Transaction) Begin(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) { //nolint:ireturn,nolintlint
+func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) { //nolint:ireturn,nolintlint
 	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
 	if err != nil {
 		return ctx, nil, err
@@ -64,12 +64,12 @@ func (t *Transaction) Begin(ctx context.Context, _ transaction.Settings) (contex
 	return ctx, t, nil
 }
 
-// Commit the transaction.Transaction.
+// Commit the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
 	if t.hasSavePoint() {
 		_, err := t.tx.ExecContext(ctx, t.savePoint.Release(t.decrementID()))
 		if err != nil {
-			return multierr.Combine(transaction.ErrNestedCommit, err)
+			return multierr.Combine(trm.ErrNestedCommit, err)
 		}
 
 		return nil
@@ -84,12 +84,12 @@ func (t *Transaction) Commit(ctx context.Context) error {
 	return nil
 }
 
-// Rollback the transaction.Transaction.
+// Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
 	if t.hasSavePoint() {
 		_, err := t.tx.ExecContext(ctx, t.savePoint.Rollback(t.decrementID()))
 		if err != nil {
-			return multierr.Combine(transaction.ErrNestedRollback, err)
+			return multierr.Combine(trm.ErrNestedRollback, err)
 		}
 
 		return nil

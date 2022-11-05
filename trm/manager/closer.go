@@ -7,16 +7,19 @@ import (
 
 	"go.uber.org/multierr"
 
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
+// Closer closes trm.Transaction.
+type Closer func(context.Context, interface{}, *error) error
+
 type trCloser struct {
-	tr     transaction.Transaction
+	tr     trm.Transaction
 	cancel context.CancelFunc
 	log    logger
 }
 
-func newTxCommit(tr transaction.Transaction, l logger, c context.CancelFunc) closer {
+func newTxCommit(tr trm.Transaction, l logger, c context.CancelFunc) Closer {
 	return (&trCloser{
 		tr:     tr,
 		cancel: c,
@@ -60,32 +63,32 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 
 	if !c.tr.IsActive() {
 		if hasError {
-			if isCtxErr || errors.Is(*errInProcessTr, transaction.ErrAlreadyClosed) {
+			if isCtxErr || errors.Is(*errInProcessTr, trm.ErrAlreadyClosed) {
 				return *errInProcessTr
 			}
 
-			return multierr.Combine(*errInProcessTr, transaction.ErrAlreadyClosed)
+			return multierr.Combine(*errInProcessTr, trm.ErrAlreadyClosed)
 		}
 
-		return transaction.ErrAlreadyClosed
+		return trm.ErrAlreadyClosed
 	}
 
 	if hasError {
 		if errRollback := c.tr.Rollback(ctx); errRollback != nil {
-			return multierr.Combine(*errInProcessTr, transaction.ErrRollback, errRollback)
+			return multierr.Combine(*errInProcessTr, trm.ErrRollback, errRollback)
 		}
 
 		return *errInProcessTr
 	}
 
 	if err := c.tr.Commit(ctx); err != nil {
-		return multierr.Combine(transaction.ErrCommit, err)
+		return multierr.Combine(trm.ErrCommit, err)
 	}
 
 	return nil
 }
 
-func newNilClose(cancel context.CancelFunc) closer {
+func newNilClose(cancel context.CancelFunc) Closer {
 	return func(ctx context.Context, p interface{}, err *error) error {
 		defer cancel()
 

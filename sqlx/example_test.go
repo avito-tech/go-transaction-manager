@@ -8,8 +8,52 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	trmsqlx "github.com/avito-tech/go-transaction-manager/sqlx"
-	"github.com/avito-tech/go-transaction-manager/transaction/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/manager"
 )
+
+// Example demonstrates the implementation of the Repository pattern by trm.Manager.
+func Example() {
+	db := newDB()
+
+	defer db.Close() //nolint:errcheck
+
+	sqlStmt := `CREATE TABLE IF NOT EXISTS user (user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, username TEXT);`
+	_, err := db.Exec(sqlStmt)
+	checkErr(err, sqlStmt)
+
+	r := newRepo(db, trmsqlx.DefaultCtxGetter)
+
+	u := &user{
+		Username: "username",
+	}
+
+	ctx := context.Background()
+	trManager := manager.Must(trmsqlx.NewDefaultFactory(db))
+
+	err = trManager.Do(ctx, func(ctx context.Context) error {
+		if err := r.Save(ctx, u); err != nil {
+			return err
+		}
+
+		if err := trManager.Do(ctx, func(ctx context.Context) error {
+			u.Username = "new_username"
+
+			return r.Save(ctx, u)
+		}); err != nil {
+			return err
+		}
+
+		return nil
+	})
+	checkErr(err)
+
+	userFromDB, err := r.GetByID(ctx, u.ID)
+	checkErr(err)
+
+	fmt.Println(userFromDB)
+
+	// Output: &{1 new_username}
+}
 
 func newDB() *sqlx.DB {
 	db, err := sqlx.Open("sqlite3", "file:test?mode=memory")
@@ -99,50 +143,6 @@ func (r *repo) toModel(row userRow) *user {
 		ID:       row.ID,
 		Username: row.Username,
 	}
-}
-
-// Example demonstrates the implementation of the Repository pattern by TrManager.
-func Example() {
-	db := newDB()
-
-	defer db.Close() //nolint:errcheck
-
-	sqlStmt := `CREATE TABLE IF NOT EXISTS user (user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, username TEXT);`
-	_, err := db.Exec(sqlStmt)
-	checkErr(err, sqlStmt)
-
-	r := newRepo(db, trmsqlx.DefaultCtxGetter)
-
-	u := &user{
-		Username: "username",
-	}
-
-	ctx := context.Background()
-	trManager := manager.New(trmsqlx.NewDefaultFactory(db))
-
-	err = trManager.Do(ctx, func(ctx context.Context) error {
-		if err := r.Save(ctx, u); err != nil {
-			return err
-		}
-
-		if err := trManager.Do(ctx, func(ctx context.Context) error {
-			u.Username = "new_username"
-
-			return r.Save(ctx, u)
-		}); err != nil {
-			return err
-		}
-
-		return nil
-	})
-	checkErr(err)
-
-	userFromDB, err := r.GetByID(ctx, u.ID)
-	checkErr(err)
-
-	fmt.Println(userFromDB)
-
-	// Output: &{1 new_username}
 }
 
 func checkErr(err error, args ...interface{}) {

@@ -8,47 +8,47 @@ import (
 	context "context"
 	reflect "reflect"
 
-	transaction "github.com/avito-tech/go-transaction-manager/transaction"
+	trm "github.com/avito-tech/go-transaction-manager/trm"
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockSPFactory is a mock of NestedFactory interface.
-type MockSPFactory struct {
+// MockNestedTrFactory is a mock of NestedTrFactory interface.
+type MockNestedTrFactory struct {
 	ctrl     *gomock.Controller
-	recorder *MockSPFactoryMockRecorder
+	recorder *MockNestedTrFactoryMockRecorder
 }
 
-// MockSPFactoryMockRecorder is the mock recorder for MockSPFactory.
-type MockSPFactoryMockRecorder struct {
-	mock *MockSPFactory
+// MockNestedTrFactoryMockRecorder is the mock recorder for MockNestedTrFactory.
+type MockNestedTrFactoryMockRecorder struct {
+	mock *MockNestedTrFactory
 }
 
-// NewMockSPFactory creates a new mock instance.
-func NewMockSPFactory(ctrl *gomock.Controller) *MockSPFactory {
-	mock := &MockSPFactory{ctrl: ctrl}
-	mock.recorder = &MockSPFactoryMockRecorder{mock}
+// NewMockNestedTrFactory creates a new mock instance.
+func NewMockNestedTrFactory(ctrl *gomock.Controller) *MockNestedTrFactory {
+	mock := &MockNestedTrFactory{ctrl: ctrl}
+	mock.recorder = &MockNestedTrFactoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockSPFactory) EXPECT() *MockSPFactoryMockRecorder {
+func (m *MockNestedTrFactory) EXPECT() *MockNestedTrFactoryMockRecorder {
 	return m.recorder
 }
 
-// SavePoint mocks base method.
-func (m *MockSPFactory) Begin(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
+// Begin mocks base method.
+func (m *MockNestedTrFactory) Begin(ctx context.Context, s trm.Settings) (context.Context, trm.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Begin", ctx, s)
 	ret0, _ := ret[0].(context.Context)
-	ret1, _ := ret[1].(transaction.Transaction)
+	ret1, _ := ret[1].(trm.Transaction)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-// SavePoint indicates an expected call of SavePoint.
-func (mr *MockSPFactoryMockRecorder) SavePoint(ctx, s interface{}) *gomock.Call {
+// Begin indicates an expected call of Begin.
+func (mr *MockNestedTrFactoryMockRecorder) Begin(ctx, s interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MockSPFactory)(nil).Begin), ctx, s)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MockNestedTrFactory)(nil).Begin), ctx, s)
 }
 
 // MockTransaction is a mock of Transaction interface.
@@ -153,6 +153,22 @@ func (m *MocktransactionWithSP) EXPECT() *MocktransactionWithSPMockRecorder {
 	return m.recorder
 }
 
+// Begin mocks base method.
+func (m *MocktransactionWithSP) Begin(ctx context.Context, s trm.Settings) (context.Context, trm.Transaction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Begin", ctx, s)
+	ret0, _ := ret[0].(context.Context)
+	ret1, _ := ret[1].(trm.Transaction)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// Begin indicates an expected call of Begin.
+func (mr *MocktransactionWithSPMockRecorder) Begin(ctx, s interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MocktransactionWithSP)(nil).Begin), ctx, s)
+}
+
 // Commit mocks base method.
 func (m *MocktransactionWithSP) Commit(arg0 context.Context) error {
 	m.ctrl.T.Helper()
@@ -193,22 +209,6 @@ func (m *MocktransactionWithSP) Rollback(arg0 context.Context) error {
 func (mr *MocktransactionWithSPMockRecorder) Rollback(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MocktransactionWithSP)(nil).Rollback), arg0)
-}
-
-// SavePoint mocks base method.
-func (m *MocktransactionWithSP) Begin(ctx context.Context, s transaction.Settings) (context.Context, transaction.Transaction, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Begin", ctx, s)
-	ret0, _ := ret[0].(context.Context)
-	ret1, _ := ret[1].(transaction.Transaction)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// SavePoint indicates an expected call of SavePoint.
-func (mr *MocktransactionWithSPMockRecorder) SavePoint(ctx, s interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MocktransactionWithSP)(nil).Begin), ctx, s)
 }
 
 // Transaction mocks base method.

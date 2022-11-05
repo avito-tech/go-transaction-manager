@@ -10,10 +10,10 @@ import (
 	"go.uber.org/multierr"
 
 	trmsql "github.com/avito-tech/go-transaction-manager/sql"
-	"github.com/avito-tech/go-transaction-manager/transaction"
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
-// Transaction is transaction.Transaction for sqlx.Tx.
+// Transaction is trm.Transaction for sqlx.Tx.
 type Transaction struct {
 	tx        *sqlx.Tx
 	savePoint trmsql.SavePoint
@@ -21,7 +21,7 @@ type Transaction struct {
 	isActive  int64
 }
 
-// NewTransaction creates transaction.Transaction for sqlx.Tx.
+// NewTransaction creates trm.Transaction for sqlx.Tx.
 func NewTransaction(
 	ctx context.Context,
 	sp trmsql.SavePoint,
@@ -51,27 +51,27 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 }
 
 // Transaction returns the real transaction sqlx.Tx.
-// transaction.SavePoint returns IsActive as true while transaction.Transaction is opened.
+// trm.NestedTrFactory returns IsActive as true while trm.Transaction is opened.
 func (t *Transaction) Transaction() interface{} {
 	return t.tx
 }
 
 // Begin nested transaction by save point.
-func (t *Transaction) Begin(ctx context.Context, _ transaction.Settings) (context.Context, transaction.Transaction, error) { //nolint:ireturn,nolintlint
+func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) { //nolint:ireturn,nolintlint
 	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
 	if err != nil {
-		return ctx, nil, multierr.Combine(transaction.ErrNestedBegin, err)
+		return ctx, nil, multierr.Combine(trm.ErrNestedBegin, err)
 	}
 
 	return ctx, t, nil
 }
 
-// Commit closes the transaction.Transaction.
+// Commit closes the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
 	if t.hasSavePoint() {
 		_, err := t.tx.ExecContext(ctx, t.savePoint.Release(t.decrementID()))
 		if err != nil {
-			return multierr.Combine(transaction.ErrNestedCommit, err)
+			return multierr.Combine(trm.ErrNestedCommit, err)
 		}
 
 		return nil
@@ -86,12 +86,12 @@ func (t *Transaction) Commit(ctx context.Context) error {
 	return nil
 }
 
-// Rollback the transaction.Transaction.
+// Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
 	if t.hasSavePoint() {
 		_, err := t.tx.ExecContext(ctx, t.savePoint.Rollback(t.decrementID()))
 		if err != nil {
-			return multierr.Combine(transaction.ErrNestedRollback, err)
+			return multierr.Combine(trm.ErrNestedRollback, err)
 		}
 
 		return nil
