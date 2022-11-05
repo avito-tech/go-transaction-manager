@@ -1,30 +1,33 @@
 // Package mock implements dependencies for testing.
 //
 //revive:disable:unexported-return
+//revive:disable:exported
 package mock
 
-import "fmt"
+import (
+	"context"
+)
 
-type log struct {
+type Log struct {
 	Logged []string
 }
 
-// NewLog create mock log.
-func NewLog() *log {
-	return &log{}
+// NewLog create mock Log.
+func NewLog() *Log {
+	return &Log{}
 }
 
-func (l *log) Printf(format string, a ...interface{}) {
-	l.Logged = append(l.Logged, fmt.Sprintf(format, a...))
+func (l *Log) Warning(_ context.Context, msg string) {
+	l.Logged = append(l.Logged, msg)
 }
 
 type zeroLog struct{}
 
-// NewZeroLog create mock log, which should not be called.
+// NewZeroLog create mock Log, which should not be called.
 func NewZeroLog() *zeroLog {
 	return &zeroLog{}
 }
 
-func (l *zeroLog) Printf(_ string, _ ...interface{}) {
+func (l *zeroLog) Warning(_ context.Context, _ string) {
 	panic("logger should not be called")
 }

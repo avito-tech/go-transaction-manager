@@ -1,11 +1,10 @@
 //nolint:ireturn,nolintlint // return Tr for external usage.
 //revive:disable:package-comments
-package sqlx
+package sql
 
 import (
 	"context"
-
-	"github.com/jmoiron/sqlx"
+	"database/sql"
 
 	"github.com/avito-tech/go-transaction-manager/trm"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
@@ -43,7 +42,7 @@ func (c *CtxGetter) TrOrDB(ctx context.Context, key trm.CtxKey, db Tr) Tr {
 }
 
 func (c *CtxGetter) convert(tr trm.Transaction) Tr {
-	if tx, ok := tr.Transaction().(*sqlx.Tx); ok {
+	if tx, ok := tr.Transaction().(*sql.Tx); ok {
 		return tx
 	}
 

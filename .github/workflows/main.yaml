@@ -1,0 +1,109 @@
+on:
+  push:
+    branches:
+      - main
+      - v1
+  pull_request:
+    branches:
+      - main
+      - v1
+name: Test
+env:
+  GO_TARGET_VERSION: 1.19
+  OS_TARGET: ubuntu-latest
+jobs:
+  tests:
+    strategy:
+      matrix:
+        go-version:
+          # - '1.10' doesn't have go module
+          # - 1.11
+          # - 1.12 doesn't have errors pkg
+          - 1.13
+          - 1.14
+          - 1.15
+          - 1.16
+          - 1.17
+          - 1.18
+          - 1.19
+        os:
+          - ubuntu-latest
+          # - macos-latest
+          # - windows-latest
+        mongodb-version:
+          - '6.0'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set environment by expression
+        run: |
+          echo "NEED_CODECOVERAGE=${{ matrix.go-version == env.GO_TARGET_VERSION && matrix.os == env.OS_TARGET }}" >> $GITHUB_ENV
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod              # Module download cache
+            ~/.cache/go-build         # Build cache (Linux)
+            ~/Library/Caches/go-build # Build cache (Mac)
+            '%LocalAppData%\go-build' # Build cache (Windows)
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+            
+      - name: Start MongoDB
+        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+        uses: supercharge/mongodb-github-action@1.8.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
+          mongodb-replica-set: test-rs
+
+      - name: Tests
+        if: ${{ matrix.go-version != env.GO_TARGET_VERSION || matrix.os != env.OS_TARGET }}
+        run: make test
+
+      - name: Tests with real databases
+        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+        run: make test.coverage.with_real_db
+
+      - name: Code coverage data
+        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+        run: |
+          set -x
+          COVERAGE_TOTAL=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          echo "COVERAGE_TOTAL=$COVERAGE_TOTAL" >> $GITHUB_ENV
+      - name: CodeCoverage the Badge
+        if: ${{ fromJSON(env.NEED_CODECOVERAGE) && github.ref == 'refs/heads/main' }}
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: ${{ secrets.GIST_FILENAME }}
+          label: coverage
+          message: ${{ env.COVERAGE_TOTAL }}%
+          valColorRange: ${{ env.COVERAGE_TOTAL }}
+          maxColorRange: 100
+          minColorRange: 0
+# TODO turn on when repository will be published
+#      - uses: jandelgado/gcov2lcov-action@v1
+#        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+#        with:
+#          outfile: ./coverage.lcov
+#      - uses: romeovs/lcov-reporter-action@v0.2.16
+#        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+#        with:
+#          github-token: ${{ secrets.POST_COMMENT_TOKEN }}
+#          lcov-file: ./coverage.lcov
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_TARGET_VERSION }}
+      - uses: actions/checkout@v3
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
