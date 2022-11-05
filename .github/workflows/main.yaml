@@ -13,6 +13,8 @@ env:
   OS_TARGET: ubuntu-latest
 jobs:
   tests:
+    permissions:
+      pull-requests: write
     strategy:
       matrix:
         go-version:
@@ -46,10 +48,8 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: |
-            ~/go/pkg/mod              # Module download cache
-            ~/.cache/go-build         # Build cache (Linux)
-            ~/Library/Caches/go-build # Build cache (Mac)
-            '%LocalAppData%\go-build' # Build cache (Windows)
+            ~/.cache/go-build
+            ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
@@ -87,16 +87,15 @@ jobs:
           valColorRange: ${{ env.COVERAGE_TOTAL }}
           maxColorRange: 100
           minColorRange: 0
-# TODO turn on when repository will be published
-#      - uses: jandelgado/gcov2lcov-action@v1
-#        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
-#        with:
-#          outfile: ./coverage.lcov
-#      - uses: romeovs/lcov-reporter-action@v0.2.16
-#        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
-#        with:
-#          github-token: ${{ secrets.POST_COMMENT_TOKEN }}
-#          lcov-file: ./coverage.lcov
+      - uses: jandelgado/gcov2lcov-action@v1.0.9
+        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+        with:
+          outfile: ./coverage.lcov
+      - uses: romeovs/lcov-reporter-action@v0.2.21
+        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./coverage.lcov
   golangci:
     name: lint
     runs-on: ubuntu-latest
