@@ -2,11 +2,9 @@ on:
   push:
     branches:
       - main
-      - v1
   pull_request:
     branches:
       - main
-      - v1
 name: Test
 env:
   GO_TARGET_VERSION: 1.19
@@ -88,11 +86,11 @@ jobs:
           maxColorRange: 100
           minColorRange: 0
       - uses: jandelgado/gcov2lcov-action@v1.0.9
-        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+        if: ${{ fromJSON(env.NEED_CODECOVERAGE) && github.event.pull_request.merged == false }}
         with:
           outfile: ./coverage.lcov
       - uses: romeovs/lcov-reporter-action@v0.2.21
-        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
+        if: ${{ fromJSON(env.NEED_CODECOVERAGE) && github.event.pull_request.merged == false }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           lcov-file: ./coverage.lcov
