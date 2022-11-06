@@ -14,6 +14,7 @@ Easiest way to get the perfect repository.
 
 * [database/sql](https://pkg.go.dev/database/sql), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/sql) (Go 1.13)
 * [jmoiron/sqlx](https://github.com/jmoiron/sqlx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/sqlx) (Go 1.13)
+* [gorm](https://github.com/go-gorm/gorm), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/gorm) (Go 1.16)
 * [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/mongo) (Go 1.13)
 
 ## Installation
@@ -37,6 +38,7 @@ Compatibility beyond that is not guaranteed.
 
 * [database/sql](sql/example_test.go)
 * [jmoiron/sqlx](sqlx/example_test.go)
+* [gorm](gorm/example_test.go)
 * [mongo-go-driver](mongo/example_test.go)
 
 Below is an example how to start usage.

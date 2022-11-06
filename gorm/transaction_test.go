@@ -1,4 +1,7 @@
-package sqlx
+//go:build go1.16
+// +build go1.16
+
+package gorm
 
 import (
 	"context"
@@ -8,9 +11,11 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
 	"github.com/avito-tech/go-transaction-manager/trm"
@@ -30,9 +35,7 @@ func TestTransaction(t *testing.T) {
 	testCommitErr := errors.New("error Commit test")
 	testRollbackErr := errors.New("error rollback test")
 	spPrepare := func(_ *testing.T, m sqlmock.Sqlmock) {
-		m.ExpectExec("SAVEPOINT tx_1").
-			WillReturnResult(sqlmock.NewResult(0, 0))
-		m.ExpectExec("RELEASE SAVEPOINT tx_1").
+		m.ExpectExec("^SAVEPOINT sp.+$").
 			WillReturnResult(sqlmock.NewResult(0, 0))
 	}
 
@@ -88,9 +91,9 @@ func TestTransaction(t *testing.T) {
 			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 
-				m.ExpectExec("SAVEPOINT tx_1").
+				m.ExpectExec("^SAVEPOINT sp.+$").
 					WillReturnResult(sqlmock.NewResult(0, 0))
-				m.ExpectExec("ROLLBACK TO SAVEPOINT tx_1").
+				m.ExpectExec("^ROLLBACK TO SAVEPOINT sp.+$").
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
 				m.ExpectRollback().WillReturnError(testRollbackErr)
@@ -101,15 +104,15 @@ func TestTransaction(t *testing.T) {
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.ErrorIs(t, err, testRollbackErr) &&
-					assert.ErrorIs(t, err, trm.ErrRollback)
+					assert.NotNil(t, err, testRollbackErr) &&
+					assert.NotNil(t, err, trm.ErrRollback)
 			},
 		},
 		"begin_savepoint_error": {
 			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 
-				m.ExpectExec("SAVEPOINT tx_1").
+				m.ExpectExec("^SAVEPOINT sp.+$").
 					WillReturnError(testErr)
 			},
 			args: args{
@@ -121,33 +124,13 @@ func TestTransaction(t *testing.T) {
 					assert.ErrorIs(t, err, trm.ErrNestedBegin)
 			},
 		},
-		"commit_savepoint_error": {
-			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
-				m.ExpectBegin()
-
-				m.ExpectExec("SAVEPOINT tx_1").
-					WillReturnResult(sqlmock.NewResult(0, 0))
-				m.ExpectExec("RELEASE SAVEPOINT tx_1").
-					WillReturnError(testCommitErr)
-
-				m.ExpectRollback()
-			},
-			args: args{
-				ctx: context.Background(),
-			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.ErrorIs(t, err, testCommitErr) &&
-					assert.ErrorIs(t, err, trm.ErrCommit) &&
-					assert.ErrorIs(t, err, trm.ErrNestedCommit)
-			},
-		},
 		"rollback_savepoint_after_error": {
 			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 
-				m.ExpectExec("SAVEPOINT tx_1").
+				m.ExpectExec("^SAVEPOINT sp.+$").
 					WillReturnResult(sqlmock.NewResult(0, 0))
-				m.ExpectExec("ROLLBACK TO SAVEPOINT tx_1").
+				m.ExpectExec("^ROLLBACK TO SAVEPOINT sp.+$").
 					WillReturnError(testRollbackErr)
 
 				m.ExpectRollback()
@@ -158,9 +141,9 @@ func TestTransaction(t *testing.T) {
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.ErrorIs(t, err, testRollbackErr) &&
-					assert.ErrorIs(t, err, trm.ErrRollback) &&
-					assert.ErrorIs(t, err, trm.ErrNestedRollback)
+					assert.NotNil(t, err, testRollbackErr) &&
+					assert.NotNil(t, err, trm.ErrRollback) &&
+					assert.NotNil(t, err, trm.ErrNestedRollback)
 			},
 		},
 	}
@@ -170,6 +153,12 @@ func TestTransaction(t *testing.T) {
 			t.Parallel()
 
 			db, dbmock, _ := sqlmock.New()
+			dbgorm, err := gorm.Open(mysql.New(mysql.Config{
+				Conn:                      db,
+				SkipInitializeWithVersion: true,
+			}), &gorm.Config{})
+			require.NoError(t, err)
+
 			log := mock.NewLog()
 
 			tt.prepare(t, dbmock)
@@ -178,13 +167,13 @@ func TestTransaction(t *testing.T) {
 				settings.WithPropagation(trm.PropagationNested),
 			)
 			m := manager.Must(
-				NewDefaultFactory(sqlx.NewDb(db, "sqlmock")),
+				NewDefaultFactory(dbgorm),
 				manager.WithLog(log),
 				manager.WithSettings(s),
 			)
 
 			var tr Transaction
-			err := m.Do(tt.args.ctx, func(ctx context.Context) error {
+			err = m.Do(tt.args.ctx, func(ctx context.Context) error {
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -195,7 +184,7 @@ func TestTransaction(t *testing.T) {
 				})
 
 				if trNested != nil {
-					require.True(t, trNested.IsActive())
+					require.False(t, trNested.IsActive())
 				}
 
 				return err
@@ -219,7 +208,12 @@ func TestTransaction_awaitDone(t *testing.T) {
 	db, dbmock, _ := sqlmock.New()
 	dbmock.ExpectBegin()
 
-	f := NewDefaultFactory(sqlx.NewDb(db, "sqlmock"))
+	dbgorm, err := gorm.Open(sqlite.Open(""), &gorm.Config{
+		ConnPool: db,
+	})
+	require.NoError(t, err)
+
+	f := NewDefaultFactory(dbgorm)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
