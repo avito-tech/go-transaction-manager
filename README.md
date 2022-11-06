@@ -8,11 +8,13 @@
 
 Transaction manager is an abstraction to coordinate database transaction boundaries.
 
+Easiest way to get the perfect repository.
+
 ## Supported implementations
 
-* [database/sql](https://pkg.go.dev/database/sql), [![go.dev sql docs](https://img.shields.io/badge/docs-sql-blue)](https://pkg.go.dev/https://github.com/avito-tech/go-transaction-manager/sql) (Go 1.13)
-* [jmoiron/sqlx](https://github.com/jmoiron/sqlx), [![go.dev sqlx docs](https://img.shields.io/badge/docs-sqlx-blue)](https://pkg.go.dev/https://github.com/avito-tech/go-transaction-manager/sqlx) (Go 1.13)
-* [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [![go.dev mong docs](https://img.shields.io/badge/docs-mongo-blue)](https://pkg.go.dev/https://github.com/avito-tech/go-transaction-manager/mongo) (Go 1.13)
+* [database/sql](https://pkg.go.dev/database/sql), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/sql) (Go 1.13)
+* [jmoiron/sqlx](https://github.com/jmoiron/sqlx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/sqlx) (Go 1.13)
+* [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/mongo) (Go 1.13)
 
 ## Installation
 
@@ -31,13 +33,13 @@ Compatibility beyond that is not guaranteed.
 
 **For nested transactions with different transaction managers**, you need to use [ChainedMW](trm/manager/chain.go) ([docs](https://pkg.go.dev/github.com/github.com/avito-tech/go-transaction-manager)).
 
-### Examples
+### Examples with an ideal *repository* and nested transactions.
 
 * [database/sql](sql/example_test.go)
 * [jmoiron/sqlx](sqlx/example_test.go)
 * [mongo-go-driver](mongo/example_test.go)
 
-Below is an example how to start usage to get ideal repository pattern.
+Below is an example how to start usage.
 
 ```go
 package main
