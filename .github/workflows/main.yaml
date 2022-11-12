@@ -48,10 +48,10 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-
-            
+            ${{ runner.os }}-go-${{ matrix.go-version }}
+
       - name: Start MongoDB
         if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
         uses: supercharge/mongodb-github-action@1.8.0
