@@ -75,7 +75,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 		return nil
 	}
 
-	t.deactivate()
+	defer t.deactivate()
 
 	if err := t.tx.Commit(); err != nil {
 		return err
@@ -95,7 +95,7 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 		return nil
 	}
 
-	t.deactivate()
+	defer t.deactivate()
 
 	if err := t.tx.Rollback(); err != nil {
 		return err

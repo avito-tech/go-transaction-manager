@@ -57,7 +57,7 @@ func (t *Transaction) Transaction() interface{} {
 
 // Commit the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
-	t.deactivate()
+	defer t.deactivate()
 
 	defer t.session.EndSession(ctx)
 
@@ -70,7 +70,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
-	t.deactivate()
+	defer t.deactivate()
 
 	defer t.session.EndSession(ctx)
 
