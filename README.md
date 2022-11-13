@@ -130,3 +130,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 	return err
 }
 ```
+
+## Benchmark
+
+[Comparing](internal/benchmark/with_or_without_trm/README.md) examples with and without trm.

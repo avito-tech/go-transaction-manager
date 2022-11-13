@@ -43,8 +43,10 @@ type Transaction interface {
 	// Transaction returns the real transaction sql.Tx, sqlx.Tx or another.
 	Transaction() interface{}
 	// Commit the trm.Transaction.
+	// Commit should be used only inside of Manager.
 	Commit(context.Context) error
 	// Rollback the trm.Transaction.
+	// Rollback should be used only inside of Manager.
 	Rollback(context.Context) error
 	// IsActive returns true if the transaction started but not committed or rolled back.
 	IsActive() bool
