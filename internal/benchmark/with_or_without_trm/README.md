@@ -26,11 +26,11 @@ BenchmarkTRM_SQLite_Memory-12      	    1000	     35139 ns/op
 
 ### Different (ns)
 
-Min: 9962; Max:132790 ; Avg: 49971,2.
+Min: 3692; Max: 6268 ; Avg: 5241,2.
 
 ### Percent
 
-Min: 0,6728880555; Max: 9,04919713; Avg: 3,395166614.
+Min: 12,40591398; Max: 21,16780926; Avg: 17,73777683.
 
 ## sqlite in file
 
@@ -72,11 +72,11 @@ Min: -4,311852939; Max: 10,58490479; Avg: 0,6802981444.
 
 ### Different (ns)
 
-Min: 3692; Max: 6268; Avg: 5241,2.
+Min: 9962; Max: 132790; Avg: 49971,2.
 
 ### Percent
 
-Min: 12,40591398; Max: 21,16780926; Avg: 17,73777683.
+Min: 0,6728880555; Max: 9,04919713; Avg: 3,395166614.
 
 ## Conclusion
 
