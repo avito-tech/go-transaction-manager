@@ -1,6 +1,6 @@
 # Go transaction manager
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/avito-tech/go-transaction-manager.svg)](https://pkg.go.dev/github.com/github.com/avito-tech/go-transaction-manager)
+[![Go Reference](https://pkg.go.dev/badge/github.com/avito-tech/go-transaction-manager.svg)](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager)
 [![Test Status](https://github.com/avito-tech/go-transaction-manager/actions/workflows/main.yaml/badge.svg)](https://github.com/avito-tech/go-transaction-manager/actions?query=branch%3Amain)
 ![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/maranqz/80b9d66a715738d2279ad93721986914/raw/badge.v1.json)
 [![Go Report Card](https://goreportcard.com/badge/github.com/avito-tech/go-transaction-manager)](https://goreportcard.com/report/github.com/avito-tech/go-transaction-manager)
