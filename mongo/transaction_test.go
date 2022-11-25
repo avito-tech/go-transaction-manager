@@ -177,12 +177,12 @@ func TestTransaction(t *testing.T) {
 				})
 
 				if trNested != nil {
-					require.Equal(t, false, trNested.IsActive())
+					require.False(t, trNested.IsActive())
 				}
 
 				return err
 			})
-			require.Equal(t, false, tr.IsActive())
+			require.False(t, false, tr.IsActive())
 
 			if !tt.wantErr(t, err) {
 				return

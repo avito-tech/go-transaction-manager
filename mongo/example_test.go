@@ -47,15 +47,11 @@ func Example() {
 			return err
 		}
 
-		if err := trManager.Do(ctx, func(ctx context.Context) error {
+		return trManager.Do(ctx, func(ctx context.Context) error {
 			u.Username = "new_username"
 
 			return r.Save(ctx, u)
-		}); err != nil {
-			return err
-		}
-
-		return nil
+		})
 	})
 	checkErr(err)
 
