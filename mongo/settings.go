@@ -58,7 +58,7 @@ func MustSettings(trms trm.Settings, oo ...Opt) Settings {
 }
 
 //revive:disable:exported
-func (s Settings) EnrichBy(in trm.Settings) (res trm.Settings) { //nolint:ireturn,nolintlint
+func (s Settings) EnrichBy(in trm.Settings) trm.Settings { //nolint:ireturn,nolintlint
 	external, ok := in.(Settings)
 	if ok {
 		if s.SessionOpts() == nil {
