@@ -30,7 +30,12 @@ type Settings struct {
 
 // New creates trm.Settings.
 func New(oo ...Opt) (Settings, error) {
-	s := &Settings{}
+	s := &Settings{
+		ctxKey:       nil,
+		propagation:  nil,
+		isCancelable: nil,
+		timeout:      nil,
+	}
 
 	for _, o := range oo {
 		if err := o(s); err != nil {

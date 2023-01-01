@@ -25,7 +25,13 @@ type Settings struct {
 
 // NewSettings creates Settings.
 func NewSettings(trms trm.Settings, oo ...Opt) (Settings, error) {
-	s := &Settings{Settings: trms}
+	s := &Settings{
+		Settings:    trms,
+		isMulti:     nil,
+		watchKeys:   nil,
+		txDecorator: nil,
+		ret:         nil,
+	}
 
 	for _, o := range oo {
 		if err := o(s); err != nil {

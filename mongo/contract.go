@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+//nolint:interfacebloat
 type client interface {
 	Connect(ctx context.Context) error
 	Disconnect(ctx context.Context) error

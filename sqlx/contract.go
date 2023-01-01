@@ -10,6 +10,8 @@ import (
 
 // Tr is an interface to work with sqlx.DB or sqlx.Tx.
 // Stmtx, StmtxContext, NamedStmt and NamedStmtContext are not implemented!
+//
+//nolint:interfacebloat
 type Tr interface {
 	sqlx.ExtContext
 

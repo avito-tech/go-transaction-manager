@@ -29,7 +29,7 @@ func NewTransaction(
 	db redis.UniversalClient,
 	s Settings,
 ) (context.Context, *Transaction, error) {
-	t := &Transaction{isActive: 1, err: make(chan error)}
+	t := &Transaction{isActive: 1, err: make(chan error), tx: nil}
 
 	var err error
 

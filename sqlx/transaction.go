@@ -33,7 +33,7 @@ func NewTransaction(
 		return ctx, nil, err
 	}
 
-	tr := &Transaction{tx: tx, savePoint: sp, isActive: 1}
+	tr := &Transaction{tx: tx, savePoint: sp, isActive: 1, saves: 0}
 
 	go tr.awaitDone(ctx)
 

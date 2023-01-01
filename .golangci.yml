@@ -13,7 +13,9 @@ linters:
     - errchkjson
     - errname
     - errorlint
+    - execinquery
     - exhaustive
+    - exhaustruct
     - exportloopref # https://github.com/kyoh86/exportloopref#whats-this
     - forcetypeassert # https://github.com/gostaticanalysis/forcetypeassert#forcetypeassert
     - funlen
@@ -33,6 +35,7 @@ linters:
     - grouper
     - gosec
     - importas
+    - interfacebloat
     - ireturn
     - lll
     - makezero # https://github.com/ashanbrown/makezero#purpose
@@ -48,6 +51,7 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - stylecheck
+    - tagliatelle
     - tparallel # https://github.com/moricho/tparallel
     - unconvert # https://github.com/mdempsky/unconvert#usage
     - unparam
@@ -103,3 +107,4 @@ issues:
         - errcheck
         - nolintlint
         - forcetypeassert
+        - exhaustruct
