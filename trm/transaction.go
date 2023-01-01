@@ -52,7 +52,7 @@ type Transaction interface {
 	IsActive() bool
 }
 
-// transactionWithSP is used for tests.
+// transactionWithSP is used for tests to generate mock.
 //
 //nolint:unused
 type transactionWithSP interface {
