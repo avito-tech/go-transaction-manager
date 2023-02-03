@@ -16,5 +16,5 @@ require (
 	go.uber.org/multierr v1.9.0
 	gorm.io/driver/mysql v1.4.5
 	gorm.io/driver/sqlite v1.4.4
-	gorm.io/gorm v1.24.3
+	gorm.io/gorm v1.24.4
 )
