@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-redis/redismock/v8 v8.0.7-0.20221230170314-95da4ad6c650
+	github.com/go-redis/redismock/v8 v8.11.5
 	github.com/golang/mock v1.6.0
 	github.com/jinzhu/copier v0.3.5
 	github.com/jmoiron/sqlx v1.3.5
