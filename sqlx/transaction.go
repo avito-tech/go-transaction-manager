@@ -79,11 +79,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 	defer t.deactivate()
 
-	if err := t.tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
+	return t.tx.Commit()
 }
 
 // Rollback the trm.Transaction.
@@ -99,11 +95,7 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 
 	defer t.deactivate()
 
-	if err := t.tx.Rollback(); err != nil {
-		return err
-	}
-
-	return nil
+	return t.tx.Rollback()
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.

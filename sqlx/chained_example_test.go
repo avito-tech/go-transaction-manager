@@ -59,7 +59,7 @@ func Example_chained() {
 			return err
 		}
 
-		if err := chainedManager.Do(ctx, func(ctx context.Context) error {
+		return chainedManager.Do(ctx, func(ctx context.Context) error {
 			u.Username = "new_username"
 
 			if err = r1.Save(ctx, u); err != nil {
@@ -67,11 +67,7 @@ func Example_chained() {
 			}
 
 			return r2.Save(ctx, u)
-		}); err != nil {
-			return err
-		}
-
-		return nil
+		})
 	})
 	checkErr(err)
 
