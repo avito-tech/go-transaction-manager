@@ -28,7 +28,7 @@ func NewCtxGetter(c trm.СtxManager) *CtxGetter {
 
 func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db Tr) Tr {
 	if tr := c.ctxManager.Default(ctx); tr != nil {
-		return c.convert(tr)
+		return c.convert(tr, db)
 	}
 
 	return db
@@ -36,16 +36,16 @@ func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db Tr) Tr {
 
 func (c *CtxGetter) TrOrDB(ctx context.Context, key trm.CtxKey, db Tr) Tr {
 	if tr := c.ctxManager.ByKey(ctx, key); tr != nil {
-		return c.convert(tr)
+		return c.convert(tr, db)
 	}
 
 	return db
 }
 
-func (c *CtxGetter) convert(tr trm.Transaction) Tr {
+func (c *CtxGetter) convert(tr trm.Transaction, db Tr) Tr {
 	if tx, ok := tr.Transaction().(*sqlx.Tx); ok {
 		return tx
 	}
 
-	return nil
+	return db
 }

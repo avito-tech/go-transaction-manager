@@ -17,6 +17,10 @@ const (
 
 type ctxKey struct{}
 
+func (ctxKey) String() string {
+	return "settings.ctxKey"
+}
+
 // Opt is type to set Settings' properties.
 type Opt func(*Settings) error
 
