@@ -33,7 +33,7 @@ func (s s) IsReadOnlyOrNil() *bool {
 	panic("implement me")
 }
 
-func (s s) SetIsReadOnly(b *bool) trm.Settings {
+func (s s) SetIsReadOnly(_ *bool) trm.Settings {
 	panic("implement me")
 }
 
