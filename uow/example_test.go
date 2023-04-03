@@ -114,7 +114,7 @@ func (r *repo) GetByID(ctx context.Context, id int64) (*user, error) {
 }
 
 func (r *repo) Save(ctx context.Context, u *user) error {
-	return trmuow.DefaultCtxGetter.DefaultTr(ctx).Register(ctx, func(ctx context.Context) error {
+	_, err := trmuow.DefaultCtxGetter.DefaultTr(ctx).Register(ctx, func(ctx context.Context) (interface{}, error) {
 		isNew := u.ID == 0
 
 		query := `UPDATE user SET username = :username WHERE user_id = :user_id;`
@@ -129,11 +129,11 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 			r.toRow(u),
 		)
 		if err != nil {
-			return err
+			return nil, err
 		} else if !isNew {
-			return nil
+			return u, nil
 		} else if u.ID, err = res.LastInsertId(); err != nil {
-			return err
+			return nil, err
 		}
 
 		// For PostgreSql need to use NamedQueryContext with RETURNING
@@ -145,8 +145,10 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 		//		}
 		//	}
 
-		return err
+		return u, nil
 	})
+
+	return err
 }
 
 func (r *repo) toRow(model *user) userRow {

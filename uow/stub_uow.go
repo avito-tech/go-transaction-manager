@@ -8,10 +8,10 @@ import (
 
 type stubUoW struct{}
 
-func (u stubUoW) Register(ctx context.Context, cmd trm.Cmd) error {
+func (u stubUoW) Register(ctx context.Context, cmd trm.Cmd) (interface{}, error) {
 	return cmd(ctx)
 }
 
-func (u stubUoW) Commit(ctx context.Context) error {
-	return nil
+func (u stubUoW) Commit(_ context.Context) ([]interface{}, error) {
+	return nil, nil
 }

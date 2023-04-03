@@ -39,5 +39,5 @@ func (r *trmRepo) Save(ctx context.Context, u *user) error {
 		return err
 	}
 
-	return err
+	return nil
 }

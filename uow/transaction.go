@@ -41,7 +41,9 @@ func (t *Transaction) Transaction() interface{} {
 func (t *Transaction) Commit(ctx context.Context) error {
 	defer t.deactivate()
 
-	return t.uow.Commit(ctx)
+	_, err := t.uow.Commit(ctx)
+
+	return err
 }
 
 // Rollback the trm.Transaction.

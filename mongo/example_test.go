@@ -89,18 +89,14 @@ func (r *repo) GetByID(ctx context.Context, id int64) (*user, error) {
 }
 
 func (r *repo) Save(ctx context.Context, u *user) error {
-	if err := r.collection.FindOneAndUpdate(
+	return r.collection.FindOneAndUpdate(
 		ctx,
 		bson.M{"_id": u.ID},
 		bson.M{"$set": u},
 		options.FindOneAndUpdate().
 			SetReturnDocument(options.After).
 			SetUpsert(true),
-	).Err(); err != nil {
-		return err
-	}
-
-	return nil
+	).Err()
 }
 
 func checkErr(err error, args ...interface{}) {

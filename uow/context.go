@@ -9,6 +9,7 @@ import (
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
 )
 
+//nolint:gochecknoglobals
 var (
 	DefaultCtxKey    = ctxKey{}
 	DefaultCtxGetter = NewCtxGetter(trmcontext.New(DefaultCtxKey))
@@ -24,7 +25,6 @@ type CtxGetter struct {
 	ctxManager trm.СtxManager
 }
 
-// TODO see in another language Repository with UnitOfWork
 func NewCtxGetter(c trm.СtxManager) *CtxGetter {
 	return &CtxGetter{ctxManager: c}
 }

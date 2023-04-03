@@ -15,22 +15,30 @@ type uow struct {
 	cmds    []trm.Cmd
 }
 
-func (u *uow) Register(_ context.Context, cmd trm.Cmd) error {
+func (u *uow) Register(_ context.Context, cmd trm.Cmd) (interface{}, error) {
 	u.cmds = append(u.cmds, cmd)
 
-	return nil
+	//nolint:nilnil
+	return nil, nil
 }
 
-func (u *uow) Commit(ctx context.Context) error {
-	return u.manager.Do(ctx, func(ctx context.Context) error {
+func (u *uow) Commit(ctx context.Context) ([]interface{}, error) {
+	res := make([]interface{}, 0, len(u.cmds))
+
+	err := u.manager.Do(ctx, func(ctx context.Context) error {
 		for _, cmd := range u.cmds {
-			if err := cmd(ctx); err != nil {
+			item, err := cmd(ctx)
+			if err != nil {
 				return err
 			}
+
+			res = append(res, item)
 		}
 
 		u.cmds = nil
 
 		return nil
 	})
+
+	return res, err
 }

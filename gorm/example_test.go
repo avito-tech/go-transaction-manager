@@ -109,11 +109,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 		db = db.Save(&row)
 	}
 
-	if db.Error != nil {
-		return db.Error
-	}
-
-	return nil
+	return db.Error
 }
 
 func (r *repo) toRow(model *user) userRow {

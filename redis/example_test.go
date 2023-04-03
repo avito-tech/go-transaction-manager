@@ -148,18 +148,12 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 		u.ID = newUUID()
 	}
 
-	cmd := r.getter.DefaultTrOrDB(ctx, r.db).Set(
+	return r.getter.DefaultTrOrDB(ctx, r.db).Set(
 		ctx,
 		string(u.ID),
 		r.toRecord(u),
 		0,
-	)
-
-	if cmd.Err() != nil {
-		return cmd.Err()
-	}
-
-	return nil
+	).Err()
 }
 
 func (r *repo) toRecord(model *user) userRecord {
