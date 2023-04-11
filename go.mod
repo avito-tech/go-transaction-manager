@@ -15,6 +15,6 @@ require (
 	go.mongodb.org/mongo-driver v1.11.4
 	go.uber.org/multierr v1.9.0
 	gorm.io/driver/mysql v1.4.7
-	gorm.io/driver/sqlite v1.4.4
-	gorm.io/gorm v1.24.6
+	gorm.io/driver/sqlite v1.5.0
+	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
 )
