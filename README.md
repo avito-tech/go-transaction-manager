@@ -35,6 +35,8 @@ Compatibility beyond that is not guaranteed.
 
 **For nested transactions with different transaction managers**, you need to use [ChainedMW](trm/manager/chain.go) ([docs](https://pkg.go.dev/github.com/github.com/avito-tech/go-transaction-manager)).
 
+### Explanation of the approach ([English](https://www.youtube.com/watch?v=aRsea6FFAyA), [Russian](https://habr.com/ru/companies/avito/articles/727168/))
+
 ### Examples with an ideal *repository* and nested transactions.
 
 * [database/sql](sql/example_test.go)
@@ -42,6 +44,7 @@ Compatibility beyond that is not guaranteed.
 * [gorm](gorm/example_test.go)
 * [mongo-go-driver](mongo/example_test.go)
 * [go-redis/redis](redis/example_test.go)
+
 
 Below is an example how to start usage.
 
