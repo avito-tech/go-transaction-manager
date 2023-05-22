@@ -14,7 +14,7 @@ require (
 	github.com/stretchr/testify v1.8.2
 	go.mongodb.org/mongo-driver v1.11.6
 	go.uber.org/multierr v1.9.0
-	gorm.io/driver/mysql v1.5.0
+	gorm.io/driver/mysql v1.5.1
 	gorm.io/driver/sqlite v1.5.1
 	gorm.io/gorm v1.25.1
 )
