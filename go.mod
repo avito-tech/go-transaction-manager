@@ -9,7 +9,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/jinzhu/copier v0.3.5
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/mattn/go-sqlite3 v1.14.16
+	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/onsi/gomega v1.24.1 // indirect
 	github.com/stretchr/testify v1.8.2
 	go.mongodb.org/mongo-driver v1.11.6
