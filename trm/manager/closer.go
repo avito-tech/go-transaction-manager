@@ -27,6 +27,7 @@ func newTxCommit(tr trm.Transaction, l logger, c context.CancelFunc) Closer {
 	}).close
 }
 
+//nolint:funlen
 func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *error) error {
 	defer c.cancel()
 
@@ -42,6 +43,7 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 	}
 
 	hasError := *errInProcessTr != nil
+	isErrSkippable := hasError && trm.IsSkippable(*errInProcessTr)
 	// TODO not sure that context errors should be propagated.
 	isCtxCanceled := errors.Is(*errInProcessTr, context.Canceled)
 	isCtxDeadlineExceeded := errors.Is(*errInProcessTr, context.DeadlineExceeded)
@@ -73,7 +75,7 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 		return trm.ErrAlreadyClosed
 	}
 
-	if hasError {
+	if hasError && !isErrSkippable {
 		if errRollback := c.tr.Rollback(ctx); errRollback != nil {
 			return multierr.Combine(*errInProcessTr, trm.ErrRollback, errRollback)
 		}
@@ -82,7 +84,14 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 	}
 
 	if err := c.tr.Commit(ctx); err != nil {
-		return multierr.Combine(trm.ErrCommit, err)
+		var errUnSkipped error
+		if isErrSkippable {
+			errUnSkipped = trm.UnSkippable(*errInProcessTr)
+		}
+
+		return multierr.Combine(trm.ErrCommit, err, errUnSkipped)
+	} else if isErrSkippable {
+		return *errInProcessTr
 	}
 
 	return nil
