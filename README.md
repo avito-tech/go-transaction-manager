@@ -35,7 +35,7 @@ Compatibility beyond that is not guaranteed.
 
 **For nested transactions with different transaction managers**, you need to use [ChainedMW](trm/manager/chain.go) ([docs](https://pkg.go.dev/github.com/github.com/avito-tech/go-transaction-manager)).
 
-**To skip a transaction rollback due to an error, use [ErrSkip](blob/main/trm/manager.go#L20) or [Skippable](blob/main/trm/manager.go#L24)**
+**To skip a transaction rollback due to an error, use [ErrSkip](trm/manager.go#L20) or [Skippable](trm/manager.go#L24)**
 
 ### Explanation of the approach ([English](https://www.youtube.com/watch?v=aRsea6FFAyA), [Russian](https://habr.com/ru/companies/avito/articles/727168/))
 
