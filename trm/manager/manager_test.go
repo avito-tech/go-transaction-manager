@@ -424,6 +424,59 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
+		"skip_rollback_with_error": {
+			args: defaultArgs,
+			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
+				return fields{
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
+						tx := mock.NewMockTransaction(ctrl)
+
+						tx.EXPECT().
+							IsActive().
+							Return(true)
+						tx.EXPECT().
+							Commit(gomock.Any())
+
+						return ctx, tx, nil
+					},
+					settings: a.settings,
+					log:      mock_log.NewMocklogger(ctrl),
+				}
+			},
+			ret: trm.Skippable(testErr),
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.ErrorIs(t, err, testErr) &&
+					assert.True(t, trm.IsSkippable(err))
+			},
+		},
+		"skip_rollback_with_commit_error": {
+			args: defaultArgs,
+			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
+				return fields{
+					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
+						tx := mock.NewMockTransaction(ctrl)
+
+						tx.EXPECT().
+							IsActive().
+							Return(true)
+						tx.EXPECT().
+							Commit(gomock.Any()).
+							Return(testCommitErr)
+
+						return ctx, tx, nil
+					},
+					settings: a.settings,
+					log:      mock_log.NewMocklogger(ctrl),
+				}
+			},
+			ret: trm.Skippable(testErr),
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.ErrorIs(t, err, testErr) &&
+					assert.ErrorIs(t, err, testCommitErr) &&
+					assert.ErrorIs(t, err, trm.ErrCommit) &&
+					assert.False(t, trm.IsSkippable(err))
+			},
+		},
 		//nolint:dupl
 		"commit_error": {
 			args: defaultArgs,
