@@ -97,8 +97,7 @@ func TestTransaction(t *testing.T) {
 					settings: MustSettings(settings.Must(
 						settings.WithPropagation(trm.PropagationNested),
 					), WithTransactionOpts((&options.TransactionOptions{}).
-						SetWriteConcern(writeconcern.New(
-							writeconcern.W(0))))),
+						SetWriteConcern(&writeconcern.WriteConcern{W: 0}))),
 				}
 			},
 			args: args{
