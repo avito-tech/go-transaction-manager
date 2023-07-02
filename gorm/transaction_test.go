@@ -35,7 +35,7 @@ func TestTransaction(t *testing.T) {
 	testCommitErr := errors.New("error Commit test")
 	testRollbackErr := errors.New("error rollback test")
 	spPrepare := func(_ *testing.T, m sqlmock.Sqlmock) {
-		m.ExpectExec("^SAVEPOINT gorm_.+$").
+		m.ExpectExec("^SAVEPOINT sp.+$").
 			WillReturnResult(sqlmock.NewResult(0, 0))
 	}
 
@@ -91,9 +91,9 @@ func TestTransaction(t *testing.T) {
 			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 
-				m.ExpectExec("^SAVEPOINT gorm_.+$").
+				m.ExpectExec("^SAVEPOINT sp.+$").
 					WillReturnResult(sqlmock.NewResult(0, 0))
-				m.ExpectExec("^ROLLBACK TO SAVEPOINT gorm_.+$").
+				m.ExpectExec("^ROLLBACK TO SAVEPOINT sp.+$").
 					WillReturnResult(sqlmock.NewResult(0, 0))
 
 				m.ExpectRollback().WillReturnError(testRollbackErr)
@@ -112,7 +112,7 @@ func TestTransaction(t *testing.T) {
 			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 
-				m.ExpectExec("^SAVEPOINT gorm_.+$").
+				m.ExpectExec("^SAVEPOINT sp.+$").
 					WillReturnError(testErr)
 			},
 			args: args{
@@ -128,9 +128,9 @@ func TestTransaction(t *testing.T) {
 			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 
-				m.ExpectExec("^SAVEPOINT gorm_.+$").
+				m.ExpectExec("^SAVEPOINT sp.+$").
 					WillReturnResult(sqlmock.NewResult(0, 0))
-				m.ExpectExec("^ROLLBACK TO SAVEPOINT gorm_.+$").
+				m.ExpectExec("^ROLLBACK TO SAVEPOINT sp.+$").
 					WillReturnError(testRollbackErr)
 
 				m.ExpectRollback()
