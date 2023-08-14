@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-// Tr is an interface to work with pgx.DB or pgx.Tx.
+// Tr is an interface to work with pgx.Conn or pgx.Tx.
 // StmtContext and Stmt are not implemented!
 type Tr interface {
 	Begin(ctx context.Context) (pgx.Tx, error)
@@ -21,4 +21,9 @@ type Tr interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
 	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
 	QueryFunc(ctx context.Context, sql string, args []interface{}, scans []interface{}, f func(pgx.QueryFuncRow) error) (pgconn.CommandTag, error)
+}
+
+// Transactional is an interface work with pgx.Conn or pgxpool.Pool
+type Transactional interface {
+	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
 }

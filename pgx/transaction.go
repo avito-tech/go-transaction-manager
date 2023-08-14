@@ -6,7 +6,6 @@ import (
 	"sync/atomic"
 
 	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/multierr"
 
 	trmsql "github.com/avito-tech/go-transaction-manager/sql"
@@ -26,7 +25,7 @@ func NewTransaction(
 	ctx context.Context,
 	sp trmsql.SavePoint,
 	txOptions *pgx.TxOptions,
-	db *pgxpool.Pool,
+	db Transactional,
 ) (context.Context, *Transaction, error) {
 	var opts pgx.TxOptions
 	if txOptions != nil {
