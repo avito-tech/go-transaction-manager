@@ -44,7 +44,7 @@ func NewTransaction(
 		saves:     0,
 	}
 
-	defer tr.awaitDone(ctx)
+	go tr.awaitDone(ctx)
 
 	return ctx, tr, nil
 }
