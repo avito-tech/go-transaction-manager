@@ -23,7 +23,7 @@ type Tr interface {
 	QueryFunc(ctx context.Context, sql string, args []interface{}, scans []interface{}, f func(pgx.QueryFuncRow) error) (pgconn.CommandTag, error)
 }
 
-// Transactional is an interface to work with pgx.Conn, pxpool.Conn or pgxpool.Pool
+// Transactional is an interface to work with pgx.Conn, pxpool.Conn or pgxpool.Pool.
 type Transactional interface {
 	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
 }
