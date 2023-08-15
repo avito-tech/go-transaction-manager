@@ -17,6 +17,7 @@ Easiest way to get the perfect repository.
 * [gorm](https://github.com/go-gorm/gorm), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/gorm) (Go 1.16)
 * [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/mongo) (Go 1.13)
 * [go-redis/redis](https://github.com/go-redis/redis), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/redis) (Go 1.17)
+* [pgx](https://github.com/jackc/pgx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/pgx) (Go 1.16)
 
 ## Installation
 
@@ -46,6 +47,7 @@ Compatibility beyond that is not guaranteed.
 * [gorm](gorm/example_test.go)
 * [mongo-go-driver](mongo/example_test.go)
 * [go-redis/redis](redis/example_test.go)
+* [pgx](redis/example_test.go)
 
 
 Below is an example how to start usage.
