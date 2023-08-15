@@ -47,7 +47,7 @@ Compatibility beyond that is not guaranteed.
 * [gorm](gorm/example_test.go)
 * [mongo-go-driver](mongo/example_test.go)
 * [go-redis/redis](redis/example_test.go)
-* [pgx](redis/example_test.go)
+* [pgx](pgx/example_test.go)
 
 
 Below is an example how to start usage.
