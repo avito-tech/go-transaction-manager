@@ -1,3 +1,6 @@
+//go:build go1.16
+// +build go1.16
+
 //nolint:ireturn,nolintlint // return Tr for external usage.
 //revive:disable:package-comments
 package pgx
