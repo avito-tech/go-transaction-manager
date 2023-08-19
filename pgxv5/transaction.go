@@ -7,8 +7,9 @@ import (
 	"context"
 	"sync/atomic"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
 // Transaction is trm.Transaction for pgx.Tx.
