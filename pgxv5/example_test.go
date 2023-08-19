@@ -26,7 +26,7 @@ func Example() {
 
 	defer pool.Close()
 
-	sqlStmt := `CREATE TABLE IF NOT EXISTS users (user_id serial, username TEXT)`
+	sqlStmt := `CREATE TABLE IF NOT EXISTS users_v5 (user_id serial, username TEXT)`
 	_, err = pool.Exec(ctx, sqlStmt)
 	checkErr(err, sqlStmt)
 
