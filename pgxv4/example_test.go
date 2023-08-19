@@ -26,7 +26,7 @@ func Example() {
 
 	defer pool.Close()
 
-	sqlStmt := `CREATE TABLE IF NOT EXISTS users_v5 (user_id serial, username TEXT)`
+	sqlStmt := `CREATE TABLE IF NOT EXISTS users_v4 (user_id serial, username TEXT)`
 	_, err = pool.Exec(ctx, sqlStmt)
 	checkErr(err, sqlStmt)
 
@@ -78,7 +78,7 @@ type user struct {
 }
 
 func (r *repo) GetByID(ctx context.Context, id int64) (*user, error) {
-	query := `SELECT * FROM users WHERE user_id=$1`
+	query := `SELECT * FROM users_v4 WHERE user_id=$1`
 
 	conn := r.getter.DefaultTrOrDB(ctx, r.db)
 	row := conn.QueryRow(ctx, query, id)
@@ -98,7 +98,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 	conn := r.getter.DefaultTrOrDB(ctx, r.db)
 
 	if !isNew {
-		query := `UPDATE users SET username = $1 WHERE user_id = $2`
+		query := `UPDATE users_v4 SET username = $1 WHERE user_id = $2`
 
 		if _, err := conn.Exec(ctx, query, u.Username, u.ID); err != nil {
 			return err
@@ -107,7 +107,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 		return nil
 	}
 
-	query := `INSERT INTO users (username) VALUES ($1) RETURNING user_id`
+	query := `INSERT INTO users_v4 (username) VALUES ($1) RETURNING user_id`
 
 	err := conn.QueryRow(ctx, query, u.Username).Scan(&u.ID)
 	if err != nil {
