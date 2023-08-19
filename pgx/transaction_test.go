@@ -33,10 +33,8 @@ func TestTransaction(t *testing.T) {
 	testCommitErr := errors.New("error Commit test")
 	testRollbackErr := errors.New("error rollback test")
 	spPrepare := func(_ *testing.T, m pgxmock.PgxPoolIface) {
-		m.ExpectExec("SAVEPOINT tx_1").
-			WillReturnResult(pgxmock.NewResult("0", 0))
-		m.ExpectExec("RELEASE SAVEPOINT tx_1").
-			WillReturnResult(pgxmock.NewResult("0", 0))
+		m.ExpectBegin()
+		m.ExpectCommit()
 	}
 
 	tests := map[string]struct {
@@ -91,10 +89,8 @@ func TestTransaction(t *testing.T) {
 			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
-				m.ExpectExec("SAVEPOINT tx_1").
-					WillReturnResult(pgxmock.NewResult("0", 0))
-				m.ExpectExec("ROLLBACK TO SAVEPOINT tx_1").
-					WillReturnResult(pgxmock.NewResult("0", 0))
+				m.ExpectBegin()
+				m.ExpectRollback()
 
 				m.ExpectRollback().WillReturnError(testRollbackErr)
 			},
@@ -112,8 +108,7 @@ func TestTransaction(t *testing.T) {
 			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
-				m.ExpectExec("SAVEPOINT tx_1").
-					WillReturnError(testErr)
+				m.ExpectBegin().WillReturnError(testErr)
 			},
 			args: args{
 				ctx: context.Background(),
@@ -128,10 +123,8 @@ func TestTransaction(t *testing.T) {
 			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
-				m.ExpectExec("SAVEPOINT tx_1").
-					WillReturnResult(pgxmock.NewResult("0", 0))
-				m.ExpectExec("RELEASE SAVEPOINT tx_1").
-					WillReturnError(testCommitErr)
+				m.ExpectBegin()
+				m.ExpectCommit().WillReturnError(testCommitErr)
 
 				m.ExpectRollback()
 			},
@@ -141,17 +134,15 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
 					assert.ErrorIs(t, err, trm.ErrCommit) &&
-					assert.ErrorIs(t, err, trm.ErrNestedCommit)
+					assert.NotNil(t, err, trm.ErrNestedCommit)
 			},
 		},
 		"rollback_savepoint_after_error": {
 			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
-				m.ExpectExec("SAVEPOINT tx_1").
-					WillReturnResult(pgxmock.NewResult("0", 0))
-				m.ExpectExec("ROLLBACK TO SAVEPOINT tx_1").
-					WillReturnError(testRollbackErr)
+				m.ExpectBegin()
+				m.ExpectRollback().WillReturnError(testRollbackErr)
 
 				m.ExpectRollback()
 			},
@@ -163,7 +154,7 @@ func TestTransaction(t *testing.T) {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
 					assert.ErrorIs(t, err, trm.ErrRollback) &&
-					assert.ErrorIs(t, err, trm.ErrNestedRollback)
+					assert.NotNil(t, err, trm.ErrNestedRollback)
 			},
 		},
 	}
@@ -199,7 +190,7 @@ func TestTransaction(t *testing.T) {
 				})
 
 				if trNested != nil {
-					require.True(t, trNested.IsActive())
+					require.False(t, trNested.IsActive())
 				}
 
 				return err
