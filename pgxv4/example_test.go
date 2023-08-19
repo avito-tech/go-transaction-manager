@@ -1,7 +1,7 @@
 //go:build with_real_db
 // +build with_real_db
 
-package pgx_test
+package pgxv4_test
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 
-	trmpgx "github.com/avito-tech/go-transaction-manager/pgx"
+	trmpgx "github.com/avito-tech/go-transaction-manager/pgxv4"
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 )
 

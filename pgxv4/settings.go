@@ -1,7 +1,7 @@
 //go:build go1.16
 // +build go1.16
 
-package pgx
+package pgxv4
 
 import (
 	"github.com/jackc/pgx/v4"
@@ -21,7 +21,7 @@ func WithTxOptions(opts *pgx.TxOptions) Opt {
 	}
 }
 
-// Settings contains settings for pgx.Transaction.
+// Settings contains settings for pgxv4.Transaction.
 type Settings struct {
 	trm.Settings
 	txOpts *pgx.TxOptions

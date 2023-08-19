@@ -3,7 +3,7 @@
 
 //nolint:ireturn,nolintlint // return Tr for external usage.
 //revive:disable:package-comments
-package pgx
+package pgxv4
 
 import (
 	"context"
