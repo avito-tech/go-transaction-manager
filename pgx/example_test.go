@@ -1,5 +1,5 @@
-//go:build go1.16
-// +build go1.16
+//go:build with_real_db
+// +build with_real_db
 
 package pgx_test
 
@@ -18,7 +18,7 @@ func Example() {
 	ctx := context.Background()
 
 	uri := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
-		"pg_user", "pg_pass", "pg_host", 5432, "pg_db",
+		"user", "pass", "localhost", 5432, "db",
 	)
 
 	pool, err := pgxpool.Connect(ctx, uri)
