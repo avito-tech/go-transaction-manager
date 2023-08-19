@@ -8,8 +8,6 @@ package pgx
 import (
 	"context"
 
-	"github.com/jackc/pgx/v4"
-
 	"github.com/avito-tech/go-transaction-manager/trm"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
 )
@@ -46,7 +44,7 @@ func (c *CtxGetter) TrOrDB(ctx context.Context, key trm.CtxKey, db Tr) Tr {
 }
 
 func (c *CtxGetter) convert(tr trm.Transaction) Tr {
-	if tx, ok := tr.Transaction().(pgx.Tx); ok {
+	if tx, ok := tr.Transaction().(Tr); ok {
 		return tx
 	}
 
