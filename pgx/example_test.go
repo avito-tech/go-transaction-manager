@@ -23,11 +23,12 @@ func Example() {
 
 	pool, err := pgxpool.Connect(ctx, uri)
 	checkErr(err)
+
 	defer pool.Close()
 
 	sqlStmt := `CREATE TABLE IF NOT EXISTS users (user_id serial, username TEXT)`
 	_, err = pool.Exec(ctx, sqlStmt)
-	checkErr(err)
+	checkErr(err, sqlStmt)
 
 	r := newRepo(pool, trmpgx.DefaultCtxGetter)
 	trManager := manager.Must(trmpgx.NewDefaultFactory(pool))
@@ -67,6 +68,7 @@ func newRepo(db *pgxpool.Pool, c *trmpgx.CtxGetter) *repo {
 		db:     db,
 		getter: c,
 	}
+
 	return repo
 }
 
@@ -82,6 +84,7 @@ func (r *repo) GetByID(ctx context.Context, id int64) (*user, error) {
 	row := conn.QueryRow(ctx, query, id)
 
 	user := &user{}
+
 	err := row.Scan(&user.ID, &user.Username)
 	if err != nil {
 		return nil, err
@@ -105,6 +108,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 	}
 
 	query := `INSERT INTO users (username) VALUES ($1) RETURNING user_id`
+
 	err := conn.QueryRow(ctx, query, u.Username).Scan(&u.ID)
 	if err != nil {
 		return err
