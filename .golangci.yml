@@ -1,6 +1,12 @@
 linters-settings:
   enable-all: true
 
+run:
+  skip-dirs:
+    - trm/mock
+    - trm/manager/mock
+    - sql/mock
+
 linters:
   enable:
     - asasalint
