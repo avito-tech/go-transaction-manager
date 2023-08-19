@@ -9,17 +9,16 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/jackc/pgconn v1.14.0
 	github.com/jackc/pgx/v4 v4.18.1
+	github.com/jackc/pgx/v5 v5.4.3
 	github.com/jinzhu/copier v0.3.5
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/onsi/gomega v1.24.1 // indirect
 	github.com/pashagolub/pgxmock v1.8.0
+	github.com/pashagolub/pgxmock/v2 v2.11.0
 	github.com/stretchr/testify v1.8.2
 	go.mongodb.org/mongo-driver v1.12.1
 	go.uber.org/multierr v1.9.0
-	golang.org/x/crypto v0.9.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/driver/sqlite v1.5.1
 	gorm.io/gorm v1.25.3
