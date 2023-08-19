@@ -1,5 +1,5 @@
-//go:build with_real_db
-// +build with_real_db
+//go:build go1.19 && with_real_db
+// +build go1.19,with_real_db
 
 package pgxv5_test
 

@@ -1,5 +1,5 @@
-//go:build go1.16
-// +build go1.16
+//go:build go1.19
+// +build go1.19
 
 //nolint:ireturn,nolintlint // return Tr for external usage.
 //revive:disable:package-comments
