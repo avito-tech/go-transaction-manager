@@ -52,8 +52,8 @@ func MustSettings(trms trm.Settings, oo ...Opt) Settings {
 	return s
 }
 
-//revive:disable:exported
-func (s Settings) EnrichBy(in trm.Settings) trm.Settings { //nolint:ireturn,nolintlint
+// EnrichBy fills nil properties from external Settings.
+func (s Settings) EnrichBy(in trm.Settings) trm.Settings {
 	external, ok := in.(Settings)
 	if ok {
 		if s.IsMultiOrNil() == nil {
@@ -78,6 +78,7 @@ func (s Settings) EnrichBy(in trm.Settings) trm.Settings { //nolint:ireturn,noli
 	return s
 }
 
+// IsMulti - true uses redis MULTI cmd.
 func (s Settings) IsMulti() bool {
 	if s.isMulti == nil {
 		return DefaultMulti
@@ -86,6 +87,7 @@ func (s Settings) IsMulti() bool {
 	return *s.isMulti
 }
 
+// IsMultiOrNil returns IsMulti or nil.
 func (s Settings) IsMultiOrNil() *bool {
 	return s.isMulti
 }

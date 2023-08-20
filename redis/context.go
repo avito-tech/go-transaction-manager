@@ -1,5 +1,3 @@
-//nolint:ireturn,nolintlint // return Tr for external usage.
-//revive:disable:package-comments
 package redis
 
 import (
@@ -12,8 +10,6 @@ import (
 )
 
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
-//
-//nolint:gochecknoglobals
 var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
 
 // CtxGetter gets redis.Pipeliner from trm.СtxManager by casting trm.Transaction to redis.UniversalClient.
@@ -21,11 +17,12 @@ type CtxGetter struct {
 	ctxManager trm.СtxManager
 }
 
-//revive:disable:exported
+// NewCtxGetter returns *CtxGetter to get Cmdable from context.Context.
 func NewCtxGetter(c trm.СtxManager) *CtxGetter {
 	return &CtxGetter{ctxManager: c}
 }
 
+// DefaultTrOrDB returns Cmdable from context.Context or DB(redis.Cmdable) otherwise.
 func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db redis.Cmdable) redis.Cmdable {
 	if tr := c.ctxManager.Default(ctx); tr != nil {
 		return c.convert(tr)
@@ -34,6 +31,7 @@ func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db redis.Cmdable) redis.C
 	return db
 }
 
+// TrOrDB returns Cmdable from context.Context by trm.CtxKey or DB(redis.Cmdable) otherwise.
 func (c *CtxGetter) TrOrDB(ctx context.Context, key trm.CtxKey, db redis.Cmdable) redis.Cmdable {
 	if tr := c.ctxManager.ByKey(ctx, key); tr != nil {
 		return c.convert(tr)

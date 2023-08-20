@@ -50,8 +50,8 @@ func MustSettings(trms trm.Settings, oo ...Opt) Settings {
 	return s
 }
 
-//revive:disable:exported
-func (s Settings) EnrichBy(in trm.Settings) (res trm.Settings) { //nolint:ireturn,nolintlint
+// EnrichBy fills nil properties from external Settings.
+func (s Settings) EnrichBy(in trm.Settings) (res trm.Settings) {
 	external, ok := in.(Settings)
 	if ok {
 		if s.TxOpts() == nil {

@@ -95,6 +95,20 @@ issues:
       linters:
         - staticcheck
       text: "SA1029: should not use built-in type string as key for value; define your own type to avoid collisions"
+    - path: .+/context\.go
+      linters:
+        - ireturn
+    - path: .+/transaction\.go
+      linters:
+        - ireturn
+      source: \) Begin\(ctx
+    - path: .+/settings\.go
+      linters:
+        - ireturn
+      source: "(?:EnrichBy|SetPropagation|SetCtxKey|CtxKey|SetCancelable|SetTimeout)"
+    - linters:
+        - gochecknoglobals
+      source: "DefaultCtxGetter"
     - &internal_text
       path: ^internal
       text: "var-naming: don't use an underscore in package name"
