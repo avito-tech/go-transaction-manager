@@ -57,7 +57,7 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // Begin nested transaction by save point.
-func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) { //nolint:ireturn,nolintlint
+func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
 	if err != nil {
 		return ctx, nil, multierr.Combine(trm.ErrNestedBegin, err)

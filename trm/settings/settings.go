@@ -56,8 +56,8 @@ func Must(oo ...Opt) Settings {
 	return s
 }
 
-//revive:disable:exported
-func (s Settings) EnrichBy(external trm.Settings) (res trm.Settings) { //nolint:ireturn,nolintlint
+// EnrichBy fills nil properties from external Settings.
+func (s Settings) EnrichBy(external trm.Settings) (res trm.Settings) {
 	res = s
 
 	if s.CtxKeyOrNil() == nil {
@@ -79,8 +79,8 @@ func (s Settings) EnrichBy(external trm.Settings) (res trm.Settings) { //nolint:
 	return res
 }
 
-// CtxKey returns trm.CtxKey for the trm.Transaction.
-func (s Settings) CtxKey() trm.CtxKey { //nolint:ireturn,nolintlint
+// CtxKey returns key(trm.CtxKey) to get trm.Transaction from context.Context.
+func (s Settings) CtxKey() trm.CtxKey {
 	if s.ctxKey == nil {
 		return DefaultCtxKey
 	}
@@ -88,11 +88,13 @@ func (s Settings) CtxKey() trm.CtxKey { //nolint:ireturn,nolintlint
 	return *s.ctxKey
 }
 
+// CtxKeyOrNil returns key(*trm.CtxKey) or nil.
 func (s Settings) CtxKeyOrNil() *trm.CtxKey {
 	return s.ctxKey
 }
 
-func (s Settings) SetCtxKey(key *trm.CtxKey) trm.Settings { //nolint:ireturn,nolintlint
+// SetCtxKey sets key(*trm.CtxKey) to store trm.Transaction in context.Context.
+func (s Settings) SetCtxKey(key *trm.CtxKey) trm.Settings {
 	return s.setCtxKey(key)
 }
 
@@ -111,11 +113,13 @@ func (s Settings) Propagation() trm.Propagation {
 	return *s.propagation
 }
 
+// PropagationOrNil returns trm.Propagation or nil.
 func (s Settings) PropagationOrNil() *trm.Propagation {
 	return s.propagation
 }
 
-func (s Settings) SetPropagation(p *trm.Propagation) trm.Settings { //nolint:ireturn,nolintlint
+// SetPropagation sets *trm.Propagation.
+func (s Settings) SetPropagation(p *trm.Propagation) trm.Settings {
 	return s.setPropagation(p)
 }
 
@@ -134,11 +138,13 @@ func (s Settings) Cancelable() bool {
 	return *s.isCancelable
 }
 
+// CancelableOrNil returns Cancelable or nil.
 func (s Settings) CancelableOrNil() *bool {
 	return s.isCancelable
 }
 
-func (s Settings) SetCancelable(t *bool) trm.Settings { //nolint:ireturn,nolintlint
+// SetCancelable sets Cancelable(*bool).
+func (s Settings) SetCancelable(t *bool) trm.Settings {
 	return s.setCancelable(t)
 }
 
@@ -153,7 +159,8 @@ func (s Settings) TimeoutOrNil() *time.Duration {
 	return s.timeout
 }
 
-func (s Settings) SetTimeout(t *time.Duration) trm.Settings { //nolint:ireturn,nolintlint
+// SetTimeout sets *time.Duration for trm.Transaction.
+func (s Settings) SetTimeout(t *time.Duration) trm.Settings {
 	return s.setTimeout(t)
 }
 

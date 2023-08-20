@@ -1,8 +1,6 @@
 //go:build go1.19
 // +build go1.19
 
-//nolint:ireturn,nolintlint // return Tr for external usage.
-//revive:disable:package-comments
 package pgxv5
 
 import (
@@ -13,8 +11,6 @@ import (
 )
 
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
-//
-//nolint:gochecknoglobals
 var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
 
 // CtxGetter gets Tr from trm.СtxManager by casting trm.Transaction to Tr.
@@ -22,11 +18,12 @@ type CtxGetter struct {
 	ctxManager trm.СtxManager
 }
 
-//revive:disable:exported
+// NewCtxGetter returns *CtxGetter to get Tr from context.Context.
 func NewCtxGetter(c trm.СtxManager) *CtxGetter {
 	return &CtxGetter{ctxManager: c}
 }
 
+// DefaultTrOrDB returns Tr from context.Context or DB(Tr) otherwise.
 func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db Tr) Tr {
 	if tr := c.ctxManager.Default(ctx); tr != nil {
 		return c.convert(tr)
@@ -35,6 +32,7 @@ func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db Tr) Tr {
 	return db
 }
 
+// TrOrDB returns Tr from context.Context by trm.CtxKey or DB(Tr) otherwise.
 func (c *CtxGetter) TrOrDB(ctx context.Context, key trm.CtxKey, db Tr) Tr {
 	if tr := c.ctxManager.ByKey(ctx, key); tr != nil {
 		return c.convert(tr)

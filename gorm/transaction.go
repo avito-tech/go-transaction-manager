@@ -83,7 +83,7 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // Begin nested transaction by save point.
-func (t *Transaction) Begin(ctx context.Context, s trm.Settings) (context.Context, trm.Transaction, error) { //nolint:ireturn,nolintlint
+func (t *Transaction) Begin(ctx context.Context, s trm.Settings) (context.Context, trm.Transaction, error) {
 	return NewDefaultFactory(t.tx)(ctx, s)
 }
 
