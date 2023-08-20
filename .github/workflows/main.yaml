@@ -140,4 +140,4 @@ jobs:
         with:
           args: --timeout=3m -v
           # TODO remove, temporary to restore
-          skip-pkg-cache: true
+          skip-cache: true

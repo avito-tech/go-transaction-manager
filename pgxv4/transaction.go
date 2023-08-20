@@ -7,8 +7,9 @@ import (
 	"context"
 	"sync/atomic"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
 	"github.com/jackc/pgx/v4"
+
+	"github.com/avito-tech/go-transaction-manager/trm"
 )
 
 // Transaction is trm.Transaction for pgx.Tx.
@@ -20,14 +21,9 @@ type Transaction struct {
 // NewTransaction creates trm.Transaction for pgx.Tx.
 func NewTransaction(
 	ctx context.Context,
-	txOptions *pgx.TxOptions,
+	opts pgx.TxOptions,
 	db Transactional,
 ) (context.Context, *Transaction, error) {
-	var opts pgx.TxOptions
-	if txOptions != nil {
-		opts = *txOptions
-	}
-
 	tx, err := db.BeginTx(ctx, opts)
 	if err != nil {
 		return ctx, nil, err

@@ -13,7 +13,7 @@ import (
 type Opt func(*Settings) error
 
 // WithTxOptions sets up pgx.TxOptions for the Settings.
-func WithTxOptions(opts *pgx.TxOptions) Opt {
+func WithTxOptions(opts pgx.TxOptions) Opt {
 	return func(s *Settings) error {
 		*s = s.setTrOpts(opts)
 
@@ -24,12 +24,17 @@ func WithTxOptions(opts *pgx.TxOptions) Opt {
 // Settings contains settings for pgxv5.Transaction.
 type Settings struct {
 	trm.Settings
-	txOpts *pgx.TxOptions
+	txOpts pgx.TxOptions
 }
 
 // NewSettings creates Settings.
 func NewSettings(trms trm.Settings, oo ...Opt) (Settings, error) {
-	s := &Settings{Settings: trms, txOpts: nil}
+	s := &Settings{Settings: trms, txOpts: pgx.TxOptions{
+		IsoLevel:       "",
+		AccessMode:     "",
+		DeferrableMode: "",
+		BeginQuery:     "",
+	}}
 
 	for _, o := range oo {
 		if err := o(s); err != nil {
@@ -54,7 +59,9 @@ func MustSettings(trms trm.Settings, oo ...Opt) Settings {
 func (s Settings) EnrichBy(in trm.Settings) trm.Settings { //nolint:ireturn,nolintlint
 	external, ok := in.(Settings)
 	if ok {
-		if s.TxOpts() == nil {
+		var emptyTrOpts pgx.TxOptions
+
+		if s.txOpts == emptyTrOpts {
 			s = s.setTrOpts(external.TxOpts())
 		}
 	}
@@ -65,11 +72,11 @@ func (s Settings) EnrichBy(in trm.Settings) trm.Settings { //nolint:ireturn,noli
 }
 
 // TxOpts returns trm.CtxKey for the trm.Transaction.
-func (s Settings) TxOpts() *pgx.TxOptions {
+func (s Settings) TxOpts() pgx.TxOptions {
 	return s.txOpts
 }
 
-func (s Settings) setTrOpts(opts *pgx.TxOptions) Settings {
+func (s Settings) setTrOpts(opts pgx.TxOptions) Settings {
 	s.txOpts = opts
 
 	return s

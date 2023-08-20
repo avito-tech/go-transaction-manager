@@ -30,41 +30,41 @@ func TestSettings_EnrichBy(t *testing.T) {
 			args: args{
 				external: MustSettings(
 					settings.Must(settings.WithCancelable(true)),
-					WithTxOptions(&pgx.TxOptions{}),
+					WithTxOptions(pgx.TxOptions{}),
 				),
 			},
 			want: MustSettings(
 				settings.Must(settings.WithCancelable(true)),
-				WithTxOptions(&pgx.TxOptions{}),
+				WithTxOptions(pgx.TxOptions{}),
 			),
 		},
 		"without_update": {
 			settings: MustSettings(
 				settings.Must(settings.WithCancelable(true)),
-				WithTxOptions(&pgx.TxOptions{IsoLevel: pgx.Serializable}),
+				WithTxOptions(pgx.TxOptions{IsoLevel: pgx.Serializable}),
 			),
 			args: args{
 				external: MustSettings(
 					settings.Must(settings.WithCancelable(false)),
-					WithTxOptions(&pgx.TxOptions{AccessMode: pgx.ReadOnly}),
+					WithTxOptions(pgx.TxOptions{AccessMode: pgx.ReadOnly}),
 				),
 			},
 			want: MustSettings(
 				settings.Must(settings.WithCancelable(true)),
-				WithTxOptions(&pgx.TxOptions{IsoLevel: pgx.Serializable}),
+				WithTxOptions(pgx.TxOptions{IsoLevel: pgx.Serializable}),
 			),
 		},
 		"update_only_trm.Settings": {
 			settings: MustSettings(
 				settings.Must(),
-				WithTxOptions(&pgx.TxOptions{IsoLevel: pgx.Serializable}),
+				WithTxOptions(pgx.TxOptions{IsoLevel: pgx.Serializable}),
 			),
 			args: args{
 				external: settings.Must(settings.WithCancelable(true)),
 			},
 			want: MustSettings(
 				settings.Must(settings.WithCancelable(true)),
-				WithTxOptions(&pgx.TxOptions{IsoLevel: pgx.Serializable}),
+				WithTxOptions(pgx.TxOptions{IsoLevel: pgx.Serializable}),
 			),
 		},
 	}
