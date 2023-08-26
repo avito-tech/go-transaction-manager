@@ -7,10 +7,51 @@ on:
       - main
 name: Test
 env:
-  GO_TARGET_VERSION: 1.19
+  GO_TARGET_VERSION: 1.21
   OS_TARGET: ubuntu-latest
 jobs:
-  tests:
+  tests-units:
+    permissions:
+      pull-requests: write
+    strategy:
+      matrix:
+        go-version:
+          # - '1.10' doesn't have go module
+          # - 1.11
+          # - 1.12 doesn't have errors pkg
+          - '1.13'
+          - '1.14'
+          - '1.15'
+          - '1.16'
+          - '1.17'
+          - '1.18'
+          - '1.19'
+          - '1.20'
+        os:
+          - ubuntu-latest
+          # - macos-latest
+          # - windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}
+
+      - name: Tests
+        run: make test
+
+  tests-integration:
     permissions:
       pull-requests: write
     services:
@@ -40,27 +81,13 @@ jobs:
     strategy:
       matrix:
         go-version:
-          # - '1.10' doesn't have go module
-          # - 1.11
-          # - 1.12 doesn't have errors pkg
-          - 1.13
-          - 1.14
-          - 1.15
-          - 1.16
-          - 1.17
-          - 1.18
-          - 1.19
+          - '1.21' # latest go version
         os:
           - ubuntu-latest
-          # - macos-latest
-          # - windows-latest
         mongodb-version:
           - '6.0'
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Set environment by expression
-        run: |
-          echo "NEED_CODECOVERAGE=${{ matrix.go-version == env.GO_TARGET_VERSION && matrix.os == env.OS_TARGET }}" >> $GITHUB_ENV
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install Go
@@ -77,56 +104,29 @@ jobs:
             ${{ runner.os }}-go-${{ matrix.go-version }}
 
       - name: Start MongoDB
-        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
         uses: supercharge/mongodb-github-action@1.8.0
         with:
           mongodb-version: ${{ matrix.mongodb-version }}
           mongodb-replica-set: test-rs
 
-      - name: Tests
-        if: ${{ matrix.go-version != env.GO_TARGET_VERSION || matrix.os != env.OS_TARGET }}
-        run: make test
-
       - name: Tests with real databases
-        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
         run: make test.coverage.with_real_db
 
       - name: Code coverage data
-        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
         run: |
           set -x
           COVERAGE_TOTAL=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
           echo "COVERAGE_TOTAL=$COVERAGE_TOTAL" >> $GITHUB_ENV
       - uses: jandelgado/gcov2lcov-action@v1.0.9
-        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
         with:
           outfile: ./coverage.lcov
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
-        if: ${{ fromJSON(env.NEED_CODECOVERAGE) }}
         with:
           path-to-lcov: ./coverage.lcov
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: Print diff coveralls
-#        uses: romeovs/lcov-reporter-action@v0.2.21
-#        if: ${{ fromJSON(env.NEED_CODECOVERAGE) && github.event_name == 'pull_request' }}
-#        with:
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
-#          lcov-file: ./coverage.lcov
-#      - name: CodeCoverage the Badge
-#        if: ${{ fromJSON(env.NEED_CODECOVERAGE) && github.ref == 'refs/heads/main' }}
-#        uses: schneegans/dynamic-badges-action@v1.6.0
-#        with:
-#          auth: ${{ secrets.GIST_SECRET }}
-#          gistID: ${{ secrets.GIST_ID }}
-#          filename: ${{ secrets.GIST_FILENAME }}
-#          label: coverage
-#          message: ${{ env.COVERAGE_TOTAL }}%
-#          valColorRange: ${{ env.COVERAGE_TOTAL }}
-#          maxColorRange: 100
-#          minColorRange: 0
   golangci:
     name: lint
     runs-on: ubuntu-latest
