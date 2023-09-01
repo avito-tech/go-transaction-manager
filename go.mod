@@ -15,7 +15,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/onsi/gomega v1.24.1 // indirect
 	github.com/pashagolub/pgxmock v1.8.0
-	github.com/pashagolub/pgxmock/v2 v2.11.0
+	github.com/pashagolub/pgxmock/v2 v2.12.0
 	github.com/stretchr/testify v1.8.2
 	go.mongodb.org/mongo-driver v1.12.1
 	go.uber.org/multierr v1.9.0
