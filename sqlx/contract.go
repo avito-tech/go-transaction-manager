@@ -28,7 +28,7 @@ type Tr interface {
 	NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
 
 	sqlx.Queryer
-	QueryRow(query string, args ...any) *sql.Row
+	QueryRow(query string, args ...interface{}) *sql.Row
 	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 	NamedQuery(query string, arg interface{}) (*sqlx.Rows, error)
 
