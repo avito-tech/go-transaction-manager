@@ -15,18 +15,20 @@ import (
 type Tr interface {
 	sqlx.ExtContext
 
+	sqlx.Preparer
 	Preparex(query string) (*sqlx.Stmt, error)
 	PreparexContext(ctx context.Context, query string) (*sqlx.Stmt, error)
-	PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error)
 	PrepareNamed(query string) (*sqlx.NamedStmt, error)
+	PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error)
 
+	sqlx.Execer
 	MustExec(query string, args ...interface{}) sql.Result
 	MustExecContext(ctx context.Context, query string, args ...interface{}) sql.Result
-	NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
 	NamedExec(query string, arg interface{}) (sql.Result, error)
+	NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
 
-	Queryx(query string, args ...interface{}) (*sqlx.Rows, error)
-	QueryRowx(query string, args ...interface{}) *sqlx.Row
+	sqlx.Queryer
+	QueryRow(query string, args ...interface{}) *sql.Row
 	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 	NamedQuery(query string, arg interface{}) (*sqlx.Rows, error)
 
