@@ -8,8 +8,13 @@ import (
 	"encoding/json"
 	"fmt"
 
+	trm "github.com/avito-tech/go-transaction-manager/v2"
+	"github.com/go-redis/redis/v8"
+
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/v2/settings"
+
+	trmredis "github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.
@@ -21,7 +26,7 @@ func Example() {
 	ctx := context.Background()
 	rdb.FlushDB(ctx)
 
-	r := newRepo(rdb, DefaultCtxGetter)
+	r := newRepo(rdb, trmredis.DefaultCtxGetter)
 
 	u1 := &user{
 		Username: "username1",
@@ -31,11 +36,11 @@ func Example() {
 	}
 
 	trManager := manager.Must(
-		NewDefaultFactory(rdb),
-		manager.WithSettings(MustSettings(
+		trmredis.NewDefaultFactory(rdb),
+		manager.WithSettings(trmredis.MustSettings(
 			settings.Must(
 				settings.WithPropagation(trm.PropagationNested)),
-			WithTxDecorator(ReadOnlyFuncWithoutTxDecorator),
+			trmredis.WithTxDecorator(trmredis.ReadOnlyFuncWithoutTxDecorator),
 		)),
 	)
 
@@ -45,7 +50,7 @@ func Example() {
 	var cmds []redis.Cmder
 	err = trManager.DoWithSettings(
 		ctx,
-		MustSettings(settings.Must(), WithRet(&cmds)),
+		trmredis.MustSettings(settings.Must(), trmredis.WithRet(&cmds)),
 		func(ctx context.Context) error {
 			if err := r.Save(ctx, u2); err != nil {
 				return err
@@ -81,10 +86,10 @@ func Example() {
 
 type repo struct {
 	db     redis.UniversalClient
-	getter *CtxGetter
+	getter *trmredis.CtxGetter
 }
 
-func newRepo(db redis.UniversalClient, c *CtxGetter) *repo {
+func newRepo(db redis.UniversalClient, c *trmredis.CtxGetter) *repo {
 	return &repo{
 		db:     db,
 		getter: c,

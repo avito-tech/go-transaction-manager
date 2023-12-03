@@ -9,7 +9,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/multierr"
 
-trmsql github.com/avito-tech/go-transaction-manager/v2/sql"
+	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
+
+	trm "github.com/avito-tech/go-transaction-manager/v2"
 )
 
 // Transaction is trm.Transaction for sqlx.Tx.
