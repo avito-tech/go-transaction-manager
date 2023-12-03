@@ -1,5 +1,5 @@
 // Package trm contains of interfaces to programmatic transaction management.
-package go_transaction_manager
+package trm
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
 

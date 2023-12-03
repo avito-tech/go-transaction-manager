@@ -78,7 +78,7 @@ func Example_watch() {
 	)
 	fmt.Println(err)
 
-	// Output: transaction: commit; go-redis-v9: transaction failed
+	// Output: transaction: commit; redis: transaction failed
 	// <nil>
 }
 

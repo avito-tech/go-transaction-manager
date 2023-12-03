@@ -29,7 +29,7 @@ func WithTxDecorator(in TxDecorator) Opt {
 	}
 }
 
-// WithRet sets link on []go-redis-v9.Cmder to get responses of commands in Transaction
+// WithRet sets link on []redis.Cmder to get responses of commands in Transaction
 // WARNING: Responses don't clean automatically, use WithRet only with DoWithSettings of trm.Manager.
 func WithRet(in *[]redis.Cmder) Opt {
 	return func(s *Settings) error {

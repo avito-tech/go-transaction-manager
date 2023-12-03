@@ -1,4 +1,4 @@
-package go_transaction_manager
+package trm
 
 import (
 	"context"

@@ -8,7 +8,7 @@ import (
 	trm "github.com/avito-tech/go-transaction-manager/v2"
 )
 
-// NewDefaultFactory creates default trm.Transaction(go-redis-v9.UniversalClient).
+// NewDefaultFactory creates default trm.Transaction(redis.UniversalClient).
 func NewDefaultFactory(db redis.UniversalClient) trm.TrFactory {
 	return func(ctx context.Context, trms trm.Settings) (context.Context, trm.Transaction, error) {
 		s, _ := trms.(Settings)

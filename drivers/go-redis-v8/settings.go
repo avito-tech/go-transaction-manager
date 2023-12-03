@@ -14,7 +14,7 @@ const (
 // Opt is a type to configure Settings.
 type Opt func(*Settings) error
 
-// Settings contains settings for go-redis-v9.Transaction.
+// Settings contains settings for redis.Transaction.
 type Settings struct {
 	trm.Settings
 	isMulti     *bool
@@ -78,7 +78,7 @@ func (s Settings) EnrichBy(in trm.Settings) trm.Settings {
 	return s
 }
 
-// IsMulti - true uses go-redis-v9 MULTI cmd.
+// IsMulti - true uses redis MULTI cmd.
 func (s Settings) IsMulti() bool {
 	if s.isMulti == nil {
 		return DefaultMulti
@@ -135,12 +135,12 @@ func (s Settings) setTxDecorator(in ...TxDecorator) Settings {
 	return s
 }
 
-// Return returns []go-redis-v9.Cmder from Transaction.
+// Return returns []redis.Cmder from Transaction.
 func (s Settings) Return() *[]redis.Cmder {
 	return s.ret
 }
 
-// SetReturn sets link to save []go-redis-v9.Cmder from Transaction.
+// SetReturn sets link to save []redis.Cmder from Transaction.
 func (s Settings) SetReturn(in *[]redis.Cmder) Settings {
 	return s.setReturn(in)
 }

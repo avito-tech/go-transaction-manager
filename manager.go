@@ -1,4 +1,4 @@
-package go_transaction_manager
+package trm
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
 

@@ -82,7 +82,7 @@ func TestTransaction(t *testing.T) {
 				ctx: context.Background(),
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.ErrorContains(t, err, "go-redis-v9: nil") &&
+				return assert.ErrorContains(t, err, "redis: nil") &&
 					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 		},

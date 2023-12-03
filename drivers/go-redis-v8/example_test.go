@@ -119,7 +119,7 @@ type user struct {
 }
 
 type userRecord struct {
-	Username string `go-redis-v9:"username"`
+	Username string `redis:"username"`
 }
 
 func (r userRecord) MarshalBinary() (data []byte, err error) {

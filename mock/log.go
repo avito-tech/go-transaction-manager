@@ -14,7 +14,9 @@ type Log struct {
 
 // NewLog create mock Log.
 func NewLog() *Log {
-	return &Log{}
+	return &Log{
+		Logged: nil,
+	}
 }
 
 func (l *Log) Warning(_ context.Context, msg string) {

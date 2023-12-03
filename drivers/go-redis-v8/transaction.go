@@ -1,4 +1,4 @@
-// Package go-redis-v9 is an implementation of trm.Transaction interface by Transaction for go-redis-v9.UniversalClient.
+// Package go_redis_v8 is an implementation of trm.Transaction interface by Transaction for redis.UniversalClient.
 package go_redis_v8
 
 import (
