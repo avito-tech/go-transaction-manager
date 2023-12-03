@@ -8,8 +8,12 @@ import (
 	"fmt"
 	"time"
 
+	trm "github.com/avito-tech/go-transaction-manager/v2"
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/v2/settings"
+	"github.com/go-redis/redis/v8"
+
+	trmredis "github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2"
 )
 
 // Example demonstrates the watching of updated keys.
@@ -21,7 +25,7 @@ func Example_watch() {
 	ctx := context.Background()
 	rdb.FlushDB(ctx)
 
-	r := newRepo(rdb, DefaultCtxGetter)
+	r := newRepo(rdb, trmredis.DefaultCtxGetter)
 
 	u := &user{
 		ID:       uuid1,
@@ -29,12 +33,12 @@ func Example_watch() {
 	}
 
 	trManager := manager.Must(
-		NewDefaultFactory(rdb),
-		manager.WithSettings(MustSettings(
+		trmredis.NewDefaultFactory(rdb),
+		manager.WithSettings(trmredis.MustSettings(
 			settings.Must(
 				settings.WithPropagation(trm.PropagationNested)),
-			WithTxDecorator(newWatchDecorator),
-			WithMulti(true),
+			trmredis.WithTxDecorator(newWatchDecorator),
+			trmredis.WithMulti(true),
 		)),
 	)
 
@@ -62,7 +66,7 @@ func Example_watch() {
 			err = r.Save(ctx, u)
 
 			// Unwatch keys
-			cmd := DefaultCtxGetter.DefaultTrOrDB(ctx, nil).(Watch).
+			cmd := trmredis.DefaultCtxGetter.DefaultTrOrDB(ctx, nil).(trmredis.Watch).
 				Unwatch(ctx)
 			checkErr(cmd.Err())
 
@@ -79,10 +83,10 @@ func Example_watch() {
 }
 
 type watchDecoratorExample struct {
-	Cmdable
+	trmredis.Cmdable
 }
 
-func newWatchDecorator(tx Cmdable, _ redis.Cmdable) Cmdable {
+func newWatchDecorator(tx trmredis.Cmdable, _ redis.Cmdable) trmredis.Cmdable {
 	return &watchDecoratorExample{Cmdable: tx}
 }
 

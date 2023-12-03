@@ -7,6 +7,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/go-redis/redis/v8"
+	redismock "github.com/go-redis/redismock/v8"
 	"github.com/stretchr/testify/require"
 )
 

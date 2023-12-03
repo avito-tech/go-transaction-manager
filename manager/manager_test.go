@@ -13,7 +13,6 @@ import (
 
 	trm "github.com/avito-tech/go-transaction-manager/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
-	trmmock "github.com/avito-tech/go-transaction-manager/v2/internal/mock"
 	mock_log "github.com/avito-tech/go-transaction-manager/v2/manager/mock"
 	"github.com/avito-tech/go-transaction-manager/v2/mock"
 	"github.com/avito-tech/go-transaction-manager/v2/settings"
@@ -573,7 +572,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	testPanic := "panic"
 	testRollbackErr := errors.New("rollback error")
 
-	log := trmmock.NewLog()
+	log := mock.NewLog()
 	factory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 		tx := mock.NewMockTransaction(ctrl)
 
@@ -776,7 +775,7 @@ func TestManager_WithOpts(t *testing.T) {
 	t.Run("set", func(t *testing.T) {
 		t.Parallel()
 
-		l := trmmock.NewZeroLog()
+		l := mock.NewZeroLog()
 		m := Must(nil, WithLog(l), WithSettings(s{}))
 
 		assert.Equal(t, l, m.log)

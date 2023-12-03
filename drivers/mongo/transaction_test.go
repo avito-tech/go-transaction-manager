@@ -16,7 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 
 	trm "github.com/avito-tech/go-transaction-manager/v2"
-	"github.com/avito-tech/go-transaction-manager/v2/internal/mock"
+	"github.com/avito-tech/go-transaction-manager/v2/mock"
 
 	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
 

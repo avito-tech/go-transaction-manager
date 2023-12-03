@@ -17,8 +17,9 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/avito-tech/go-transaction-manager/v2/internal/mock"
+	"github.com/avito-tech/go-transaction-manager/v2/mock"
 
+	trm "github.com/avito-tech/go-transaction-manager/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
 
 	"github.com/avito-tech/go-transaction-manager/v2/manager"

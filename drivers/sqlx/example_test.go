@@ -7,7 +7,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 
-"github.com/avito-tech/go-transaction-manager/v2/manager"
+	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
+	"github.com/avito-tech/go-transaction-manager/v2/manager"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.
@@ -20,14 +21,14 @@ func Example() {
 	_, err := db.Exec(sqlStmt)
 	checkErr(err, sqlStmt)
 
-	r := newRepo(db, DefaultCtxGetter)
+	r := newRepo(db, trmsqlx.DefaultCtxGetter)
 
 	u := &user{
 		Username: "username",
 	}
 
 	ctx := context.Background()
-	trManager := manager.Must(NewDefaultFactory(db))
+	trManager := manager.Must(trmsqlx.NewDefaultFactory(db))
 
 	err = trManager.Do(ctx, func(ctx context.Context) error {
 		if err := r.Save(ctx, u); err != nil {
@@ -59,10 +60,10 @@ func newDB() *sqlx.DB {
 
 type repo struct {
 	db     *sqlx.DB
-	getter *CtxGetter
+	getter *trmsqlx.CtxGetter
 }
 
-func newRepo(db *sqlx.DB, c *CtxGetter) *repo {
+func newRepo(db *sqlx.DB, c *trmsqlx.CtxGetter) *repo {
 	return &repo{
 		db:     db,
 		getter: c,

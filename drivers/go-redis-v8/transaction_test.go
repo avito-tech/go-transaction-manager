@@ -14,7 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	trm "github.com/avito-tech/go-transaction-manager/v2"
-	"github.com/avito-tech/go-transaction-manager/v2/internal/mock"
+	"github.com/avito-tech/go-transaction-manager/v2/mock"
+	"github.com/go-redis/redismock/v8"
 
 	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
 
