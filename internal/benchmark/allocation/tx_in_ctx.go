@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/avito-tech/go-transaction-manager/internal/benchmark/common"
+	"github.com/avito-tech/go-transaction-manager/v2/internal/benchmark/common"
 )
 
 func trInContext() {

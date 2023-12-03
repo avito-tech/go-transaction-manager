@@ -56,10 +56,10 @@ jobs:
       pull-requests: write
     services:
       redis:
-        image: redis
+        image: go-redis-v9
         ports:
           - 6379:6379
-        # Set health checks to wait until redis has started
+        # Set health checks to wait until go-redis-v9 has started
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
