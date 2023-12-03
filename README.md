@@ -47,7 +47,7 @@ Compatibility beyond that is not guaranteed.
 * [jmoiron/sqlx](drivers/sqlx/example_test.go)
 * [gorm](drivers/gorm/example_test.go)
 * [mongo-go-driver](drivers/mongo/example_test.go)
-* [go-redis/redis](drivers/go-redis-v9/example_test.go)
+* [go-redis/redis](drivers/go-redis-v8/example_test.go)
 * [pgx_v4](drivers/pgxv4/example_test.go)
 * [pgx_v5](drivers/pgxv5/example_test.go)
 
