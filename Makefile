@@ -23,3 +23,14 @@ lint:
 
 generate:
 	go generate ./...
+
+
+go.update: go.tidy go.vendor
+
+go.prepare: go.vendor
+
+go.tidy:
+	./sh/go.mod.tidy.sh
+
+go.vendor:
+	./sh/go.mod.vendor.sh

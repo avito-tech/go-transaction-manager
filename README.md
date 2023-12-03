@@ -12,13 +12,13 @@ Easiest way to get the perfect repository.
 
 ## Supported implementations
 
-* [database/sql](https://pkg.go.dev/database/sql), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/sql) (Go 1.13)
-* [jmoiron/sqlx](https://github.com/jmoiron/sqlx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/sqlx) (Go 1.13)
-* [gorm](https://github.com/go-gorm/gorm), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/gorm) (Go 1.16)
-* [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/mongo) (Go 1.13)
-* [go-redis/redis](https://github.com/go-redis/redis), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/redis) (Go 1.17)
-* [pgx_v4](https://github.com/jackc/pgx/tree/v4), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/pgxv4) (Go 1.16)
-* [pgx_v5](https://github.com/jackc/pgx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/pgxv5) (Go 1.19)
+* [database/sql](https://pkg.go.dev/database/sql), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/sql/v2) (Go 1.13)
+* [jmoiron/sqlx](https://github.com/jmoiron/sqlx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2) (Go 1.13)
+* [gorm](https://github.com/go-gorm/gorm), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/gorm/v2) (Go 1.18)
+* [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/mongo/v2) (Go 1.13)
+* [go-redis/redis](https://github.com/go-redis/redis), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2) (Go 1.17)
+* [pgx_v4](https://github.com/jackc/pgx/tree/v4), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/pgxv4/v2) (Go 1.16)
+* [pgx_v5](https://github.com/jackc/pgx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2) (Go 1.19)
 
 ## Installation
 
@@ -33,23 +33,23 @@ Compatibility beyond that is not guaranteed.
 
 ## Usage
 
-**To use multiple transactions from different databases**, you need to set CtxKey in [Settings](trm/settings.go) by [WithCtxKey](trm/settings/option.go).
+**To use multiple transactions from different databases**, you need to set CtxKey in [Settings](trm/settings.go) by [WithCtxKey](settings/option.go).
 
-**For nested transactions with different transaction managers**, you need to use [ChainedMW](trm/manager/chain.go) ([docs](https://pkg.go.dev/github.com/github.com/avito-tech/go-transaction-manager)).
+**For nested transactions with different transaction managers**, you need to use [ChainedMW](manager/chain.go) ([docs](https://pkg.go.dev/github.com/github.com/avito-tech/go-transaction-manager)).
 
-**To skip a transaction rollback due to an error, use [ErrSkip](trm/manager.go#L20) or [Skippable](trm/manager.go#L24)**
+**To skip a transaction rollback due to an error, use [ErrSkip](manager.go#L20) or [Skippable](manager.go#L24)**
 
 ### Explanation of the approach ([English](https://www.youtube.com/watch?v=aRsea6FFAyA), [Russian](https://habr.com/ru/companies/avito/articles/727168/))
 
 ### Examples with an ideal *repository* and nested transactions.
 
-* [database/sql](sql/example_test.go)
-* [jmoiron/sqlx](sqlx/example_test.go)
-* [gorm](gorm/example_test.go)
-* [mongo-go-driver](mongo/example_test.go)
-* [go-redis/redis](redis/example_test.go)
-* [pgx_v4](pgxv4/example_test.go)
-* [pgx_v5](pgxv5/example_test.go)
+* [database/sql](drivers/sql/example_test.go)
+* [jmoiron/sqlx](drivers/sqlx/example_test.go)
+* [gorm](drivers/gorm/example_test.go)
+* [mongo-go-driver](drivers/mongo/example_test.go)
+* [go-redis/redis](drivers/go-redis-v9/example_test.go)
+* [pgx_v4](drivers/pgxv4/example_test.go)
+* [pgx_v5](drivers/pgxv5/example_test.go)
 
 
 Below is an example how to start usage.
@@ -64,8 +64,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 
-	trmsqlx "github.com/avito-tech/go-transaction-manager/sqlx"
-	"github.com/avito-tech/go-transaction-manager/trm/manager"
+	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
+	"github.com/avito-tech/go-transaction-manager/v2/manager"
 )
 
 func main() {
