@@ -117,14 +117,12 @@ jobs:
           set -x
           COVERAGE_TOTAL=`go tool covdata func -i=./coverage | grep total | grep -Eo '[0-9]+\.[0-9]+'`
           echo "COVERAGE_TOTAL=$COVERAGE_TOTAL" >> $GITHUB_ENV
-      - uses: jandelgado/gcov2lcov-action@v1.0.9
-        with:
-          outfile: ./coverage.lcov
 
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
-          path-to-lcov: ./coverage.lcov
+          format: golang
+          file: ./coverage.out
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   golangci:
