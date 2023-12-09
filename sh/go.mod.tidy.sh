@@ -6,7 +6,7 @@ ROOT=$(pwd)
 
 go mod tidy
 
-for driver in ./drivers/*/; do
+for driver in ./db/*/; do
   if [ -d "$driver" ]; then
     echo "\n$driver"
     cd $driver && go mod tidy

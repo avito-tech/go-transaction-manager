@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 
-	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
+	trmsqlx "github.com/avito-tech/go-transaction-manager/db/sqlx/v2"
 
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 )
