@@ -95,14 +95,14 @@ issues:
       linters:
         - staticcheck
       text: "SA1029: should not use built-in type string as key for value; define your own type to avoid collisions"
-    - path: .+/context\.go
+    - path: (.+/)?context\.go
       linters:
         - ireturn
-    - path: .+/transaction\.go
+    - path: (.+/)?transaction\.go
       linters:
         - ireturn
       source: \) Begin\(ctx
-    - path: .+/settings\.go
+    - path: (.+/)?settings\.go
       linters:
         - ireturn
       source: "(?:EnrichBy|SetPropagation|SetCtxKey|CtxKey|SetCancelable|SetTimeout)"

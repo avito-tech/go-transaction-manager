@@ -14,7 +14,7 @@ import (
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/v2/settings"
 
-	trmredis "github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2"
+	trmredis "github.com/avito-tech/go-transaction-manager/db/go-redis-v8/v2"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.

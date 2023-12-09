@@ -11,7 +11,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	trmgorm "github.com/avito-tech/go-transaction-manager/drivers/gorm/v2"
+	trmgorm "github.com/avito-tech/go-transaction-manager/db/gorm/v2"
 	trm "github.com/avito-tech/go-transaction-manager/v2"
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/v2/settings"
@@ -19,7 +19,7 @@ import (
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.
 func Example() {
-	db, err := gorm.Open(sqlite.Open("file:test.db?mode=memory"))
+	db, err := gorm.Open(sqlite.Open("file:test.dbs?mode=memory"))
 	checkErr(err)
 
 	// Migrate the schema

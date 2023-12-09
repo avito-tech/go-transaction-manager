@@ -13,7 +13,7 @@ import (
 	"github.com/avito-tech/go-transaction-manager/v2/settings"
 	"github.com/go-redis/redis/v8"
 
-	trmredis "github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2"
+	trmredis "github.com/avito-tech/go-transaction-manager/db/go-redis-v8/v2"
 )
 
 // Example demonstrates the watching of updated keys.

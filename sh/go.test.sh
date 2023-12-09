@@ -2,7 +2,9 @@
 
 DIR=$(pwd)
 
-drivers=("$($DIR/utils/drivers.sh)")
+drivers=$($DIR/utils/drivers.sh)
+
+echo $drivers
 
 cd ../
 
