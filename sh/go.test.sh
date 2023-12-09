@@ -1,3 +1,9 @@
+#!/bin/bash
+
+DIR=$(pwd)
+
+drivers=("$($DIR/utils/drivers.sh)")
+
 cd ../
 
 ROOT=$(pwd)
@@ -9,16 +15,16 @@ golist() {
 gotest() {
   cd $driver
 
-  go test $(golist) -race "$@"
+  go test $(golist) "$@"
 
   cd $ROOT
 }
 
-go test $(golist) -race "$@"
+go test $(golist) $@ &
 
-for driver in ./drivers/*; do
+for driver in $drivers; do
   if [ -d "$driver" ]; then
-    gotest "$@" &
+    gotest $@ &
   fi
 done
 

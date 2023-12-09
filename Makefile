@@ -1,21 +1,21 @@
-GO_TEST=cd ./sh && sh ./go.test.sh
-GO_TEST_WITH_REAL_DB=$(GO_TEST) --tags=with_real_db
-
 DIR=$(PWD)
-COVERAGE_FILE=`echo $(DIR)/coverage.out`
+
+GO_TEST=cd ./sh && bash ./go.test.sh
+GO_TEST_COVERAGE=cd ./sh && bash ./go.test.coverage.sh
+
+GO_TEST_WITH_REAL_DB=--tags=with_real_db
 
 test:
 	$(GO_TEST)
 
 test.with_real_db:
-	$(GO_TEST_WITH_REAL_DB)
+	$(GO_TEST) $(GO_TEST_WITH_REAL_DB)
 
-# TODO see in https://gist.github.com/skarllot/13ebe8220822bc19494c8b076aabe9fc
 test.coverage:
-	$(GO_TEST) -covermode=atomic -coverprofile=$(COVERAGE_FILE)
+	$(GO_TEST_COVERAGE)
 
 test.coverage.with_real_db:
-	$(GO_TEST_WITH_REAL_DB) -covermode=atomic -coverprofile=$(COVERAGE_FILE)
+	$(GO_TEST_COVERAGE) $(GO_TEST_WITH_REAL_DB)
 
 fmt:
 	go fmt ./...
