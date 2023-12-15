@@ -1,6 +1,5 @@
 #!/bin/bash
 
-DIR=$(pwd)
 ROOT="$(pwd)/.."
 
 COVERAGE_TEST="-cover -covermode=atomic -test.gocoverdir=$ROOT/coverage"

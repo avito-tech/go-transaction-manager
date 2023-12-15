@@ -8,13 +8,13 @@ import (
 	"encoding/json"
 	"fmt"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
 	"github.com/go-redis/redis/v8"
 
+	trm "github.com/avito-tech/go-transaction-manager/v2"
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/v2/settings"
 
-	trmredis "github.com/avito-tech/go-transaction-manager/db/go-redis-v8/v2"
+	trmredis "github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.

@@ -1,4 +1,4 @@
-module github.com/avito-tech/go-transaction-manager/db/gorm/v2
+module github.com/avito-tech/go-transaction-manager/drivers/gorm/v2
 
 go 1.18
 

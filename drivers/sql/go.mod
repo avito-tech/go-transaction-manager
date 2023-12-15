@@ -1,4 +1,4 @@
-module github.com/avito-tech/go-transaction-manager/db/sql/v2
+module github.com/avito-tech/go-transaction-manager/drivers/sql/v2
 
 go 1.13
 

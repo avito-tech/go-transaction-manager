@@ -6,7 +6,9 @@ ROOT=$(pwd)
 
 go mod vendor
 
-for driver in ./db/*; do
+drivers=$($DIR/utils/drivers.sh)
+
+for driver in $drivers; do
   if [ -d "$driver" ]; then
     echo "\n$driver"
     cd $driver && go mod vendor
