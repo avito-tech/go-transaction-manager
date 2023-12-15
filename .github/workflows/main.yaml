@@ -112,12 +112,6 @@ jobs:
       - name: Tests with real databases
         run: make test.coverage.with_real_db
 
-      - name: Code coverage data
-        run: |
-          set -x
-          COVERAGE_TOTAL=`go tool covdata func -i=./coverage | grep total | grep -Eo '[0-9]+\.[0-9]+'`
-          echo "COVERAGE_TOTAL=$COVERAGE_TOTAL" >> $GITHUB_ENV
-
       - name: Coveralls
         uses: coverallsapp/github-action@v2
         with:

@@ -19,7 +19,7 @@ func Example() {
 	ctx := context.Background()
 
 	uri := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
-		"user", "pass", "localhost", 5432, "drivers",
+		"user", "pass", "localhost", 5432, "db",
 	)
 
 	pool, err := pgxpool.Connect(ctx, uri)
