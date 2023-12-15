@@ -32,3 +32,6 @@ go.mod.tidy:
 
 go.mod.vendor:
 	cd sh && sh ./go.mod.vendor.sh
+
+go.work.sync:
+	cd sh && sh ./go.work.sync.sh

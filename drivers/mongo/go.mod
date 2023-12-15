@@ -10,6 +10,3 @@ require (
 	go.mongodb.org/mongo-driver v1.13.1
 )
 
-replace github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0 => ../sql
-
-replace github.com/avito-tech/go-transaction-manager/v2 v2.0.0 => ../../

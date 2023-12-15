@@ -9,5 +9,3 @@ require (
 	github.com/pashagolub/pgxmock v1.8.0
 	github.com/stretchr/testify v1.8.2
 )
-
-replace github.com/avito-tech/go-transaction-manager/v2 v2.0.0 => ../../
