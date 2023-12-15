@@ -56,7 +56,6 @@ func TestTransaction(t *testing.T) {
 		t,
 		mtest.NewOptions().ClientType(mtest.Mock),
 	)
-	defer mt.Close()
 
 	tests := map[string]struct {
 		fields  func(mt *mtest.T) fields
@@ -202,7 +201,6 @@ func TestTransaction_awaitDone(t *testing.T) {
 			ClientType(mtest.Mock).
 			ShareClient(true),
 	)
-	defer mt.Close()
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
