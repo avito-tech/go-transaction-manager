@@ -2,4 +2,4 @@
 
 cd ../
 
-echo ./db/*
+echo ./drivers/*

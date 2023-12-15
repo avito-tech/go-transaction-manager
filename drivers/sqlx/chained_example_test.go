@@ -6,13 +6,11 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	trmsqlx "github.com/avito-tech/go-transaction-manager/db/sqlx/v2"
+	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	trm "github.com/avito-tech/go-transaction-manager/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
-
-	"github.com/avito-tech/go-transaction-manager/v2/settings"
-
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/v2/settings"
 )
 
 // Example demonstrates a work of manager.ChainedMW.

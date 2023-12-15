@@ -4,8 +4,6 @@ DIR=$(pwd)
 
 drivers=$($DIR/utils/drivers.sh)
 
-echo $drivers
-
 cd ../
 
 ROOT=$(pwd)

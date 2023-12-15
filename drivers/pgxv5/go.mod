@@ -1,4 +1,4 @@
-module github.com/avito-tech/go-transaction-manager/db/pgxv5/v2
+module github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2
 
 go 1.13
 
