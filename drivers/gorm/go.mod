@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.1
-	github.com/avito-tech/go-transaction-manager/v2 v2.0.0
+	github.com/avito-tech/go-transaction-manager/v2 v2.0.0-rc1
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/stretchr/testify v1.8.2
 	gorm.io/driver/mysql v1.5.2
@@ -23,4 +23,3 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-

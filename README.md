@@ -33,7 +33,7 @@ Easiest way to get the perfect repository.
 go get github.com/avito-tech/go-transaction-manager/v2
 ```
 
-To install some support database use `go get github.com/avito-tech/go-transaction-manager/drivers/{name}/v2`.
+To install some support database use `go get github.com/avito-tech/go-transaction-manager/v2/drivers/{name}`.
 
 For example `go get github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2`.
 
@@ -163,5 +163,8 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 
 ## Contribution
 
-* To install all dependencies use `make go.mod.vendor`.
+1. To local development sync dependencies by `make go.work.sync`.
+2. After finalizing of changes bump up version in all drivers.
+
+* To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.
 * To run all tests use `make go.test` or `make go.test.with_real_db` for integration tests.
