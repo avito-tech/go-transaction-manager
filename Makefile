@@ -40,3 +40,14 @@ go.mod.vendor:
 
 go.work.sync:
 	cd sh && sh ./go.work.sync.sh
+
+
+git.tag: git.tag.create git.tag.push
+
+# 1.0, "v2." added automatically
+# make git.tag version="0.0-rc1"
+git.tag.create:
+	cd sh && sh ./git.tag.sh $(version)
+
+git.tag.push:
+	git push origin --tags
