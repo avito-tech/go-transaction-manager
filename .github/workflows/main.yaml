@@ -120,7 +120,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # https://github.com/golangci/golangci-lint/issues/828
-  generate-matrix:
+  generate-pkgs-matrix:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -132,12 +132,12 @@ jobs:
           DIRECTORIES=$(find .  -not -path "*/vendor/*" -type f -name go.mod -exec sh -c 'echo $(dirname {})' \; | jq -R -s -c 'split("\n")[:-1]')
           echo "matrix=${DIRECTORIES}" >> $GITHUB_OUTPUT
 
-  golangci-lint:
-    needs: generate-matrix
+  lint:
+    needs: generate-pkgs-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        modules: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
+        modules: ${{fromJson(needs.generate-pkgs-matrix.outputs.matrix)}}
     steps:
       - name: Fetch Repository
         uses: actions/checkout@v4
