@@ -20,7 +20,7 @@ Easiest way to get the perfect repository.
   Go 1.18)
 * [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/mongo/v2) (
   Go 1.13)
-* [go-redis/redis](https://github.com/go-redis/redis), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2) (
+* [go-redis/redis](https://github.com/go-redis/redis), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/goredis8/v2) (
   Go 1.17)
 * [pgx_v4](https://github.com/jackc/pgx/tree/v4), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/pgxv4/v2) (
   Go 1.16)
@@ -60,7 +60,7 @@ use [ChainedMW](manager/chain.go) ([docs](https://pkg.go.dev/github.com/github.c
 * [jmoiron/sqlx](drivers/sqlx/example_test.go)
 * [gorm](drivers/gorm/example_test.go)
 * [mongo-go-driver](drivers/mongo/example_test.go)
-* [go-redis/redis](drivers/go-redis-v8/example_test.go)
+* [go-redis/redis](drivers/goredis8/example_test.go)
 * [pgx_v4](drivers/pgxv4/example_test.go)
 * [pgx_v5](drivers/pgxv5/example_test.go)
 

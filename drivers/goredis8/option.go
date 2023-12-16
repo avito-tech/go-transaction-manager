@@ -1,4 +1,4 @@
-package go_redis_v8
+package goredis8
 
 import "github.com/go-redis/redis/v8"
 

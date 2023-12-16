@@ -1,14 +1,14 @@
 //go:build go1.14
 // +build go1.14
 
-package go_redis_v8
+package goredis8
 
 import (
 	"context"
 	"testing"
 
 	"github.com/go-redis/redis/v8"
-	redismock "github.com/go-redis/redismock/v8"
+	"github.com/go-redis/redismock/v8"
 	"github.com/stretchr/testify/require"
 )
 

@@ -1,7 +1,7 @@
 //go:build with_real_db
 // +build with_real_db
 
-package go_redis_v8_test
+package goredis8_test
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/v2/settings"
 
-	trmredis "github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2"
+	trmredis "github.com/avito-tech/go-transaction-manager/drivers/goredis8/v2"
 )
 
 // Example demonstrates the watching of updated keys.
