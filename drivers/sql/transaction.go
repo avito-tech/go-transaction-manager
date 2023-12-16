@@ -8,7 +8,7 @@ import (
 
 	"go.uber.org/multierr"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // Transaction is trm.Transaction for sql.Tx.

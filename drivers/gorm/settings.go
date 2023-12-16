@@ -1,12 +1,9 @@
-//go:build go1.18
-// +build go1.18
-
 package gorm
 
 import (
 	"database/sql"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // Opt is a type to configure Settings.

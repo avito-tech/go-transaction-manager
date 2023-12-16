@@ -18,14 +18,19 @@ test.coverage.with_real_db:
 	$(GO_TEST_COVERAGE) $(GO_TEST_WITH_REAL_DB)
 
 fmt:
-	go fmt ./...
+	cd sh && sh ./go.fmt.sh
 
 lint:
-	golangci-lint run -v --timeout=2m
+	cd sh && sh ./lint.sh
+
+lint.verbose:
+	cd sh && sh ./lint.sh -v
+
+lint.cache.clean:
+	golangci-lint cache clean
 
 generate:
 	go generate ./...
-
 
 go.mod.tidy:
 	cd sh && sh ./go.mod.tidy.sh

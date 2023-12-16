@@ -2,6 +2,6 @@ go 1.21
 
 use .
 
-replace github.com/avito-tech/go-transaction-manager/v2 => ../../
+replace github.com/avito-tech/go-transaction-manager/trm/v2 => ../../trm
 
-replace github.com/avito-tech/go-transaction-manager/v2/drivers/sql/v2 => ../sql
+replace github.com/avito-tech/go-transaction-manager/drivers/sql/v2 => ../sql

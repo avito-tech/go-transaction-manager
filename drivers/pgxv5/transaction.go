@@ -1,6 +1,3 @@
-//go:build go1.19
-// +build go1.19
-
 package pgxv5
 
 import (
@@ -9,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // Transaction is trm.Transaction for pgx.Tx.

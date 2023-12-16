@@ -12,10 +12,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
-	trmmongo "github.com/avito-tech/go-transaction-manager/v2/drivers/mongo/v2"
-	trmsql "github.com/avito-tech/go-transaction-manager/v2/drivers/sql/v2"
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+
+	trmmongo "github.com/avito-tech/go-transaction-manager/drivers/mongo/v2"
+	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.

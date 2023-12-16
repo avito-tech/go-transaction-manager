@@ -1,5 +1,5 @@
-//go:build go1.19 && with_real_db
-// +build go1.19,with_real_db
+//go:build with_real_db
+// +build with_real_db
 
 package pgxv5_test
 
@@ -9,9 +9,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	trmpgx "github.com/avito-tech/go-transaction-manager/v2/drivers/pgxv5/v2"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.

@@ -3,7 +3,7 @@ package sql
 import (
 	"database/sql"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // Opt is a type to configure Settings.

@@ -1,6 +1,3 @@
-//go:build go1.19
-// +build go1.19
-
 package pgxv5
 
 import (
@@ -11,18 +8,19 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pashagolub/pgxmock/v2"
+	pgxmock "github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
-	"github.com/avito-tech/go-transaction-manager/v2/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
 
-	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 
-	"github.com/avito-tech/go-transaction-manager/v2/settings"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
 func TestTransaction(t *testing.T) {

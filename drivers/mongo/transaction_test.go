@@ -15,14 +15,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
-	"github.com/avito-tech/go-transaction-manager/v2/mock"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 
-	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
-
-	"github.com/avito-tech/go-transaction-manager/v2/settings"
-
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 type user struct {

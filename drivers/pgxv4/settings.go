@@ -1,12 +1,9 @@
-//go:build go1.16
-// +build go1.16
-
 package pgxv4
 
 import (
 	"github.com/jackc/pgx/v4"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // Opt is a type to configure Settings.

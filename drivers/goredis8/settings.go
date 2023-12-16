@@ -3,7 +3,7 @@ package goredis8
 import (
 	"github.com/go-redis/redis/v8"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 const (

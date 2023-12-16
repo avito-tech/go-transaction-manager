@@ -1,6 +1,3 @@
-//go:build go1.16
-// +build go1.16
-
 package gorm
 
 import (
@@ -8,7 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // NewDefaultFactory creates default trm.Transaction(sqlx.Tx).

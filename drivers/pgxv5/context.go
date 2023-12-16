@@ -1,13 +1,10 @@
-//go:build go1.19
-// +build go1.19
-
 package pgxv5
 
 import (
 	"context"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
-	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 )
 
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.

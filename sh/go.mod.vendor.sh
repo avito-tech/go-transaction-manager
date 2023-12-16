@@ -7,12 +7,14 @@ cd ../
 
 ROOT=$(pwd)
 
-go mod vendor &
+echo "\ntrm"
+cd trm && go mod vendor
+cd $ROOT
 
 for driver in $drivers; do
   if [ -d "$driver" ]; then
     echo "\n$driver"
-    cd $driver && go mod vendor &
+    cd $driver && go mod vendor
 
     cd $ROOT
   fi

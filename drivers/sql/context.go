@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
-	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 )
 
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
