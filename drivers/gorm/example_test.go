@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 
 	trmgorm "github.com/avito-tech/go-transaction-manager/drivers/gorm/v2"
+
 	trm "github.com/avito-tech/go-transaction-manager/v2"
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/v2/settings"

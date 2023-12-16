@@ -1,4 +1,6 @@
 github.com/DATA-DOG/go-sqlmock v1.5.1/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
+github.com/avito-tech/go-transaction-manager/v2 v2.0.0-rc1 h1:T40OayD/EdYn1uSUg0+8whVYhzgkTDN9dVPuwGQd4jM=
+github.com/avito-tech/go-transaction-manager/v2 v2.0.0-rc1/go.mod h1:zl4uvbnlVO7ZCaD2Nz3tn776TmkwUykDYGVqpkmO4zo=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
