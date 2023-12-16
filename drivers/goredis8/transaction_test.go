@@ -1,6 +1,3 @@
-//go:build go1.14
-// +build go1.14
-
 package goredis8
 
 import (
@@ -10,19 +7,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-redis/redismock/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/go-redis/redismock/v8"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
-	"github.com/avito-tech/go-transaction-manager/v2/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 
-	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 
-	"github.com/avito-tech/go-transaction-manager/v2/settings"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 const OK = "OK"

@@ -7,11 +7,11 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	trmsql "github.com/avito-tech/go-transaction-manager/v2/drivers/sql/v2"
+	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
 
-	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.

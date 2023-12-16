@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // NewDefaultFactory creates default trm.Transaction(sql.Tx).

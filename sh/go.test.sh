@@ -20,7 +20,8 @@ gotest() {
   cd $ROOT
 }
 
-go test $(golist) $@ &
+cd trm && go test $(golist) $@ &
+cd $ROOT
 
 for driver in $drivers; do
   if [ -d "$driver" ]; then

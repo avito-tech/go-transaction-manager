@@ -1,4 +1,4 @@
-// Package go_redis_v8 is an implementation of trm.Transaction interface by Transaction for redis.UniversalClient.
+// Package goredis8 is an implementation of trm.Transaction interface by Transaction for redis.UniversalClient.
 package goredis8
 
 import (

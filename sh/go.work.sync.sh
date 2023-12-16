@@ -7,13 +7,15 @@ cd ../
 
 ROOT=$(pwd)
 
+echo "\ntrm"
+cd trm && go work sync
+cd $ROOT
+
 for driver in $drivers; do
   if [ -d "$driver" ]; then
     echo "\n$driver"
-    cd $driver && go work sync &
+    cd $driver && go work sync
 
     cd $ROOT
   fi
 done
-
-wait

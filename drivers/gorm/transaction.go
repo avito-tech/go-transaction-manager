@@ -1,6 +1,3 @@
-//go:build go1.16
-// +build go1.16
-
 // Package gorm is an implementation of trm.Transaction interface by Transaction for *gorm.DB.
 package gorm
 
@@ -13,7 +10,7 @@ import (
 
 	"gorm.io/gorm"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 var errRollbackTx = errors.New("rollback transaction")

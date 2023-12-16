@@ -10,11 +10,11 @@ import (
 
 	"github.com/go-redis/redis/v8"
 
-	trmredis "github.com/avito-tech/go-transaction-manager/v2/drivers/goredis8/v2"
+	trmredis "github.com/avito-tech/go-transaction-manager/drivers/goredis8/v2"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
-	"github.com/avito-tech/go-transaction-manager/v2/settings"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 // Example demonstrates the watching of updated keys.

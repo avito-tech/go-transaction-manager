@@ -119,6 +119,7 @@ jobs:
           file: ./coverage.out
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+  # https://github.com/golangci/golangci-lint/issues/828
   golangci:
     name: lint
     runs-on: ubuntu-latest

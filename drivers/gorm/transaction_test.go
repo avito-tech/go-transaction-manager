@@ -1,6 +1,3 @@
-//go:build go1.16
-// +build go1.16
-
 package gorm
 
 import (
@@ -17,13 +14,15 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/avito-tech/go-transaction-manager/v2/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
-	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
-	"github.com/avito-tech/go-transaction-manager/v2/settings"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
 func TestTransaction(t *testing.T) {

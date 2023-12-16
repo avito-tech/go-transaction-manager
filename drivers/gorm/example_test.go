@@ -1,6 +1,3 @@
-//go:build go1.16
-// +build go1.16
-
 package gorm_test
 
 import (
@@ -11,11 +8,11 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	trmgorm "github.com/avito-tech/go-transaction-manager/v2/drivers/gorm/v2"
+	trmgorm "github.com/avito-tech/go-transaction-manager/drivers/gorm/v2"
 
-	trm "github.com/avito-tech/go-transaction-manager/v2"
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
-	"github.com/avito-tech/go-transaction-manager/v2/settings"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.

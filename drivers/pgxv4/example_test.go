@@ -9,9 +9,9 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 
-	trmpgx "github.com/avito-tech/go-transaction-manager/v2/drivers/pgxv4/v2"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv4/v2"
 
-	"github.com/avito-tech/go-transaction-manager/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.

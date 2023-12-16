@@ -1,6 +1,3 @@
-//go:build go1.19
-// +build go1.19
-
 // Package pgxv5 is an implementation of trm.Transaction interface by Transaction for pgx.Tx.
 package pgxv5
 
