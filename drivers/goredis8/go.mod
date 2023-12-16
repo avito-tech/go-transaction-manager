@@ -1,4 +1,4 @@
-module github.com/avito-tech/go-transaction-manager/drivers/go-redis-v8/v2
+module github.com/avito-tech/go-transaction-manager/drivers/goredis8/v2
 
 go 1.13
 

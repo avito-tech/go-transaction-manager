@@ -1,7 +1,7 @@
 //go:build go1.14
 // +build go1.14
 
-package go_redis_v8
+package goredis8
 
 import (
 	"context"
@@ -13,9 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/go-redis/redismock/v8"
+
 	trm "github.com/avito-tech/go-transaction-manager/v2"
 	"github.com/avito-tech/go-transaction-manager/v2/mock"
-	"github.com/go-redis/redismock/v8"
 
 	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
 

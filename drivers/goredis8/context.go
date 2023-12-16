@@ -1,4 +1,4 @@
-package go_redis_v8
+package goredis8
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
 var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
 
-// CtxGetter gets go-redis-v8.Pipeliner from trm.СtxManager by casting trm.Transaction to redis.UniversalClient.
+// CtxGetter gets goredis8.Pipeliner from trm.СtxManager by casting trm.Transaction to redis.UniversalClient.
 type CtxGetter struct {
 	ctxManager trm.СtxManager
 }
@@ -22,7 +22,7 @@ func NewCtxGetter(c trm.СtxManager) *CtxGetter {
 	return &CtxGetter{ctxManager: c}
 }
 
-// DefaultTrOrDB returns Cmdable from context.Context or DB(go-redis-v8.Cmdable) otherwise.
+// DefaultTrOrDB returns Cmdable from context.Context or DB(goredis8.Cmdable) otherwise.
 func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db redis.Cmdable) redis.Cmdable {
 	if tr := c.ctxManager.Default(ctx); tr != nil {
 		return c.convert(tr)
@@ -31,7 +31,7 @@ func (c *CtxGetter) DefaultTrOrDB(ctx context.Context, db redis.Cmdable) redis.C
 	return db
 }
 
-// TrOrDB returns Cmdable from context.Context by trm.CtxKey or DB(go-redis-v8.Cmdable) otherwise.
+// TrOrDB returns Cmdable from context.Context by trm.CtxKey or DB(goredis8.Cmdable) otherwise.
 func (c *CtxGetter) TrOrDB(ctx context.Context, key trm.CtxKey, db redis.Cmdable) redis.Cmdable {
 	if tr := c.ctxManager.ByKey(ctx, key); tr != nil {
 		return c.convert(tr)
