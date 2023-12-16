@@ -12,21 +12,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	trmmongo "github.com/avito-tech/go-transaction-manager/drivers/mongo/v2"
-	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
+	trmmongo "github.com/avito-tech/go-transaction-manager/v2/drivers/mongo/v2"
+	trmsql "github.com/avito-tech/go-transaction-manager/v2/drivers/sql/v2"
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.
 func Example() {
-	client, err := mongo.NewClient(options.Client().
-		ApplyURI("mongodb://127.0.0.1:27017"))
-	checkErr(err)
-
 	ctx := context.Background()
 
-	checkErr(client.Connect(ctx))
+	client, err := mongo.Connect(ctx, options.Client().
+		ApplyURI("mongodb://127.0.0.1:27017"))
+	checkErr(err)
 
 	collection := client.Database("test").Collection("users")
 

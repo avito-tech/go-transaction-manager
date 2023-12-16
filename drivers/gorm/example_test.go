@@ -11,7 +11,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	trmgorm "github.com/avito-tech/go-transaction-manager/drivers/gorm/v2"
+	trmgorm "github.com/avito-tech/go-transaction-manager/v2/drivers/gorm/v2"
 
 	trm "github.com/avito-tech/go-transaction-manager/v2"
 	"github.com/avito-tech/go-transaction-manager/v2/manager"

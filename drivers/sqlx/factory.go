@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
+	trmsql "github.com/avito-tech/go-transaction-manager/v2/drivers/sql/v2"
 
 	trm "github.com/avito-tech/go-transaction-manager/v2"
 )

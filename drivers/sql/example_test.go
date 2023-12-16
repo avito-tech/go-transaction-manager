@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
+	trmsql "github.com/avito-tech/go-transaction-manager/v2/drivers/sql/v2"
 
 	trmcontext "github.com/avito-tech/go-transaction-manager/v2/context"
 
