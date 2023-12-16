@@ -42,6 +42,11 @@ go.work.sync:
 	cd sh && sh ./go.work.sync.sh
 
 
+tag: git.tag tag.pkg
+
+tag.pkg:
+	cd sh && sh ./tag.pkg.sh $(version)
+
 git.tag: git.tag.create git.tag.push
 
 # 1.0, "v2." added automatically
