@@ -12,19 +12,19 @@ Easiest way to get the perfect repository.
 
 ## Supported implementations
 
-* [database/sql](https://pkg.go.dev/database/sql), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/sql/v2) (
+* [database/sql](https://pkg.go.dev/database/sql), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/v2/drivers/sql/v2) (
   Go 1.13)
-* [jmoiron/sqlx](https://github.com/jmoiron/sqlx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2) (
+* [jmoiron/sqlx](https://github.com/jmoiron/sqlx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/v2/drivers/sqlx/v2) (
   Go 1.13)
-* [gorm](https://github.com/go-gorm/gorm), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/gorm/v2) (
+* [gorm](https://github.com/go-gorm/gorm), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/v2/drivers/gorm/v2) (
   Go 1.18)
-* [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/mongo/v2) (
+* [mongo-go-driver](https://github.com/mongodb/mongo-go-driver), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/v2/drivers/mongo/v2) (
   Go 1.13)
-* [go-redis/redis](https://github.com/go-redis/redis), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/goredis8/v2) (
+* [go-redis/redis](https://github.com/go-redis/redis), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/v2/drivers/goredis8/v2) (
   Go 1.17)
-* [pgx_v4](https://github.com/jackc/pgx/tree/v4), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/pgxv4/v2) (
+* [pgx_v4](https://github.com/jackc/pgx/tree/v4), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/v2/drivers/pgxv4/v2) (
   Go 1.16)
-* [pgx_v5](https://github.com/jackc/pgx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2) (
+* [pgx_v5](https://github.com/jackc/pgx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/v2/drivers/pgxv5/v2) (
   Go 1.19)
 
 ## Installation
@@ -35,7 +35,7 @@ go get github.com/avito-tech/go-transaction-manager/v2
 
 To install some support database use `go get github.com/avito-tech/go-transaction-manager/v2/drivers/{name}`.
 
-For example `go get github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2`.
+For example `go get github.com/avito-tech/go-transaction-manager/v2/drivers/sqlx/v2`.
 
 ### Backwards Compatibility
 
@@ -76,7 +76,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 
-	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
+	trmsqlx "github.com/avito-tech/go-transaction-manager/v2/drivers/sqlx/v2"
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 )
 

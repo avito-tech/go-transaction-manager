@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
+	trmpgx "github.com/avito-tech/go-transaction-manager/v2/drivers/pgxv5/v2"
 
 	"github.com/avito-tech/go-transaction-manager/v2/manager"
 )
