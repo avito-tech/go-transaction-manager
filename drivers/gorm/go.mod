@@ -3,7 +3,7 @@ module github.com/avito-tech/go-transaction-manager/drivers/gorm/v2
 go 1.18
 
 require (
-	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc5
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc6
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/stretchr/testify v1.8.2
 	gorm.io/driver/mysql v1.5.2
