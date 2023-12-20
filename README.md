@@ -163,7 +163,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 
 ## Contribution
 
-1. To local development sync dependencies by `make go.work.sync`.
+1. To local development sync dependencies use `make go.work.sync`.
 2. After finalizing of changes bump up version in all drivers.
 
 * To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.

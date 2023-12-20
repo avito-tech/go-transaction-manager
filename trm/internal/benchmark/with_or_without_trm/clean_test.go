@@ -17,7 +17,7 @@ func BenchmarkClean_MockDB(b *testing.B) {
 }
 
 func BenchmarkClean_SQLite_File(b *testing.B) {
-	db := sqlite3(b, "file:test_clean.drivers")
+	db := sqlite3(b, "file:test_clean.db")
 	defer db.Close()
 
 	runClean(b, db)

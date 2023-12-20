@@ -1,0 +1,12 @@
+go 1.21
+
+use (
+	./drivers/goredis8
+	./drivers/gorm
+	./drivers/mongo
+	./drivers/pgxv4
+	./drivers/pgxv5
+	./drivers/sql
+	./drivers/sqlx
+	./trm
+)
