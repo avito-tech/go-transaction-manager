@@ -52,7 +52,7 @@ use [ChainedMW](trm/manager/chain.go) ([docs](https://pkg.go.dev/github.com/gith
 
 **To skip a transaction rollback due to an error, use [ErrSkip](manager.go#L20) or [Skippable](manager.go#L24)**
 
-### Explanation of the approach ([English](https://www.youtube.com/watch?v=aRsea6FFAyA), [Russian](https://habr.com/ru/companies/avito/articles/727168/))
+### Explanation of the approach ([English](https://www.youtube.com/watch?v=aRsea6FFAyA), Russian [article](https://habr.com/ru/companies/avito/articles/727168/), [Youtube](https://www.youtube.com/watch?v=fcdckM5sUxA))
 
 ### Examples with an ideal *repository* and nested transactions.
 
