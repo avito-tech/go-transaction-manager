@@ -45,13 +45,13 @@ Compatibility beyond that is not guaranteed.
 ## Usage
 
 **To use multiple transactions from different databases**, you need to set CtxKey in [Settings](trm/settings.go)
-by [WithCtxKey](trm/settings/option.go).
+by [WithCtxKey](trm/settings/option.go) ([docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/trm/v2)).
 
-**For nested transactions with different transaction managers**, you need to use [ChainedMW](trm/manager/chain.go) ([docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/trm/manager)).
+**For nested transactions with different transaction managers**, you need to use [ChainedMW](trm/manager/chain.go) ([docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/trm/v2/manager)).
 
 **To skip a transaction rollback due to an error, use [ErrSkip](manager.go#L20) or [Skippable](manager.go#L24)**
 
-### Explanation of the approach ([English](https://www.youtube.com/watch?v=aRsea6FFAyA), Russian [article](https://habr.com/ru/companies/avito/articles/727168/), [Youtube](https://www.youtube.com/watch?v=fcdckM5sUxA))
+### Explanation of the approach [English](https://www.youtube.com/watch?v=aRsea6FFAyA), Russian [article](https://habr.com/ru/companies/avito/articles/727168/) and [youtube](https://www.youtube.com/watch?v=fcdckM5sUxA).
 
 ### Examples with an ideal *repository* and nested transactions.
 
