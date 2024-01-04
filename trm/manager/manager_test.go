@@ -11,12 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	trmmock "github.com/avito-tech/go-transaction-manager/internal/mock"
-	"github.com/avito-tech/go-transaction-manager/trm"
-	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
-	mock_log "github.com/avito-tech/go-transaction-manager/trm/manager/mock"
-	"github.com/avito-tech/go-transaction-manager/trm/mock"
-	"github.com/avito-tech/go-transaction-manager/trm/settings"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	mock_log "github.com/avito-tech/go-transaction-manager/trm/v2/manager/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 func Test_transactionManager_Do(t *testing.T) {
@@ -573,7 +573,7 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	testPanic := "panic"
 	testRollbackErr := errors.New("rollback error")
 
-	log := trmmock.NewLog()
+	log := mock.NewLog()
 	factory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 		tx := mock.NewMockTransaction(ctrl)
 
@@ -776,7 +776,7 @@ func TestManager_WithOpts(t *testing.T) {
 	t.Run("set", func(t *testing.T) {
 		t.Parallel()
 
-		l := trmmock.NewZeroLog()
+		l := mock.NewZeroLog()
 		m := Must(nil, WithLog(l), WithSettings(s{}))
 
 		assert.Equal(t, l, m.log)

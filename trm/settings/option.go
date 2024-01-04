@@ -3,7 +3,7 @@ package settings
 import (
 	"time"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // WithCtxKey sets up trm.CtxKey for the trm.Settings.

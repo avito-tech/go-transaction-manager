@@ -4,7 +4,7 @@ package settings
 import (
 	"time"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // DefaultCtxKey is a default key to store Transaction.

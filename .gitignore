@@ -28,3 +28,4 @@ vendor/
 
 # Code coverage
 coverage.*
+coverage/

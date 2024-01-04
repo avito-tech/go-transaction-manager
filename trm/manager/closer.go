@@ -7,7 +7,7 @@ import (
 
 	"go.uber.org/multierr"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // Closer closes trm.Transaction.

@@ -6,9 +6,10 @@ import (
 
 	"go.uber.org/multierr"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
-	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
-	"github.com/avito-tech/go-transaction-manager/trm/settings"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 )
 
 // Opt is a type to configure Manager.

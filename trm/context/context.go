@@ -4,8 +4,9 @@ package context
 import (
 	"context"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
-	"github.com/avito-tech/go-transaction-manager/trm/settings"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // DefaultManager is a trm.СtxManager with settings.DefaultCtxKey.

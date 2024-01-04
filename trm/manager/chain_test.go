@@ -8,9 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
-	"github.com/avito-tech/go-transaction-manager/trm/mock"
-	"github.com/avito-tech/go-transaction-manager/trm/settings"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 func TestChainedMW_Do(t *testing.T) {

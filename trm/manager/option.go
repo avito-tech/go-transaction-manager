@@ -1,6 +1,6 @@
 package manager
 
-import "github.com/avito-tech/go-transaction-manager/trm"
+import "github.com/avito-tech/go-transaction-manager/trm/v2"
 
 // WithLog sets logger for Manager.
 func WithLog(l logger) Opt {

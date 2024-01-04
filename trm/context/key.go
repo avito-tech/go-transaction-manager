@@ -3,7 +3,7 @@ package context
 import (
 	"sync/atomic"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 //nolint:gochecknoglobals

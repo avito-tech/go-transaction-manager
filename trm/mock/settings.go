@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	trm "github.com/avito-tech/go-transaction-manager/trm"
+	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
 	gomock "github.com/golang/mock/gomock"
 )
 

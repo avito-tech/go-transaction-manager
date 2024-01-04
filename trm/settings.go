@@ -2,7 +2,9 @@ package trm
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
 
-import "time"
+import (
+	"time"
+)
 
 // Settings is the configuration of the Manager.
 // Preferable to implement as an immutable struct.

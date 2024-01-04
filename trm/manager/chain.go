@@ -3,7 +3,7 @@ package manager
 import (
 	"context"
 
-	"github.com/avito-tech/go-transaction-manager/trm"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // ChainedMW starts transactions in the order given and commit/rollback in reverse order.

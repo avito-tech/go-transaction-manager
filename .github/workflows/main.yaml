@@ -112,30 +112,40 @@ jobs:
       - name: Tests with real databases
         run: make test.coverage.with_real_db
 
-      - name: Code coverage data
-        run: |
-          set -x
-          COVERAGE_TOTAL=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
-          echo "COVERAGE_TOTAL=$COVERAGE_TOTAL" >> $GITHUB_ENV
-      - uses: jandelgado/gcov2lcov-action@v1.0.9
-        with:
-          outfile: ./coverage.lcov
-
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
-          path-to-lcov: ./coverage.lcov
+          format: golang
+          file: ./coverage.out
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  golangci:
-    name: lint
+  # https://github.com/golangci/golangci-lint/issues/828
+  generate-pkgs-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/setup-go@v3
+      - name: Fetch Repository
+        uses: actions/checkout@v4
+      - id: set-matrix
+        run: |
+          DIRECTORIES=$(find .  -not -path "*/vendor/*" -type f -name go.mod -exec sh -c 'echo $(dirname {})' \; | jq -R -s -c 'split("\n")[:-1]')
+          echo "matrix=${DIRECTORIES}" >> $GITHUB_OUTPUT
+
+  lint:
+    needs: generate-pkgs-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        modules: ${{fromJson(needs.generate-pkgs-matrix.outputs.matrix)}}
+    steps:
+      - name: Fetch Repository
+        uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_TARGET_VERSION }}
-      - uses: actions/checkout@v3
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           args: --timeout=3m -v
+          working-directory: ${{ matrix.modules }}
