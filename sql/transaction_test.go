@@ -10,13 +10,19 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/goleak"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
+	"github.com/avito-tech/go-transaction-manager/internal/test"
 	"github.com/avito-tech/go-transaction-manager/trm"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
+
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
+}
 
 func TestTransaction(t *testing.T) {
 	t.Parallel()
@@ -24,6 +30,9 @@ func TestTransaction(t *testing.T) {
 	type args struct {
 		ctx context.Context
 	}
+
+	//nolint:govet
+	ctx, _ := context.WithCancel(context.Background())
 
 	testErr := errors.New("error test")
 	testCommitErr := errors.New("error Commit test")
@@ -50,7 +59,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectCommit()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret:     nil,
 			wantErr: assert.NoError,
@@ -60,7 +69,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectBegin().WillReturnError(testErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
@@ -76,7 +85,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectCommit().WillReturnError(testCommitErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
@@ -95,7 +104,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectRollback().WillReturnError(testRollbackErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -112,7 +121,7 @@ func TestTransaction(t *testing.T) {
 					WillReturnError(testErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
@@ -132,7 +141,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectRollback()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
@@ -151,7 +160,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectRollback()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -167,7 +176,8 @@ func TestTransaction(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			db, dbmock, _ := sqlmock.New()
+			db, dbmock := test.NewDBMock(t)
+
 			log := mock.NewLog()
 
 			tt.prepare(t, dbmock)
@@ -214,7 +224,7 @@ func TestTransaction_awaitDone(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	db, dbmock, _ := sqlmock.New()
+	db, dbmock := test.NewDBMock(t)
 	dbmock.ExpectBegin()
 
 	f := NewDefaultFactory(db)

@@ -18,6 +18,7 @@ require (
 	github.com/pashagolub/pgxmock/v2 v2.12.0
 	github.com/stretchr/testify v1.8.2
 	go.mongodb.org/mongo-driver v1.12.2
+	go.uber.org/goleak v1.3.0 // indirect
 	go.uber.org/multierr v1.9.0
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/driver/sqlite v1.5.1

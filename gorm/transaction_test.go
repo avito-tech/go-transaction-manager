@@ -13,6 +13,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/goleak"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -23,6 +24,10 @@ import (
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
+
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
+}
 
 func TestTransaction(t *testing.T) {
 	t.Parallel()
