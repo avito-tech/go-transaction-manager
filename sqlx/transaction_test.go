@@ -178,7 +178,7 @@ func TestTransaction(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			db, dbmock := test.NewDBMock(t)
+			db, dbmock := test.NewDBMockWithClose(t)
 			log := mock.NewLog()
 
 			tt.prepare(t, dbmock)
@@ -192,8 +192,10 @@ func TestTransaction(t *testing.T) {
 				manager.WithSettings(s),
 			)
 
-			var tr Transaction
+			var tr trm.Transaction
 			err := m.Do(tt.args.ctx, func(ctx context.Context) error {
+				tr = trmcontext.DefaultManager.Default(ctx)
+
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -209,7 +211,10 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
-			require.False(t, tr.IsActive())
+
+			if tr != nil {
+				require.False(t, tr.IsActive())
+			}
 
 			if !tt.wantErr(t, err) {
 				return
@@ -222,26 +227,61 @@ func TestTransaction(t *testing.T) {
 func TestTransaction_awaitDone(t *testing.T) {
 	t.Parallel()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
-	db, dbmock := test.NewDBMock(t)
+	db, dbmock := test.NewDBMock()
 	dbmock.ExpectBegin()
+	dbmock.ExpectClose()
+	t.Cleanup(func() {
+		_ = db.Close()
+	})
 
 	f := NewDefaultFactory(sqlx.NewDb(db, "sqlmock"))
 	ctx, cancel := context.WithCancel(context.Background())
 
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
 
 		cancel()
-		<-time.After(time.Second)
+		<-time.After(time.Millisecond)
 
 		<-ctx.Done()
 
+		require.False(t, tr.IsActive())
+	}()
+
+	wg.Wait()
+}
+
+// TestTransaction_awaitDone_byRollback checks goroutine leak when we close transaction manually.
+func TestTransaction_awaitDone_byRollback(t *testing.T) {
+	t.Parallel()
+
+	db, dbmock := test.NewDBMockWithClose(t)
+	dbmock.ExpectBegin()
+	dbmock.ExpectRollback()
+	dbmock.ExpectClose()
+	t.Cleanup(func() {
+		_ = db.Close()
+	})
+
+	f := NewDefaultFactory(sqlx.NewDb(db, "sqlmock"))
+	ctx := context.Background()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		_, tr, err := f(ctx, settings.Must())
 		require.NoError(t, err)
+
+		<-time.After(time.Millisecond)
+
+		require.NoError(t, tr.Rollback(ctx))
 		require.False(t, tr.IsActive())
 	}()
 
