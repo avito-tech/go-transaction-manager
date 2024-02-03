@@ -25,7 +25,8 @@ import (
 const OK = "OK"
 
 func TestMain(m *testing.M) {
-	goleak.VerifyTestMain(m)
+	// https://github.com/redis/go-redis/issues/1029
+	goleak.VerifyTestMain(m, goleak.IgnoreAnyFunction("github.com/go-redis/redis/v8/internal/pool.(*ConnPool).reaper"))
 }
 
 func TestTransaction(t *testing.T) {
@@ -35,6 +36,7 @@ func TestTransaction(t *testing.T) {
 		ctx context.Context
 	}
 
+	ctx := context.Background()
 	testErr := errors.New("error test")
 	testKey := "key1"
 	testValue := "value"
@@ -56,7 +58,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectTxPipelineExec()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret:     nil,
 			wantErr: assert.NoError,
@@ -64,7 +66,7 @@ func TestTransaction(t *testing.T) {
 		"begin_error": {
 			prepare: func(t *testing.T, m redismock.ClientMock) {},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorContains(t, err, "all expectations were already fulfilled, call to cmd '[watch key1]' was not expected") &&
@@ -81,7 +83,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectTxPipelineExec().RedisNil()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorContains(t, err, "redis: nil") &&
@@ -93,7 +95,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectWatch(testKey)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -120,8 +122,10 @@ func TestTransaction(t *testing.T) {
 				manager.WithSettings(s),
 			)
 
-			var tr Transaction
+			var tr trm.Transaction
 			err := m.Do(tt.args.ctx, func(ctx context.Context) error {
+				tr = trmcontext.DefaultManager.Default(ctx)
+
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -143,7 +147,9 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
-			require.False(t, tr.IsActive())
+			if tr != nil {
+				require.False(t, tr.IsActive())
+			}
 
 			if !tt.wantErr(t, err) {
 				return
@@ -153,7 +159,7 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-func TestTransaction_awaitDone(t *testing.T) {
+func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
 	wg := sync.WaitGroup{}

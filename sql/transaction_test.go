@@ -2,10 +2,10 @@ package sql
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -177,7 +177,6 @@ func TestTransaction(t *testing.T) {
 			t.Parallel()
 
 			db, dbmock := test.NewDBMockWithClose(t)
-
 			log := mock.NewLog()
 
 			tt.prepare(t, dbmock)
@@ -229,7 +228,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	dbmock.ExpectBegin()
 	dbmock.ExpectClose()
 	t.Cleanup(func() {
-		_ = db.Close()
+		require.NoError(t, db.Close())
 	})
 
 	f := NewDefaultFactory(db)
@@ -244,11 +243,15 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		require.NoError(t, err)
 
 		cancel()
-		<-time.After(time.Millisecond)
 
 		<-ctx.Done()
-
+		require.True(t, tr.IsActive())
+		<-tr.Closed()
 		require.False(t, tr.IsActive())
+
+		require.Equal(t, context.Canceled, ctx.Err())
+		err = tr.Commit(ctx)
+		require.ErrorIs(t, err, sql.ErrTxDone)
 	}()
 
 	wg.Wait()
@@ -276,8 +279,6 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 
 		_, tr, err := f(ctx, settings.Must())
 		require.NoError(t, err)
-
-		<-time.After(time.Millisecond)
 
 		require.NoError(t, tr.Rollback(ctx))
 		require.False(t, tr.IsActive())

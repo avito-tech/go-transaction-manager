@@ -50,6 +50,8 @@ type Transaction interface {
 	Rollback(context.Context) error
 	// IsActive returns true if the transaction started but not committed or rolled back.
 	IsActive() bool
+	// Closed returns a channel that's closed when transaction committed or rolled back.
+	Closed() <-chan struct{}
 }
 
 // transactionWithSP is used for tests to generate mock.

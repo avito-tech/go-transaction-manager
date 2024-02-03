@@ -2,10 +2,10 @@ package sqlx
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
@@ -224,14 +224,14 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-func TestTransaction_awaitDone(t *testing.T) {
+func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
 	db, dbmock := test.NewDBMock()
 	dbmock.ExpectBegin()
 	dbmock.ExpectClose()
 	t.Cleanup(func() {
-		_ = db.Close()
+		require.NoError(t, db.Close())
 	})
 
 	f := NewDefaultFactory(sqlx.NewDb(db, "sqlmock"))
@@ -246,11 +246,15 @@ func TestTransaction_awaitDone(t *testing.T) {
 		require.NoError(t, err)
 
 		cancel()
-		<-time.After(time.Millisecond)
 
 		<-ctx.Done()
-
+		require.True(t, tr.IsActive())
+		<-tr.Closed()
 		require.False(t, tr.IsActive())
+
+		require.Equal(t, context.Canceled, ctx.Err())
+		err = tr.Commit(ctx)
+		require.ErrorIs(t, err, sql.ErrTxDone)
 	}()
 
 	wg.Wait()
@@ -278,8 +282,6 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 
 		_, tr, err := f(ctx, settings.Must())
 		require.NoError(t, err)
-
-		<-time.After(time.Millisecond)
 
 		require.NoError(t, tr.Rollback(ctx))
 		require.False(t, tr.IsActive())

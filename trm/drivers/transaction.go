@@ -1,43 +1,67 @@
 package drivers
 
 import (
+	"errors"
 	"sync"
-	"sync/atomic"
 )
 
-type IsActive struct {
-	isActive int64
+// ErrRollbackTr is used to rollback transaction, which runs in closure.
+var ErrRollbackTr = errors.New("rollback")
+
+type IsClose struct {
+	isClosed bool
+	mu       sync.RWMutex
+	once     sync.Once
 	ch       chan struct{}
-	close    func()
+	// txErr stores error from transaction commit or rollback
+	err error
 }
 
-func NewIsActive() *IsActive {
-	once := sync.Once{}
-	closeCh := make(chan struct{})
-
-	return &IsActive{
-		isActive: 1,
-		ch:       closeCh,
-		close: func() {
-			once.Do(func() {
-				close(closeCh)
-			})
-		}}
+func NewIsClosed() *IsClose {
+	return &IsClose{
+		isClosed: false,
+		mu:       sync.RWMutex{},
+		once:     sync.Once{},
+		ch:       make(chan struct{}),
+	}
 }
 
-// IsActive returns true if the transaction started but not committed or rolled back.
-func (a *IsActive) IsActive() bool {
-	return atomic.LoadInt64(&a.isActive) == 1
+func (a *IsClose) IsActive() bool {
+	return !a.IsClosed()
+}
+
+func (a *IsClose) IsClosed() bool {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
+	return a.isClosed
 }
 
 // Deactivated returns a channel that's closed when trm.Transaction done.
 // Deactivated is provided for use in select statements
-func (a *IsActive) Deactivated() <-chan struct{} {
+func (a *IsClose) Closed() <-chan struct{} {
 	return a.ch
 }
 
-func (a *IsActive) Deactivate() {
-	a.close()
+func (a *IsClose) Close() {
+	a.CloseWithCause(nil)
+}
 
-	atomic.SwapInt64(&a.isActive, 0)
+func (a *IsClose) CloseWithCause(err error) {
+	a.once.Do(func() {
+		a.mu.Lock()
+		defer a.mu.Unlock()
+
+		a.isClosed = true
+		a.err = err
+
+		close(a.ch)
+	})
+}
+
+func (a *IsClose) Err() error {
+	a.mu.RLock()
+	defer a.mu.RLock()
+
+	return a.err
 }

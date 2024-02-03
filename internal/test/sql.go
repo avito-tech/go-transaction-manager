@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/require"
 )
 
 func NewDBMock() (*sql.DB, sqlmock.Sqlmock) {
@@ -20,7 +21,7 @@ func NewDBMockWithClose(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
 	t.Cleanup(func() {
 		dbmock.ExpectClose()
 
-		_ = db.Close()
+		require.NoError(t, db.Close())
 	})
 
 	return db, dbmock

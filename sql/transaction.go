@@ -18,7 +18,7 @@ type Transaction struct {
 	tx        *sql.Tx
 	savePoint SavePoint
 	saves     int64
-	active    *drivers.IsActive
+	active    *drivers.IsClose
 }
 
 // NewTransaction creates trm.Transaction for sql.Tx.
@@ -37,7 +37,7 @@ func NewTransaction(
 		tx:        tx,
 		savePoint: sp,
 		saves:     0,
-		active:    drivers.NewIsActive(),
+		active:    drivers.NewIsClosed(),
 	}
 
 	go tr.awaitDone(ctx)
@@ -52,10 +52,9 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 
 	select {
 	case <-ctx.Done():
-		t.active.Deactivate()
-	case <-t.active.Deactivated():
+		t.active.Close()
+	case <-t.active.Closed():
 	}
-
 }
 
 // Transaction returns the real transaction sqlx.Tx.
@@ -87,7 +86,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 		return nil
 	}
 
-	defer t.active.Deactivate()
+	defer t.active.Close()
 
 	return t.tx.Commit()
 }
@@ -103,13 +102,17 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 		return nil
 	}
 
-	defer t.active.Deactivate()
+	defer t.active.Close()
 
 	return t.tx.Rollback()
 }
 
 func (t *Transaction) IsActive() bool {
 	return t.active.IsActive()
+}
+
+func (t *Transaction) Closed() <-chan struct{} {
+	return t.active.Closed()
 }
 
 func (t *Transaction) hasSavePoint() bool {

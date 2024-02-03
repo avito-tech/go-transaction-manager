@@ -195,7 +195,7 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-func TestTransaction_awaitDone(t *testing.T) {
+func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
 	mt := mtest.New(

@@ -5,9 +5,10 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"sync/atomic"
 
 	"github.com/go-redis/redis/v8"
+
+	"github.com/avito-tech/go-transaction-manager/trm/drivers"
 )
 
 var errRollbackTx = errors.New("rollback transaction")
@@ -19,8 +20,8 @@ type TxDecorator func(tx Cmdable, db redis.Cmdable) Cmdable
 type Transaction struct {
 	tx Cmdable
 	// err is used to close transaction and get error from it
-	err      chan error
-	isActive int64
+	err    chan error
+	active *drivers.IsClose
 }
 
 // NewTransaction creates trm.Transaction for sqlx.Tx.
@@ -29,7 +30,11 @@ func NewTransaction(
 	db redis.UniversalClient,
 	s Settings,
 ) (context.Context, *Transaction, error) {
-	t := &Transaction{isActive: 1, err: make(chan error), tx: nil}
+	t := &Transaction{
+		err:    make(chan error),
+		tx:     nil,
+		active: drivers.NewIsClosed(),
+	}
 
 	var err error
 
@@ -90,9 +95,11 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 		return
 	}
 
-	<-ctx.Done()
-
-	t.deactivate()
+	select {
+	case <-ctx.Done():
+		t.active.Close()
+	case <-t.active.Closed():
+	}
 }
 
 // Transaction returns the real transaction sqlx.Tx.
@@ -103,8 +110,9 @@ func (t *Transaction) Transaction() interface{} {
 
 // Commit closes the trm.Transaction.
 func (t *Transaction) Commit(_ context.Context) error {
-	defer t.deactivate()
+	defer t.active.Close()
 
+	// TODO deadlock
 	t.err <- nil
 
 	return <-t.err
@@ -112,8 +120,9 @@ func (t *Transaction) Commit(_ context.Context) error {
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(_ context.Context) error {
-	defer t.deactivate()
+	defer t.active.Close()
 
+	// TODO deadlock
 	t.err <- errRollbackTx
 
 	err := <-t.err
@@ -127,9 +136,5 @@ func (t *Transaction) Rollback(_ context.Context) error {
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
-	return atomic.LoadInt64(&t.isActive) == 1
-}
-
-func (t *Transaction) deactivate() {
-	atomic.SwapInt64(&t.isActive, 0)
+	return t.active.IsActive()
 }

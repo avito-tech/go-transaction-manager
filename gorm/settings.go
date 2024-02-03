@@ -40,7 +40,7 @@ func NewSettings(trms trm.Settings, oo ...Opt) (Settings, error) {
 	return *s, nil
 }
 
-// MustSettings returns Settings if err is nil and panics otherwise.
+// MustSettings returns Settings if stopByErr is nil and panics otherwise.
 func MustSettings(trms trm.Settings, oo ...Opt) Settings {
 	s, err := NewSettings(trms, oo...)
 	if err != nil {

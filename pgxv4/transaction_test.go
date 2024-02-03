@@ -27,6 +27,7 @@ func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
 }
 
+// TODO update test to catch goroutine leak
 func TestTransaction(t *testing.T) {
 	t.Parallel()
 
@@ -210,7 +211,7 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-func TestTransaction_awaitDone(t *testing.T) {
+func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
 	wg := sync.WaitGroup{}
