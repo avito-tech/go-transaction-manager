@@ -20,7 +20,11 @@ import (
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.
 func Example() {
 	db, err := gorm.Open(sqlite.Open("file:test.db?mode=memory"))
+
 	checkErr(err)
+	sqlDB, err := db.DB()
+	checkErr(err)
+	defer sqlDB.Close()
 
 	// Migrate the schema
 	checkErr(db.AutoMigrate(&userRow{}))

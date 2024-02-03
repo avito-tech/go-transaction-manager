@@ -1,6 +1,8 @@
 package redis
 
 import (
+	"sync"
+
 	"github.com/go-redis/redis/v8"
 
 	"github.com/avito-tech/go-transaction-manager/trm"
@@ -20,7 +22,9 @@ type Settings struct {
 	isMulti     *bool
 	watchKeys   []string
 	txDecorator []TxDecorator
-	ret         *[]redis.Cmder
+
+	ret   *[]redis.Cmder
+	muRet sync.RWMutex
 }
 
 // NewSettings creates Settings.
@@ -31,6 +35,7 @@ func NewSettings(trms trm.Settings, oo ...Opt) (Settings, error) {
 		watchKeys:   nil,
 		txDecorator: nil,
 		ret:         nil,
+		muRet:       sync.RWMutex{},
 	}
 
 	for _, o := range oo {
@@ -68,8 +73,8 @@ func (s Settings) EnrichBy(in trm.Settings) trm.Settings {
 			s = s.SetTxDecorators(external.TxDecorators()...)
 		}
 
-		if s.Return() == nil {
-			s = s.SetReturn(external.Return())
+		if s.ReturnPtr() == nil {
+			s = s.SetReturn(external.ReturnPtr())
 		}
 	}
 
@@ -135,9 +140,29 @@ func (s Settings) setTxDecorator(in ...TxDecorator) Settings {
 	return s
 }
 
-// Return returns []redis.Cmder from Transaction.
-func (s Settings) Return() *[]redis.Cmder {
+func (s Settings) ReturnPtr() *[]redis.Cmder {
+	s.muRet.RLock()
+	defer s.muRet.RUnlock()
+
 	return s.ret
+}
+
+// Return returns []redis.Cmder from Transaction.
+func (s Settings) Return() []redis.Cmder {
+	res := s.ReturnPtr()
+	if res != nil {
+		return *s.ReturnPtr()
+	}
+
+	return nil
+}
+
+// AppendReturn append []redis.Cmder from Transaction.
+func (s *Settings) AppendReturn(cmds ...redis.Cmder) {
+	s.muRet.Lock()
+	defer s.muRet.Unlock()
+
+	*s.ret = append(*s.ret, cmds...)
 }
 
 // SetReturn sets link to save []redis.Cmder from Transaction.

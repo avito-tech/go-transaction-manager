@@ -270,7 +270,7 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	})
 
 	f := NewDefaultFactory(db)
-	ctx := context.Background()
+	ctx, _ := context.WithCancel(context.Background())
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -282,6 +282,7 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 
 		require.NoError(t, tr.Rollback(ctx))
 		require.False(t, tr.IsActive())
+		require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
 	}()
 
 	wg.Wait()

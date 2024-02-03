@@ -30,7 +30,7 @@ func NewTransaction(
 	opts *sql.TxOptions,
 	db *gorm.DB,
 ) (context.Context, *Transaction, error) {
-	tr := &Transaction{
+	t := &Transaction{
 		tx:            nil,
 		txMutex:       sync.Mutex{},
 		active:        drivers.NewIsClosed(),
@@ -46,28 +46,28 @@ func NewTransaction(
 		db = db.WithContext(ctx)
 		// Used closure to avoid implementing nested transactions.
 		err = db.Transaction(func(tx *gorm.DB) error {
-			tr.tx = tx
+			t.tx = tx
 
 			wg.Done()
 
-			<-tr.activeClosure.Closed()
+			<-t.activeClosure.Closed()
 
-			return tr.activeClosure.Err()
+			return t.activeClosure.Err()
 		}, opts)
 
-		tr.txMutex.Lock()
-		defer tr.txMutex.Unlock()
-		tx := tr.tx
+		t.txMutex.Lock()
+		defer t.txMutex.Unlock()
+		tx := t.tx
 
 		if tx != nil {
 			// Return error from transaction rollback
 			// Error from commit returns from db.Transaction closure
 			if errors.Is(err, drivers.ErrRollbackTr) &&
 				tx.Error != nil {
-				err = tr.tx.Error
+				err = t.tx.Error
 			}
 
-			tr.active.CloseWithCause(err)
+			t.active.CloseWithCause(err)
 		} else {
 			wg.Done()
 		}
@@ -79,9 +79,9 @@ func NewTransaction(
 		return ctx, nil, err
 	}
 
-	go tr.awaitDone(ctx)
+	go t.awaitDone(ctx)
 
-	return ctx, tr, nil
+	return ctx, t, nil
 }
 
 func (t *Transaction) awaitDone(ctx context.Context) {

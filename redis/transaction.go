@@ -18,10 +18,9 @@ type TxDecorator func(tx Cmdable, db redis.Cmdable) Cmdable
 
 // Transaction is trm.Transaction for sqlx.Tx.
 type Transaction struct {
-	tx Cmdable
-	// err is used to close transaction and get error from it
-	err    chan error
-	active *drivers.IsClose
+	tx            txInterface
+	active        *drivers.IsClose
+	activeClosure *drivers.IsClose
 }
 
 // NewTransaction creates trm.Transaction for sqlx.Tx.
@@ -31,9 +30,9 @@ func NewTransaction(
 	s Settings,
 ) (context.Context, *Transaction, error) {
 	t := &Transaction{
-		err:    make(chan error),
-		tx:     nil,
-		active: drivers.NewIsClosed(),
+		tx:            nil,
+		active:        drivers.NewIsClosed(),
+		activeClosure: drivers.NewIsClosed(),
 	}
 
 	var err error
@@ -52,8 +51,8 @@ func NewTransaction(
 
 			cmds, err = fn(ctx, func(pipe redis.Pipeliner) error {
 				t.tx = &tx{
-					tx:      rtx,
-					Cmdable: pipe,
+					tx:        rtx,
+					Pipeliner: pipe,
 				}
 
 				for _, d := range s.TxDecorators() {
@@ -62,18 +61,20 @@ func NewTransaction(
 
 				wg.Done()
 
-				return <-t.err
+				<-t.activeClosure.Closed()
+
+				return t.activeClosure.Err()
 			})
 
-			if len(cmds) > 0 && s.Return() != nil {
-				*s.Return() = append(*s.Return(), cmds...)
+			if len(cmds) > 0 && s.ReturnPtr() != nil {
+				s.AppendReturn(cmds...)
 			}
 
 			return err
 		}, s.WatchKeys()...)
 
 		if t.tx != nil {
-			t.err <- err
+			t.active.CloseWithCause(err)
 		} else {
 			wg.Done()
 		}
@@ -97,7 +98,8 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 
 	select {
 	case <-ctx.Done():
-		t.active.Close()
+		// Rollback will be called by context.Err()
+		t.activeClosure.Close()
 	case <-t.active.Closed():
 	}
 }
@@ -109,32 +111,52 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // Commit closes the trm.Transaction.
-func (t *Transaction) Commit(_ context.Context) error {
-	defer t.active.Close()
+func (t *Transaction) Commit(ctx context.Context) error {
+	select {
+	case <-t.active.Closed():
+		cmds, err := t.tx.Exec(ctx)
 
-	// TODO deadlock
-	t.err <- nil
+		// TODO process cmds
+		_ = cmds
 
-	return <-t.err
+		return err
+	default:
+		t.activeClosure.Close()
+
+		<-t.active.Closed()
+
+		return t.active.Err()
+	}
 }
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(_ context.Context) error {
-	defer t.active.Close()
+	select {
+	case <-t.active.Closed():
+		return t.tx.Discard()
+	default:
+		t.activeClosure.CloseWithCause(drivers.ErrRollbackTr)
 
-	// TODO deadlock
-	t.err <- errRollbackTx
+		<-t.active.Closed()
 
-	err := <-t.err
+		err := t.active.Err()
+		if errors.Is(err, drivers.ErrRollbackTr) {
+			return nil
+		}
 
-	if errors.Is(err, errRollbackTx) {
-		return nil
+		// unreachable code, because of go-redis doesn't process error from Close
+		// https://github.com/redis/go-redis/blob/v8.11.5/tx.go#L69
+		// https://github.com/redis/go-redis/blob/v8.11.5/pipeline.go#L130
+
+		return err
 	}
-
-	return err
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
 	return t.active.IsActive()
+}
+
+func (t *Transaction) Closed() <-chan struct{} {
+	return t.active.Closed()
 }
