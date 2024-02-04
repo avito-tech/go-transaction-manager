@@ -16,8 +16,7 @@ func NewDefaultFactory(db *gorm.DB) trm.TrFactory {
 	return func(ctx context.Context, trms trm.Settings) (context.Context, trm.Transaction, error) {
 		s, _ := trms.(Settings)
 
-		// TODO do update TRM config by settings gorm nested transaction
-		// db.DisableNestedTransaction = true
+		db.Config.DisableNestedTransaction = trms.Propagation() != trm.PropagationNested
 
 		return NewTransaction(ctx, s.TxOpts(), db)
 	}

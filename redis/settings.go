@@ -160,6 +160,10 @@ func (s *Settings) Return() []redis.Cmder {
 
 // AppendReturn append []redis.Cmder from Transaction.
 func (s *Settings) AppendReturn(cmds ...redis.Cmder) {
+	if s.ReturnPtr() == nil {
+		return
+	}
+
 	s.muRet.Lock()
 	defer s.muRet.Unlock()
 

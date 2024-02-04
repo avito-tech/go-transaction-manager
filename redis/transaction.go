@@ -60,7 +60,7 @@ func NewTransaction(
 				return t.isClosedClosure.Err()
 			})
 
-			if len(cmds) > 0 && s.ReturnPtr() != nil {
+			if len(cmds) > 0 {
 				s.AppendReturn(cmds...)
 			}
 
@@ -108,10 +108,7 @@ func (t *Transaction) Transaction() interface{} {
 func (t *Transaction) Commit(ctx context.Context) error {
 	select {
 	case <-t.isClosed.Closed():
-		cmds, err := t.tx.Exec(ctx)
-
-		// TODO process cmds
-		_ = cmds
+		_, err := t.tx.Exec(ctx)
 
 		return err
 	default:
