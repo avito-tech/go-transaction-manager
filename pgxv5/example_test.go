@@ -19,6 +19,7 @@ func Example() {
 
 	pool, err := db(ctx)
 	checkErr(err)
+	defer pool.Close()
 
 	r := newRepo(pool, trmpgx.DefaultCtxGetter)
 	trManager := manager.Must(trmpgx.NewDefaultFactory(pool))

@@ -1,18 +1,18 @@
-//go:build go1.19 && with_real_db
-// +build go1.19,with_real_db
+//go:build go1.16 && with_real_db
+// +build go1.16,with_real_db
 
-package pgxv5_test
+package pgxv4_test
 
 import (
 	"context"
 	"fmt"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/stretchr/testify/require"
 
-	"github.com/avito-tech/go-transaction-manager/pgxv5"
+	"github.com/avito-tech/go-transaction-manager/pgxv4"
 	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
 
@@ -21,12 +21,12 @@ func db(ctx context.Context) (*pgxpool.Pool, error) {
 		"user", "pass", "localhost", 5432, "db",
 	)
 
-	pool, err := pgxpool.New(ctx, uri)
+	pool, err := pgxpool.Connect(ctx, uri)
 	if err != nil {
 		return nil, err
 	}
 
-	sqlStmt := `CREATE TABLE IF NOT EXISTS users_v5 (user_id SERIAL, username TEXT)`
+	sqlStmt := `CREATE TABLE IF NOT EXISTS users_v4 (user_id SERIAL, username TEXT)`
 	_, err = pool.Exec(ctx, sqlStmt)
 
 	return pool, err
@@ -41,7 +41,7 @@ func TestTransaction_WithRealDB(t *testing.T) {
 	require.NoError(t, err)
 	defer pool.Close()
 
-	f := pgxv5.NewDefaultFactory(pool)
+	f := pgxv4.NewDefaultFactory(pool)
 
 	_, tr, err := f(ctx, settings.Must())
 	require.NoError(t, err)
