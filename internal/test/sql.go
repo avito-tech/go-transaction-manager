@@ -24,7 +24,7 @@ func NewDBMockWithClose(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
 	db, dbmock := NewDBMock()
 
 	// need to solve goroutine leak detection https://kumakichi.github.io/goroutine-leak.html
-	t.Cleanup(func() {
+	Cleanup(t, func() {
 		dbmock.ExpectClose()
 
 		require.NoError(t, db.Close())

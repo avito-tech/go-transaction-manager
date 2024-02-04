@@ -3,5 +3,10 @@
 
 package test
 
+import (
+	"testing"
+)
+
+// Cleanup skipped for go1.13 and lower.
 func Cleanup(t *testing.T, fn func()) {
 }
