@@ -223,7 +223,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	db, dbmock := test.NewDBMock()
 	dbmock.ExpectBegin()
 	dbmock.ExpectClose()
-	t.Cleanup(func() {
+	test.Cleanup(t, func() {
 		require.NoError(t, db.Close())
 	})
 
@@ -265,7 +265,7 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	dbmock.ExpectBegin()
 	dbmock.ExpectRollback()
 	dbmock.ExpectClose()
-	t.Cleanup(func() {
+	test.Cleanup(t, func() {
 		_ = db.Close()
 	})
 

@@ -13,7 +13,6 @@ import (
 	"github.com/pashagolub/pgxmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
 	"github.com/avito-tech/go-transaction-manager/trm"
@@ -21,10 +20,6 @@ import (
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
-
-func TestMain(m *testing.M) {
-	goleak.VerifyTestMain(m)
-}
 
 func TestTransaction(t *testing.T) {
 	t.Parallel()
