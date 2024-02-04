@@ -18,10 +18,10 @@ import (
 
 // Transaction is trm.Transaction for sqlx.Tx.
 type Transaction struct {
-	tx            *gorm.DB
-	txMutex       sync.Mutex
-	active        *drivers.IsClose
-	activeClosure *drivers.IsClose
+	tx              *gorm.DB
+	txMutex         sync.Mutex
+	isClosed        *drivers.IsClosed
+	isClosedClosure *drivers.IsClosed
 }
 
 // NewTransaction creates trm.Transaction for sqlx.Tx.
@@ -31,10 +31,10 @@ func NewTransaction(
 	db *gorm.DB,
 ) (context.Context, *Transaction, error) {
 	t := &Transaction{
-		tx:            nil,
-		txMutex:       sync.Mutex{},
-		active:        drivers.NewIsClosed(),
-		activeClosure: drivers.NewIsClosed(),
+		tx:              nil,
+		txMutex:         sync.Mutex{},
+		isClosed:        drivers.NewIsClosed(),
+		isClosedClosure: drivers.NewIsClosed(),
 	}
 
 	var err error
@@ -50,9 +50,9 @@ func NewTransaction(
 
 			wg.Done()
 
-			<-t.activeClosure.Closed()
+			<-t.isClosedClosure.Closed()
 
-			return t.activeClosure.Err()
+			return t.isClosedClosure.Err()
 		}, opts)
 
 		t.txMutex.Lock()
@@ -67,7 +67,7 @@ func NewTransaction(
 				err = t.tx.Error
 			}
 
-			t.active.CloseWithCause(err)
+			t.isClosed.CloseWithCause(err)
 		} else {
 			wg.Done()
 		}
@@ -92,8 +92,8 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 	select {
 	case <-ctx.Done():
 		// Rollback will be called by context.Err()
-		t.activeClosure.Close()
-	case <-t.active.Closed():
+		t.isClosedClosure.Close()
+	case <-t.isClosed.Closed():
 	}
 }
 
@@ -114,34 +114,34 @@ func (t *Transaction) Begin(ctx context.Context, s trm.Settings) (context.Contex
 // Commit closes the trm.Transaction.
 func (t *Transaction) Commit(_ context.Context) error {
 	select {
-	case <-t.active.Closed():
+	case <-t.isClosed.Closed():
 		t.txMutex.Lock()
 		defer t.txMutex.Unlock()
 
 		return t.tx.Commit().Error
 	default:
-		t.activeClosure.Close()
+		t.isClosedClosure.Close()
 
-		<-t.active.Closed()
+		<-t.isClosed.Closed()
 
-		return t.active.Err()
+		return t.isClosed.Err()
 	}
 }
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(_ context.Context) error {
 	select {
-	case <-t.active.Closed():
+	case <-t.isClosed.Closed():
 		t.txMutex.Lock()
 		defer t.txMutex.Unlock()
 
 		return t.tx.Rollback().Error
 	default:
-		t.activeClosure.CloseWithCause(drivers.ErrRollbackTr)
+		t.isClosedClosure.CloseWithCause(drivers.ErrRollbackTr)
 
-		<-t.active.Closed()
+		<-t.isClosed.Closed()
 
-		err := t.active.Err()
+		err := t.isClosed.Err()
 		if errors.Is(err, drivers.ErrRollbackTr) {
 			return nil
 		}
@@ -152,9 +152,10 @@ func (t *Transaction) Rollback(_ context.Context) error {
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
-	return t.active.IsActive()
+	return t.isClosed.IsActive()
 }
 
+// Closed returns a channel that's closed when transaction committed or rolled back.
 func (t *Transaction) Closed() <-chan struct{} {
-	return t.active.Closed()
+	return t.isClosed.Closed()
 }

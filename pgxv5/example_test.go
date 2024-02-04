@@ -17,18 +17,8 @@ import (
 func Example() {
 	ctx := context.Background()
 
-	uri := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
-		"user", "pass", "localhost", 5432, "db",
-	)
-
-	pool, err := pgxpool.New(ctx, uri)
+	pool, err := db(ctx)
 	checkErr(err)
-
-	defer pool.Close()
-
-	sqlStmt := `CREATE TABLE IF NOT EXISTS users_v5 (user_id serial, username TEXT)`
-	_, err = pool.Exec(ctx, sqlStmt)
-	checkErr(err, sqlStmt)
 
 	r := newRepo(pool, trmpgx.DefaultCtxGetter)
 	trManager := manager.Must(trmpgx.NewDefaultFactory(pool))

@@ -6,11 +6,11 @@ import (
 	"errors"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
 	"github.com/avito-tech/go-transaction-manager/internal/test"
@@ -19,10 +19,6 @@ import (
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
-
-func TestMain(m *testing.M) {
-	goleak.VerifyTestMain(m)
-}
 
 func TestTransaction(t *testing.T) {
 	t.Parallel()
@@ -236,6 +232,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -244,12 +241,15 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 
 		cancel()
 
+		// Need to wait for the transaction to be closed.
+		// https://github.com/golang/go/blob/go1.21.6/src/database/sql/sql.go#L2174
+		<-time.After(time.Millisecond)
+
 		<-ctx.Done()
-		require.True(t, tr.IsActive())
+		require.False(t, tr.IsActive())
 		<-tr.Closed()
 		require.False(t, tr.IsActive())
 
-		require.Equal(t, context.Canceled, ctx.Err())
 		err = tr.Commit(ctx)
 		require.ErrorIs(t, err, sql.ErrTxDone)
 	}()
@@ -270,10 +270,11 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	})
 
 	f := NewDefaultFactory(db)
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 

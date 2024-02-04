@@ -19,7 +19,7 @@ type Transaction struct {
 	tx        *sqlx.Tx
 	savePoint trmsql.SavePoint
 	saves     int64
-	active    *drivers.IsClose
+	isClosed  *drivers.IsClosed
 }
 
 // NewTransaction creates trm.Transaction for sqlx.Tx.
@@ -38,7 +38,7 @@ func NewTransaction(
 		tx:        tx,
 		savePoint: sp,
 		saves:     0,
-		active:    drivers.NewIsClosed(),
+		isClosed:  drivers.NewIsClosed(),
 	}
 
 	go tr.awaitDone(ctx)
@@ -53,8 +53,8 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 
 	select {
 	case <-ctx.Done():
-		t.active.Close()
-	case <-t.active.Closed():
+		t.isClosed.Close()
+	case <-t.isClosed.Closed():
 	}
 }
 
@@ -88,7 +88,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 		return nil
 	}
 
-	defer t.active.Close()
+	defer t.isClosed.Close()
 
 	return t.tx.Commit()
 }
@@ -104,18 +104,19 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 		return nil
 	}
 
-	defer t.active.Close()
+	defer t.isClosed.Close()
 
 	return t.tx.Rollback()
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
-	return t.active.IsActive()
+	return t.isClosed.IsActive()
 }
 
+// Closed returns a channel that's closed when transaction committed or rolled back.
 func (t *Transaction) Closed() <-chan struct{} {
-	return t.active.Closed()
+	return t.isClosed.Closed()
 }
 
 func (t *Transaction) hasSavePoint() bool {

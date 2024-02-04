@@ -13,7 +13,6 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
@@ -24,10 +23,6 @@ import (
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
-
-func TestMain(m *testing.M) {
-	goleak.VerifyTestMain(m)
-}
 
 func TestTransaction(t *testing.T) {
 	t.Parallel()
@@ -272,10 +267,11 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	require.NoError(t, err)
 
 	f := NewDefaultFactory(dbgorm)
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 

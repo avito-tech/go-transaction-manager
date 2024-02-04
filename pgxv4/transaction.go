@@ -5,17 +5,17 @@ package pgxv4
 
 import (
 	"context"
-	"sync/atomic"
 
 	"github.com/jackc/pgx/v4"
 
 	"github.com/avito-tech/go-transaction-manager/trm"
+	"github.com/avito-tech/go-transaction-manager/trm/drivers"
 )
 
 // Transaction is trm.Transaction for pgx.Tx.
 type Transaction struct {
 	tx       pgx.Tx
-	isActive int64
+	isClosed *drivers.IsClosed
 }
 
 // NewTransaction creates trm.Transaction for pgx.Tx.
@@ -31,7 +31,7 @@ func NewTransaction(
 
 	tr := &Transaction{
 		tx:       tx,
-		isActive: 1,
+		isClosed: drivers.NewIsClosed(),
 	}
 
 	go tr.awaitDone(ctx)
@@ -44,9 +44,11 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 		return
 	}
 
-	<-ctx.Done()
-
-	t.deactivate()
+	select {
+	case <-ctx.Done():
+		t.isClosed.Close()
+	case <-t.isClosed.Closed():
+	}
 }
 
 // Transaction returns the real transaction pgx.Tx.
@@ -63,7 +65,7 @@ func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Contex
 
 	tr := &Transaction{
 		tx:       tx,
-		isActive: 1,
+		isClosed: drivers.NewIsClosed(),
 	}
 
 	return ctx, tr, nil
@@ -71,23 +73,24 @@ func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Contex
 
 // Commit the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
-	defer t.deactivate()
+	defer t.isClosed.Close()
 
 	return t.tx.Commit(ctx)
 }
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
-	defer t.deactivate()
+	defer t.isClosed.Close()
 
 	return t.tx.Rollback(ctx)
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
-	return atomic.LoadInt64(&t.isActive) == 1
+	return t.isClosed.IsActive()
 }
 
-func (t *Transaction) deactivate() {
-	atomic.SwapInt64(&t.isActive, 0)
+// Closed returns a channel that's closed when transaction committed or rolled back.
+func (t *Transaction) Closed() <-chan struct{} {
+	return t.isClosed.Closed()
 }

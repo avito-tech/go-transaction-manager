@@ -8,7 +8,6 @@ import (
 	"errors"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/pashagolub/pgxmock"
@@ -27,7 +26,6 @@ func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
 }
 
-// TODO update test to catch goroutine leak
 func TestTransaction(t *testing.T) {
 	t.Parallel()
 
@@ -184,8 +182,10 @@ func TestTransaction(t *testing.T) {
 				manager.WithSettings(s),
 			)
 
-			var tr Transaction
+			var tr trm.Transaction
 			err = m.Do(tt.args.ctx, func(ctx context.Context) error {
+				tr = trmcontext.DefaultManager.Default(ctx)
+
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -201,7 +201,9 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
-			require.False(t, tr.IsActive())
+			if tr != nil {
+				require.False(t, tr.IsActive())
+			}
 
 			if !tt.wantErr(t, err) {
 				return
@@ -220,6 +222,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	dbmock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	dbmock.ExpectBeginTx(pgx.TxOptions{})
+	dbmock.ExpectCommit()
 
 	f := NewDefaultFactory(dbmock)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -228,13 +231,43 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
 
 		cancel()
-		<-time.After(time.Second)
 
 		<-ctx.Done()
+		require.True(t, tr.IsActive())
+		<-tr.Closed()
+		require.False(t, tr.IsActive())
 
+		err = tr.Commit(ctx)
 		require.NoError(t, err)
+	}()
+
+	wg.Wait()
+}
+
+func TestTransaction_awaitDone_byRollback(t *testing.T) {
+	t.Parallel()
+
+	dbmock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	dbmock.ExpectBeginTx(pgx.TxOptions{})
+	dbmock.ExpectRollback()
+
+	f := NewDefaultFactory(dbmock)
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+
+		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
+
+		require.NoError(t, tr.Rollback(ctx))
 		require.False(t, tr.IsActive())
 	}()
 

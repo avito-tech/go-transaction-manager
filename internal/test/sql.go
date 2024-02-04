@@ -8,12 +8,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// NewDBMock returns a new sql.DB and sqlmock.
+//
+//nolint:ireturn
 func NewDBMock() (*sql.DB, sqlmock.Sqlmock) {
 	db, dbmock, _ := sqlmock.New()
 
 	return db, dbmock
 }
 
+// NewDBMockWithClose returns a new sql.DB and sqlmock, and close it after test.
+//
+//nolint:ireturn
 func NewDBMockWithClose(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
 	db, dbmock := NewDBMock()
 

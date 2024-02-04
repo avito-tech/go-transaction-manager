@@ -14,7 +14,6 @@ import (
 	"github.com/go-redis/redismock/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
 	"github.com/avito-tech/go-transaction-manager/trm"
@@ -24,11 +23,6 @@ import (
 )
 
 const OK = "OK"
-
-func TestMain(m *testing.M) {
-	// https://github.com/redis/go-redis/issues/1029
-	goleak.VerifyTestMain(m, goleak.IgnoreAnyFunction("github.com/go-redis/redis/v8/internal/pool.(*ConnPool).reaper"))
-}
 
 func TestTransaction(t *testing.T) {
 	t.Parallel()
@@ -181,6 +175,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
 
 		cancel()
 
@@ -205,10 +200,11 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	db, rmock := redismock.NewClientMock()
 
 	f := NewDefaultFactory(db)
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 

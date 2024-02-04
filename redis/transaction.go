@@ -11,45 +11,39 @@ import (
 	"github.com/avito-tech/go-transaction-manager/trm/drivers"
 )
 
-var errRollbackTx = errors.New("rollback transaction")
-
 // TxDecorator is an interface for Transaction.tx decoration.
 type TxDecorator func(tx Cmdable, db redis.Cmdable) Cmdable
 
 // Transaction is trm.Transaction for sqlx.Tx.
 type Transaction struct {
-	tx            txInterface
-	active        *drivers.IsClose
-	activeClosure *drivers.IsClose
+	tx              txInterface
+	isClosed        *drivers.IsClosed
+	isClosedClosure *drivers.IsClosed
 }
 
 // NewTransaction creates trm.Transaction for sqlx.Tx.
 func NewTransaction(
 	ctx context.Context,
 	db redis.UniversalClient,
-	s Settings,
-) (context.Context, *Transaction, error) {
+	s *Settings,
+) (_ context.Context, _ *Transaction, err error) {
 	t := &Transaction{
-		tx:            nil,
-		active:        drivers.NewIsClosed(),
-		activeClosure: drivers.NewIsClosed(),
+		tx:              nil,
+		isClosed:        drivers.NewIsClosed(),
+		isClosedClosure: drivers.NewIsClosed(),
 	}
-
-	var err error
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
 	go func() {
-		var cmds []redis.Cmder
-
 		err = db.Watch(ctx, func(rtx *redis.Tx) error {
 			fn := rtx.Pipelined
 			if s.IsMulti() {
 				fn = rtx.TxPipelined
 			}
 
-			cmds, err = fn(ctx, func(pipe redis.Pipeliner) error {
+			cmds, err := fn(ctx, func(pipe redis.Pipeliner) error {
 				t.tx = &tx{
 					tx:        rtx,
 					Pipeliner: pipe,
@@ -61,9 +55,9 @@ func NewTransaction(
 
 				wg.Done()
 
-				<-t.activeClosure.Closed()
+				<-t.isClosedClosure.Closed()
 
-				return t.activeClosure.Err()
+				return t.isClosedClosure.Err()
 			})
 
 			if len(cmds) > 0 && s.ReturnPtr() != nil {
@@ -74,7 +68,7 @@ func NewTransaction(
 		}, s.WatchKeys()...)
 
 		if t.tx != nil {
-			t.active.CloseWithCause(err)
+			t.isClosed.CloseWithCause(err)
 		} else {
 			wg.Done()
 		}
@@ -99,8 +93,8 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 	select {
 	case <-ctx.Done():
 		// Rollback will be called by context.Err()
-		t.activeClosure.Close()
-	case <-t.active.Closed():
+		t.isClosedClosure.Close()
+	case <-t.isClosed.Closed():
 	}
 }
 
@@ -113,7 +107,7 @@ func (t *Transaction) Transaction() interface{} {
 // Commit closes the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
 	select {
-	case <-t.active.Closed():
+	case <-t.isClosed.Closed():
 		cmds, err := t.tx.Exec(ctx)
 
 		// TODO process cmds
@@ -121,25 +115,25 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 		return err
 	default:
-		t.activeClosure.Close()
+		t.isClosedClosure.Close()
 
-		<-t.active.Closed()
+		<-t.isClosed.Closed()
 
-		return t.active.Err()
+		return t.isClosed.Err()
 	}
 }
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(_ context.Context) error {
 	select {
-	case <-t.active.Closed():
+	case <-t.isClosed.Closed():
 		return t.tx.Discard()
 	default:
-		t.activeClosure.CloseWithCause(drivers.ErrRollbackTr)
+		t.isClosedClosure.CloseWithCause(drivers.ErrRollbackTr)
 
-		<-t.active.Closed()
+		<-t.isClosed.Closed()
 
-		err := t.active.Err()
+		err := t.isClosed.Err()
 		if errors.Is(err, drivers.ErrRollbackTr) {
 			return nil
 		}
@@ -154,9 +148,10 @@ func (t *Transaction) Rollback(_ context.Context) error {
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
-	return t.active.IsActive()
+	return t.isClosed.IsActive()
 }
 
+// Closed returns a channel that's closed when transaction committed or rolled back.
 func (t *Transaction) Closed() <-chan struct{} {
-	return t.active.Closed()
+	return t.isClosed.Closed()
 }

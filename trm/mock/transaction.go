@@ -74,6 +74,20 @@ func (m *MockTransaction) EXPECT() *MockTransactionMockRecorder {
 	return m.recorder
 }
 
+// Closed mocks base method.
+func (m *MockTransaction) Closed() <-chan struct{} {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Closed")
+	ret0, _ := ret[0].(<-chan struct{})
+	return ret0
+}
+
+// Closed indicates an expected call of Closed.
+func (mr *MockTransactionMockRecorder) Closed() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Closed", reflect.TypeOf((*MockTransaction)(nil).Closed))
+}
+
 // Commit mocks base method.
 func (m *MockTransaction) Commit(arg0 context.Context) error {
 	m.ctrl.T.Helper()
@@ -167,6 +181,20 @@ func (m *MocktransactionWithSP) Begin(ctx context.Context, s trm.Settings) (cont
 func (mr *MocktransactionWithSPMockRecorder) Begin(ctx, s interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MocktransactionWithSP)(nil).Begin), ctx, s)
+}
+
+// Closed mocks base method.
+func (m *MocktransactionWithSP) Closed() <-chan struct{} {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Closed")
+	ret0, _ := ret[0].(<-chan struct{})
+	return ret0
+}
+
+// Closed indicates an expected call of Closed.
+func (mr *MocktransactionWithSPMockRecorder) Closed() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Closed", reflect.TypeOf((*MocktransactionWithSP)(nil).Closed))
 }
 
 // Commit mocks base method.

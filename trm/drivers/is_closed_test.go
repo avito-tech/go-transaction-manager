@@ -9,6 +9,8 @@ import (
 )
 
 func TestIsClose(t *testing.T) {
+	t.Parallel()
+
 	errExpected := errors.New("expected")
 	err := errors.New("test")
 
@@ -21,6 +23,7 @@ func TestIsClose(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 			require.NotPanics(t, func() {
@@ -50,6 +53,8 @@ func TestIsClose(t *testing.T) {
 }
 
 func TestIsClose_Err_nil(t *testing.T) {
+	t.Parallel()
+
 	isClosed := NewIsClosed()
 
 	isClosed.Close()

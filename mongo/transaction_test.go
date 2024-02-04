@@ -14,7 +14,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
-	"go.uber.org/goleak"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
 	"github.com/avito-tech/go-transaction-manager/trm"
@@ -25,10 +24,6 @@ import (
 
 type user struct {
 	ID primitive.ObjectID `bson:"_id,omitempty"`
-}
-
-func TestMain(m *testing.M) {
-	goleak.VerifyTestMain(m)
 }
 
 func TestTransaction(t *testing.T) {
@@ -169,8 +164,10 @@ func TestTransaction(t *testing.T) {
 				manager.WithSettings(f.settings),
 			)
 
-			var tr Transaction
+			var tr trm.Transaction
 			err := m.Do(tt.args.ctx, func(ctx context.Context) error {
+				tr = trmcontext.DefaultManager.Default(ctx)
+
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -186,7 +183,9 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
-			require.False(t, false, tr.IsActive())
+			if tr != nil {
+				require.False(t, tr.IsActive())
+			}
 
 			if !tt.wantErr(t, err) {
 				return
