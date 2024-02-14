@@ -1,6 +1,5 @@
 // Package test provides a set of utilities for testing.
-// You should not use this package in your application code.
-// TODO try to use Deprecated for the package
+// Deprecated: You should NOT use this package in your application code.
 package test
 
 import (
@@ -13,7 +12,7 @@ import (
 
 // NewDBMock returns a new sql.DB and sqlmock.
 //
-//nolint:ireturn
+//nolint:ireturn,nolintlint
 func NewDBMock() (*sql.DB, sqlmock.Sqlmock) {
 	db, dbmock, _ := sqlmock.New()
 
@@ -22,7 +21,7 @@ func NewDBMock() (*sql.DB, sqlmock.Sqlmock) {
 
 // NewDBMockWithClose returns a new sql.DB and sqlmock, and close it after test.
 //
-//nolint:ireturn
+//nolint:ireturn,nolintlint
 func NewDBMockWithClose(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
 	db, dbmock := NewDBMock()
 

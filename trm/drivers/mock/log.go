@@ -1,4 +1,5 @@
 // Package mock implements dependencies for testing.
+// Deprecated: You should NOT use this package in your application code.
 //
 //revive:disable:unexported-return
 //revive:disable:exported

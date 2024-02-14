@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.0-rc-8] - 2024-01-04
+
+### Fixed
+
+- gouroutine leak.
+
+## [2.0.0-rc-7] - 2024-01-04
+
+### Changes
+
+- Transferred drivers in separated modules.
+
 ## [1.4.0] - 2023-09-01
 
 ### Added
