@@ -1,7 +1,7 @@
 // Package trm contains of interfaces to programmatic transaction management.
 package trm
 
-//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
+//go:generate mockgen -source=$GOFILE -destination=drivers/mock/$GOFILE -package=mock
 
 import (
 	"context"
@@ -50,6 +50,8 @@ type Transaction interface {
 	Rollback(context.Context) error
 	// IsActive returns true if the transaction started but not committed or rolled back.
 	IsActive() bool
+	// Closed returns a channel that's closed when transaction committed or rolled back.
+	Closed() <-chan struct{}
 }
 
 // transactionWithSP is used for tests to generate mock.

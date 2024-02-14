@@ -5,22 +5,17 @@ import (
 	"errors"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/jackc/pgx/v5"
-	pgxmock "github.com/pashagolub/pgxmock/v2"
+	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
-
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
-
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 func TestTransaction(t *testing.T) {
@@ -29,6 +24,9 @@ func TestTransaction(t *testing.T) {
 	type args struct {
 		ctx context.Context
 	}
+
+	//nolint:govet
+	ctx, _ := context.WithCancel(context.Background())
 
 	testErr := errors.New("error test")
 	testCommitErr := errors.New("error Commit test")
@@ -53,19 +51,19 @@ func TestTransaction(t *testing.T) {
 				m.ExpectCommit()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret:     nil,
 			wantErr: assert.NoError,
 		},
 		"begin_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin().WillReturnError(testErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, trm.ErrBegin)
 			},
@@ -79,15 +77,15 @@ func TestTransaction(t *testing.T) {
 				m.ExpectCommit().WillReturnError(testCommitErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
 					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 		},
 		"rollback_after_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
 				m.ExpectBegin()
@@ -96,32 +94,32 @@ func TestTransaction(t *testing.T) {
 				m.ExpectRollback().WillReturnError(testRollbackErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret: testErr,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
 					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 		"begin_savepoint_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
 				m.ExpectBegin().WillReturnError(testErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, trm.ErrBegin) &&
 					assert.ErrorIs(t, err, trm.ErrNestedBegin)
 			},
 		},
 		"commit_savepoint_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
 				m.ExpectBegin()
@@ -130,16 +128,16 @@ func TestTransaction(t *testing.T) {
 				m.ExpectRollback()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
 					assert.ErrorIs(t, err, trm.ErrCommit) &&
 					assert.NotNil(t, err, trm.ErrNestedCommit)
 			},
 		},
 		"rollback_savepoint_after_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
 				m.ExpectBegin()
@@ -148,10 +146,10 @@ func TestTransaction(t *testing.T) {
 				m.ExpectRollback()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret: testErr,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
 					assert.ErrorIs(t, err, trm.ErrRollback) &&
@@ -179,8 +177,10 @@ func TestTransaction(t *testing.T) {
 				manager.WithSettings(s),
 			)
 
-			var tr Transaction
+			var tr trm.Transaction
 			err = m.Do(tt.args.ctx, func(ctx context.Context) error {
+				tr = trmcontext.DefaultManager.Default(ctx)
+
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -196,17 +196,21 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
-			require.False(t, tr.IsActive())
+
+			if tr != nil {
+				require.False(t, tr.IsActive())
+			}
 
 			if !tt.wantErr(t, err) {
 				return
 			}
+
 			assert.NoError(t, dbmock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestTransaction_awaitDone(t *testing.T) {
+func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
 	wg := sync.WaitGroup{}
@@ -215,6 +219,7 @@ func TestTransaction_awaitDone(t *testing.T) {
 	dbmock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	dbmock.ExpectBeginTx(pgx.TxOptions{})
+	dbmock.ExpectCommit()
 
 	f := NewDefaultFactory(dbmock)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -223,13 +228,43 @@ func TestTransaction_awaitDone(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
 
 		cancel()
-		<-time.After(time.Second)
 
 		<-ctx.Done()
+		require.True(t, tr.IsActive())
+		<-tr.Closed()
+		require.False(t, tr.IsActive())
 
+		err = tr.Commit(ctx)
+		require.ErrorIs(t, err, context.Canceled)
+	}()
+
+	wg.Wait()
+}
+
+func TestTransaction_awaitDone_byRollback(t *testing.T) {
+	t.Parallel()
+
+	dbmock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	dbmock.ExpectBeginTx(pgx.TxOptions{})
+	dbmock.ExpectRollback()
+
+	f := NewDefaultFactory(dbmock)
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+
+		_, tr, err := f(ctx, settings.Must())
 		require.NoError(t, err)
+
+		require.NoError(t, tr.Rollback(ctx))
 		require.False(t, tr.IsActive())
 	}()
 

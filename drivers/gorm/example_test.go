@@ -20,6 +20,11 @@ func Example() {
 	db, err := gorm.Open(sqlite.Open("file:test.drivers?mode=memory"))
 	checkErr(err)
 
+	sqlDB, err := db.DB()
+	checkErr(err)
+
+	defer sqlDB.Close()
+
 	// Migrate the schema
 	checkErr(db.AutoMigrate(&userRow{}))
 
