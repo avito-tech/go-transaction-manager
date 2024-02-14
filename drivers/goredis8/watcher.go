@@ -8,8 +8,8 @@ import (
 
 // Cmdable is an experimental interface to Watch and Unwatch keys in Transaction.
 type Cmdable interface {
-	redis.Cmdable
 	Watch
+	redis.Pipeliner
 }
 
 // Watch is experimental functional for watching updated keys.
@@ -20,8 +20,13 @@ type Watch interface {
 }
 
 type tx struct {
-	redis.Cmdable
+	redis.Pipeliner
 	tx *redis.Tx
+}
+
+type txInterface interface {
+	redis.Pipeliner
+	Watch
 }
 
 func (t *tx) Watch(ctx context.Context, keys ...string) *redis.StatusCmd {

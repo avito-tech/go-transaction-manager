@@ -5,7 +5,7 @@ import "github.com/go-redis/redis/v8"
 // WithMulti sets up sql.TxOptions for the Settings.
 func WithMulti(isMulti bool) Opt {
 	return func(s *Settings) error {
-		*s = s.setIsMulti(&isMulti)
+		s.setIsMulti(&isMulti)
 
 		return nil
 	}
@@ -14,7 +14,7 @@ func WithMulti(isMulti bool) Opt {
 // WithWatchKeys sets WATCH keys in Transaction.
 func WithWatchKeys(keys ...string) Opt {
 	return func(s *Settings) error {
-		*s = s.setWatchKeys(keys)
+		s.setWatchKeys(keys)
 
 		return nil
 	}
@@ -23,7 +23,7 @@ func WithWatchKeys(keys ...string) Opt {
 // WithTxDecorator sets TxDecorator to change behavior of Transaction.
 func WithTxDecorator(in TxDecorator) Opt {
 	return func(s *Settings) error {
-		*s = s.setTxDecorator(in)
+		s.setTxDecorator(in)
 
 		return nil
 	}
@@ -33,7 +33,7 @@ func WithTxDecorator(in TxDecorator) Opt {
 // WARNING: Responses don't clean automatically, use WithRet only with DoWithSettings of trm.Manager.
 func WithRet(in *[]redis.Cmder) Opt {
 	return func(s *Settings) error {
-		*s = s.SetReturn(in)
+		s.SetReturn(in)
 
 		return nil
 	}

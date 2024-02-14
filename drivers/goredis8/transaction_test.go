@@ -7,11 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/go-redis/redismock/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 
@@ -31,18 +32,20 @@ func TestTransaction(t *testing.T) {
 		ctx context.Context
 	}
 
+	ctx := context.Background()
 	testErr := errors.New("error test")
 	testKey := "key1"
 	testValue := "value"
 	testExp := time.Duration(0)
 
 	tests := map[string]struct {
-		prepare func(t *testing.T, m redismock.ClientMock)
-		args    args
-		ret     error
-		wantErr assert.ErrorAssertionFunc
+		prepare  func(t *testing.T, m redismock.ClientMock)
+		args     args
+		ret      error
+		wantErr  assert.ErrorAssertionFunc
+		wantCmds int
 	}{
-		"success": {
+		"commit": {
 			prepare: func(t *testing.T, m redismock.ClientMock) {
 				m.ExpectWatch(testKey)
 				m.ExpectTxPipeline()
@@ -52,15 +55,16 @@ func TestTransaction(t *testing.T) {
 				m.ExpectTxPipelineExec()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
-			ret:     nil,
-			wantErr: assert.NoError,
+			ret:      nil,
+			wantErr:  assert.NoError,
+			wantCmds: 1,
 		},
 		"begin_error": {
 			prepare: func(t *testing.T, m redismock.ClientMock) {},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorContains(t, err, "all expectations were already fulfilled, call to cmd '[watch key1]' was not expected") &&
@@ -77,19 +81,21 @@ func TestTransaction(t *testing.T) {
 				m.ExpectTxPipelineExec().RedisNil()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
+			ret: nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorContains(t, err, "redis: nil") &&
 					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
+			wantCmds: 1,
 		},
 		"rollback": {
 			prepare: func(t *testing.T, m redismock.ClientMock) {
 				m.ExpectWatch(testKey)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -109,15 +115,17 @@ func TestTransaction(t *testing.T) {
 
 			s := MustSettings(settings.Must(
 				settings.WithPropagation(trm.PropagationNested),
-			), WithWatchKeys(testKey))
+			), WithWatchKeys(testKey), WithRet(&[]redis.Cmder{}))
 			m := manager.Must(
 				NewDefaultFactory(db),
 				manager.WithLog(log),
 				manager.WithSettings(s),
 			)
 
-			var tr Transaction
+			var tr trm.Transaction
 			err := m.Do(tt.args.ctx, func(ctx context.Context) error {
+				tr = trmcontext.DefaultManager.Default(ctx)
+
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -139,17 +147,21 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
-			require.False(t, tr.IsActive())
+			if tr != nil {
+				require.False(t, tr.IsActive())
+			}
 
 			if !tt.wantErr(t, err) {
 				return
 			}
+
+			assert.Len(t, s.Return(), tt.wantCmds)
 			assert.NoError(t, rmock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestTransaction_awaitDone(t *testing.T) {
+func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
 	wg := sync.WaitGroup{}
@@ -164,14 +176,45 @@ func TestTransaction_awaitDone(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
 
 		cancel()
-		<-time.After(time.Second)
 
 		<-ctx.Done()
-
-		require.NoError(t, err)
+		require.True(t, tr.IsActive())
+		<-tr.Closed()
 		require.False(t, tr.IsActive())
+
+		require.Equal(t, context.Canceled, ctx.Err())
+		err = tr.Commit(ctx)
+		require.ErrorIs(t, err, redis.ErrClosed)
+	}()
+
+	wg.Wait()
+	assert.NoError(t, rmock.ExpectationsWereMet())
+}
+
+// TestTransaction_awaitDone_byRollback checks goroutine leak when we close transaction manually.
+func TestTransaction_awaitDone_byRollback(t *testing.T) {
+	t.Parallel()
+
+	db, rmock := redismock.NewClientMock()
+
+	f := NewDefaultFactory(db)
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+
+		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
+
+		require.NoError(t, tr.Rollback(ctx))
+		require.False(t, tr.IsActive())
+		require.NoError(t, tr.Rollback(ctx))
 	}()
 
 	wg.Wait()
