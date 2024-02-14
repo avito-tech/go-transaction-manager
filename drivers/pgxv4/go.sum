@@ -1,8 +1,11 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DATA-DOG/go-sqlmock v1.5.1/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc6 h1:4/jYpusMcFLlMI2cz0fXPxK959A6kIMrwCwyjqvpthM=
+github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0-rc6/go.mod h1:00Cif8xUIQfAtpQ5cuPt9T9dDNJ9bGcY9ev/JpcR0tc=
+github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc6/go.mod h1:WkB+h0Fx4qiLAgeFw1xLc1gGwqhOdtndUUmHC6Cww/M=
 github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc6/go.mod h1:efBmVaj9GiucjXsVk7rIwgWXsfoS+1XJqLF9g4TKKZE=
+github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8 h1:lFx+q6V4fJZTyK9+qbQv3k5Bd0mQB2/ZOMaop95KhLg=
+github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8/go.mod h1:70UhdxnEKj+no0/bTVxsAZ7scTb2+2DagtZu5OZ6bRg=
 github.com/cockroachdb/apd v1.1.0 h1:3LFP3629v+1aKXU5Q37mxmRxX/pIu1nijXydLShEq5I=
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
 github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
@@ -15,6 +18,7 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/go-kit/log v0.1.0/go.mod h1:zbhenjAZHb184qTLMA9ZjW7ThYL0H2mk7Q6pNt4vbaY=
 github.com/go-logfmt/logfmt v0.5.0/go.mod h1:wCYkCAKZfumFQihp8CzCvQ3paCTfi41vtzG1KdI/P7A=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
+github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gofrs/uuid v4.0.0+incompatible h1:1SD/1F5pU8p29ybwgQSwpQk+mwdRrXCYuPhW6m+TnJw=
 github.com/gofrs/uuid v4.0.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
