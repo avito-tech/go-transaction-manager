@@ -11,6 +11,7 @@ import (
 
 	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers"
 )
 
 // Transaction is trm.Transaction for sqlx.Tx.
@@ -18,7 +19,7 @@ type Transaction struct {
 	tx        *sqlx.Tx
 	savePoint trmsql.SavePoint
 	saves     int64
-	isActive  int64
+	isClosed  *drivers.IsClosed
 }
 
 // NewTransaction creates trm.Transaction for sqlx.Tx.
@@ -33,7 +34,12 @@ func NewTransaction(
 		return ctx, nil, err
 	}
 
-	tr := &Transaction{tx: tx, savePoint: sp, isActive: 1, saves: 0}
+	tr := &Transaction{
+		tx:        tx,
+		savePoint: sp,
+		saves:     0,
+		isClosed:  drivers.NewIsClosed(),
+	}
 
 	go tr.awaitDone(ctx)
 
@@ -45,9 +51,11 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 		return
 	}
 
-	<-ctx.Done()
-
-	t.deactivate()
+	select {
+	case <-ctx.Done():
+		t.isClosed.Close()
+	case <-t.isClosed.Closed():
+	}
 }
 
 // Transaction returns the real transaction sqlx.Tx.
@@ -60,6 +68,9 @@ func (t *Transaction) Transaction() interface{} {
 func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
 	if err != nil {
+		// decrement save point ID after error
+		t.decrementID()
+
 		return ctx, nil, multierr.Combine(trm.ErrNestedBegin, err)
 	}
 
@@ -77,7 +88,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 		return nil
 	}
 
-	defer t.deactivate()
+	defer t.isClosed.Close()
 
 	return t.tx.Commit()
 }
@@ -93,18 +104,19 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 		return nil
 	}
 
-	defer t.deactivate()
+	defer t.isClosed.Close()
 
 	return t.tx.Rollback()
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
-	return atomic.LoadInt64(&t.isActive) == 1
+	return t.isClosed.IsActive()
 }
 
-func (t *Transaction) deactivate() {
-	atomic.SwapInt64(&t.isActive, 0)
+// Closed returns a channel that's closed when transaction committed or rolled back.
+func (t *Transaction) Closed() <-chan struct{} {
+	return t.isClosed.Closed()
 }
 
 func (t *Transaction) hasSavePoint() bool {
