@@ -11,6 +11,7 @@ env:
   OS_TARGET: ubuntu-latest
 jobs:
   tests-units:
+    needs: [lint]
     permissions:
       pull-requests: write
     strategy:
@@ -52,6 +53,7 @@ jobs:
         run: make test
 
   tests-integration:
+    needs: [tests-units]
     permissions:
       pull-requests: write
     services:
@@ -145,7 +147,7 @@ jobs:
         with:
           go-version: ${{ env.GO_TARGET_VERSION }}
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
           args: --timeout=3m -v
           working-directory: ${{ matrix.modules }}

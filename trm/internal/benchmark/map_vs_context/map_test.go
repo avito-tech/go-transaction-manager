@@ -34,6 +34,7 @@ func BenchmarkMapEmptyTransaction(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			benchmarkMap(i, creator)
+
 			i++
 		}
 	})
@@ -46,6 +47,7 @@ func BenchmarkMapCopy(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			benchmarkMap(i, creator)
+
 			i++
 		}
 	})
@@ -58,6 +60,7 @@ func BenchmarkMapRealTransaction(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			benchmarkMap(i, creator)
+
 			i++
 		}
 	})

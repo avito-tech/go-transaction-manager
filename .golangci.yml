@@ -63,6 +63,10 @@ linters:
     - whitespace
     - wsl # https://github.com/bombsimon/wsl/blob/master/doc/rules.md
 
+linters-settings:
+  wsl:
+    allow-assign-and-anything: true
+
 issues:
   exclude-use-default: false
   exclude:

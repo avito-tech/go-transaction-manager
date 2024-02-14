@@ -57,13 +57,13 @@ func TestTransaction(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		"begin_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin().WillReturnError(testErr)
 			},
 			args: args{
 				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, trm.ErrBegin)
 			},
@@ -79,13 +79,13 @@ func TestTransaction(t *testing.T) {
 			args: args{
 				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
 					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 		},
 		"rollback_after_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
 				m.ExpectBegin()
@@ -97,14 +97,14 @@ func TestTransaction(t *testing.T) {
 				ctx: ctx,
 			},
 			ret: testErr,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
 					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 		"begin_savepoint_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
 				m.ExpectBegin().WillReturnError(testErr)
@@ -112,14 +112,14 @@ func TestTransaction(t *testing.T) {
 			args: args{
 				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, trm.ErrBegin) &&
 					assert.ErrorIs(t, err, trm.ErrNestedBegin)
 			},
 		},
 		"commit_savepoint_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
 				m.ExpectBegin()
@@ -130,14 +130,14 @@ func TestTransaction(t *testing.T) {
 			args: args{
 				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
 					assert.ErrorIs(t, err, trm.ErrCommit) &&
 					assert.NotNil(t, err, trm.ErrNestedCommit)
 			},
 		},
 		"rollback_savepoint_after_error": {
-			prepare: func(t *testing.T, m pgxmock.PgxPoolIface) {
+			prepare: func(_ *testing.T, m pgxmock.PgxPoolIface) {
 				m.ExpectBegin()
 
 				m.ExpectBegin()
@@ -149,7 +149,7 @@ func TestTransaction(t *testing.T) {
 				ctx: ctx,
 			},
 			ret: testErr,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
 					assert.ErrorIs(t, err, trm.ErrRollback) &&
@@ -196,6 +196,7 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
+
 			if tr != nil {
 				require.False(t, tr.IsActive())
 			}
@@ -203,6 +204,7 @@ func TestTransaction(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
+
 			assert.NoError(t, dbmock.ExpectationsWereMet())
 		})
 	}

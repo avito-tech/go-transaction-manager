@@ -66,7 +66,7 @@ func TestSkippable(t *testing.T) {
 			args: args{
 				err: Skippable(Skippable(errTest)),
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, ErrSkip) &&
 					assert.ErrorIs(t, err, errTest)
 			},
@@ -75,7 +75,7 @@ func TestSkippable(t *testing.T) {
 			args: args{
 				err: Skippable(Skippable(nil)),
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.Nil(t, err)
 			},
 		},
@@ -108,7 +108,7 @@ func TestUnSkippable(t *testing.T) {
 				err: UnSkippable(UnSkippable(
 					Skippable(Skippable(errTest)))),
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.NotErrorIs(t, err, ErrSkip) &&
 					assert.ErrorIs(t, err, errTest)
 			},
@@ -117,7 +117,7 @@ func TestUnSkippable(t *testing.T) {
 			args: args{
 				err: UnSkippable(UnSkippable(nil)),
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.Nil(t, err)
 			},
 		},

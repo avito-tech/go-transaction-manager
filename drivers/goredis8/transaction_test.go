@@ -46,7 +46,7 @@ func TestTransaction(t *testing.T) {
 		wantCmds int
 	}{
 		"commit": {
-			prepare: func(t *testing.T, m redismock.ClientMock) {
+			prepare: func(_ *testing.T, m redismock.ClientMock) {
 				m.ExpectWatch(testKey)
 				m.ExpectTxPipeline()
 
@@ -62,17 +62,17 @@ func TestTransaction(t *testing.T) {
 			wantCmds: 1,
 		},
 		"begin_error": {
-			prepare: func(t *testing.T, m redismock.ClientMock) {},
+			prepare: func(_ *testing.T, _ redismock.ClientMock) {},
 			args: args{
 				ctx: ctx,
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorContains(t, err, "all expectations were already fulfilled, call to cmd '[watch key1]' was not expected") &&
 					assert.ErrorIs(t, err, trm.ErrBegin)
 			},
 		},
 		"commit_error": {
-			prepare: func(t *testing.T, m redismock.ClientMock) {
+			prepare: func(_ *testing.T, m redismock.ClientMock) {
 				m.ExpectWatch(testKey)
 				m.ExpectTxPipeline()
 
@@ -84,21 +84,21 @@ func TestTransaction(t *testing.T) {
 				ctx: ctx,
 			},
 			ret: nil,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorContains(t, err, "redis: nil") &&
 					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 			wantCmds: 1,
 		},
 		"rollback": {
-			prepare: func(t *testing.T, m redismock.ClientMock) {
+			prepare: func(_ *testing.T, m redismock.ClientMock) {
 				m.ExpectWatch(testKey)
 			},
 			args: args{
 				ctx: ctx,
 			},
 			ret: testErr,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr)
 			},
 		},
@@ -147,6 +147,7 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
+
 			if tr != nil {
 				require.False(t, tr.IsActive())
 			}

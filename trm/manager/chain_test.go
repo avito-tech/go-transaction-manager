@@ -32,7 +32,7 @@ func TestChainedMW_Do(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		"empty": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
+			mm: func(_ *testing.T, _ *gomock.Controller) []trm.Manager {
 				return nil
 			},
 			args: args{
@@ -69,16 +69,16 @@ func TestChainedMW_Do(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		"two": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
+			mm: func(_ *testing.T, ctrl *gomock.Controller) []trm.Manager {
 				m1LVL := mock.NewMockManager(ctrl)
 				m1LVL.EXPECT().Do(ctxSource, gomock.Any()).
-					DoAndReturn(func(ctx context.Context, fn func(ctx context.Context) error) error {
+					DoAndReturn(func(_ context.Context, fn func(ctx context.Context) error) error {
 						return fn(ctx1LVL)
 					})
 
 				m2LVL := mock.NewMockManager(ctrl)
 				m2LVL.EXPECT().Do(ctx1LVL, gomock.Any()).
-					DoAndReturn(func(ctx context.Context, fn func(ctx context.Context) error) error {
+					DoAndReturn(func(_ context.Context, fn func(ctx context.Context) error) error {
 						return fn(ctx2LVL)
 					})
 
@@ -130,7 +130,7 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		"empty": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
+			mm: func(_ *testing.T, _ *gomock.Controller) []trm.Manager {
 				return nil
 			},
 			args: args{
@@ -169,16 +169,16 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		"two": {
-			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
+			mm: func(_ *testing.T, ctrl *gomock.Controller) []trm.Manager {
 				m1LVL := mock.NewMockManager(ctrl)
 				m1LVL.EXPECT().DoWithSettings(ctxSource, s, gomock.Any()).
-					DoAndReturn(func(ctx context.Context, _ settings.Settings, fn func(ctx context.Context) error) error {
+					DoAndReturn(func(_ context.Context, _ settings.Settings, fn func(_ context.Context) error) error {
 						return fn(ctx1LVL)
 					})
 
 				m2LVL := mock.NewMockManager(ctrl)
 				m2LVL.EXPECT().DoWithSettings(ctx1LVL, s, gomock.Any()).
-					DoAndReturn(func(ctx context.Context, _ settings.Settings, fn func(ctx context.Context) error) error {
+					DoAndReturn(func(_ context.Context, _ settings.Settings, fn func(ctx context.Context) error) error {
 						return fn(ctx2LVL)
 					})
 

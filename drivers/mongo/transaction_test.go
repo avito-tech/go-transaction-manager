@@ -39,10 +39,10 @@ func TestTransaction(t *testing.T) {
 	}
 
 	testErr := errors.New("error test")
-	doNil := func(mt *mtest.T, ctx context.Context) error {
+	doNil := func(_ *mtest.T, _ context.Context) error {
 		return nil
 	}
-	defaultFields := func(mt *mtest.T) fields {
+	defaultFields := func(_ *mtest.T) fields {
 		return fields{
 			settings: MustSettings(settings.Must(
 				settings.WithPropagation(trm.PropagationRequiresNew),
@@ -70,7 +70,7 @@ func TestTransaction(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		"begin_session_error": {
-			fields: func(mt *mtest.T) fields {
+			fields: func(_ *mtest.T) fields {
 				return fields{
 					settings: MustSettings(settings.Must(
 						settings.WithPropagation(trm.PropagationNested),
@@ -82,17 +82,17 @@ func TestTransaction(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			do: func(mt *mtest.T, ctx context.Context) error {
+			do: func(mt *mtest.T, _ context.Context) error {
 				require.NotNil(mt, 1, "should not be here")
 
 				return nil
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, trm.ErrBegin)
 			},
 		},
 		"begin_transaction_error": {
-			fields: func(mt *mtest.T) fields {
+			fields: func(_ *mtest.T) fields {
 				return fields{
 					settings: MustSettings(settings.Must(
 						settings.WithPropagation(trm.PropagationNested),
@@ -103,12 +103,12 @@ func TestTransaction(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 			},
-			do: func(mt *mtest.T, ctx context.Context) error {
+			do: func(mt *mtest.T, _ context.Context) error {
 				require.NotNil(mt, 1, "should not be here")
 
 				return nil
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, trm.ErrBegin)
 			},
 		},
@@ -124,7 +124,7 @@ func TestTransaction(t *testing.T) {
 
 				return nil
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				var divErr mongo.CommandError
 
 				return assert.ErrorAs(t, err, &divErr) &&
@@ -143,7 +143,7 @@ func TestTransaction(t *testing.T) {
 
 				return testErr
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
@@ -183,6 +183,7 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
+
 			if tr != nil {
 				require.False(t, tr.IsActive())
 			}
