@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2"

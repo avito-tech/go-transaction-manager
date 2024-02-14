@@ -1,6 +1,6 @@
 package trm
 
-//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
+//go:generate mockgen -source=$GOFILE -destination=drivers/mock/$GOFILE -package=mock
 
 import (
 	"time"

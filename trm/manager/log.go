@@ -2,7 +2,7 @@ package manager
 
 import "context"
 
-//go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
+//go:generate mockgen -source=$GOFILE -destination=drivers/mock/$GOFILE -package=mock
 
 type logger interface {
 	Warning(ctx context.Context, msg string)

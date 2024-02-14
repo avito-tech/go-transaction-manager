@@ -5,11 +5,12 @@
 package mock
 
 import (
-	reflect "reflect"
-	time "time"
+	"reflect"
+	"time"
 
-	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // MockSettings is a mock of Settings interface.

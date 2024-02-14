@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	mock2 "github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
 	mock_log "github.com/avito-tech/go-transaction-manager/trm/v2/manager/mock"
-	"github.com/avito-tech/go-transaction-manager/trm/v2/mock"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
@@ -55,7 +55,7 @@ func Test_transactionManager_Do(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						tx := mock.NewMockTransaction(ctrl)
+						tx := mock2.NewMockTransaction(ctrl)
 
 						tx.EXPECT().IsActive().Return(true)
 						tx.EXPECT().Commit(gomock.Any()).Return(nil)
@@ -83,7 +83,7 @@ func Test_transactionManager_Do(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						txSP := mock.NewMocktransactionWithSP(ctrl)
+						txSP := mock2.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true).Times(2)
 						txSP.EXPECT().Begin(gomock.Any(), a.settings).Return(ctx, txSP, nil)
@@ -104,7 +104,7 @@ func Test_transactionManager_Do(t *testing.T) {
 				ctx: ctxManager.SetByKey(
 					context.Background(),
 					settings.DefaultCtxKey,
-					mock.NewMockTransaction(nil),
+					mock2.NewMockTransaction(nil),
 				),
 				settings: settings.Must(),
 				nestedSettings: settings.Must(
@@ -114,7 +114,7 @@ func Test_transactionManager_Do(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						txSP := mock.NewMocktransactionWithSP(ctrl)
+						txSP := mock2.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true)
 						txSP.EXPECT().Begin(gomock.Any(), a.settings).Return(txSP, nil)
@@ -183,7 +183,7 @@ func Test_transactionManager_Do(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						tx := mock.NewMockTransaction(ctrl)
+						tx := mock2.NewMockTransaction(ctrl)
 
 						tx.EXPECT().IsActive().Return(true)
 						tx.EXPECT().Rollback(gomock.Any()).Return(nil)
@@ -233,7 +233,7 @@ func Test_transactionManager_Do(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						txSP := mock.NewMocktransactionWithSP(ctrl)
+						txSP := mock2.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true)
 						txSP.EXPECT().Commit(gomock.Any()).Return(nil)
@@ -262,7 +262,7 @@ func Test_transactionManager_Do(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
 					factory: func() trm.TrFactory {
-						txSP := mock.NewMocktransactionWithSP(ctrl)
+						txSP := mock2.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true).Times(2)
 						txSP.EXPECT().Commit(gomock.Any()).Return(nil).Times(2)
@@ -314,7 +314,7 @@ func Test_transactionManager_Do(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
 					factory: func() func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						txSP := mock.NewMocktransactionWithSP(ctrl)
+						txSP := mock2.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true)
 						txSP.EXPECT().Commit(gomock.Any()).Return(nil)
@@ -403,7 +403,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				return fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						tx := mock.NewMockTransaction(ctrl)
+						tx := mock2.NewMockTransaction(ctrl)
 
 						tx.EXPECT().
 							IsActive().
@@ -429,7 +429,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				return fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						tx := mock.NewMockTransaction(ctrl)
+						tx := mock2.NewMockTransaction(ctrl)
 
 						tx.EXPECT().
 							IsActive().
@@ -454,7 +454,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				return fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						tx := mock.NewMockTransaction(ctrl)
+						tx := mock2.NewMockTransaction(ctrl)
 
 						tx.EXPECT().
 							IsActive().
@@ -483,7 +483,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				return fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						tx := mock.NewMockTransaction(ctrl)
+						tx := mock2.NewMockTransaction(ctrl)
 
 						tx.EXPECT().
 							IsActive().
@@ -514,7 +514,7 @@ func Test_transactionManager_Do_Error(t *testing.T) {
 			fields: func(t *testing.T, ctrl *gomock.Controller, a args) fields {
 				f := fields{
 					factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-						txSP := mock.NewMocktransactionWithSP(ctrl)
+						txSP := mock2.NewMocktransactionWithSP(ctrl)
 
 						txSP.EXPECT().IsActive().Return(true).Times(1)
 						txSP.EXPECT().Begin(gomock.Any(), a.settings).Return(ctx, nil, testErr)
@@ -573,9 +573,9 @@ func Test_transactionManager_Do_Panic(t *testing.T) {
 	testPanic := "panic"
 	testRollbackErr := errors.New("rollback error")
 
-	log := mock.NewLog()
+	log := mock2.NewLog()
 	factory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-		tx := mock.NewMockTransaction(ctrl)
+		tx := mock2.NewMockTransaction(ctrl)
 
 		tx.EXPECT().IsActive().Return(true)
 		tx.EXPECT().Rollback(gomock.Any()).Return(testRollbackErr)
@@ -639,7 +639,7 @@ func Test_transactionManager_Do_ClosedTransaction(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			tx := mock.NewMockTransaction(ctrl)
+			tx := mock2.NewMockTransaction(ctrl)
 			tx.EXPECT().IsActive().Return(false).MinTimes(2)
 
 			factory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
@@ -683,7 +683,7 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 		"cancel": {
 			fields: fields{
 				factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-					tr := mock.NewMockTransaction(ctrl)
+					tr := mock2.NewMockTransaction(ctrl)
 					tr.EXPECT().IsActive().Return(false)
 
 					return ctx, tr, nil
@@ -706,7 +706,7 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 		"timeout": {
 			fields: fields{
 				factory: func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-					tr := mock.NewMockTransaction(ctrl)
+					tr := mock2.NewMockTransaction(ctrl)
 					tr.EXPECT().IsActive().Return(false)
 
 					return ctx, tr, nil
@@ -776,7 +776,7 @@ func TestManager_WithOpts(t *testing.T) {
 	t.Run("set", func(t *testing.T) {
 		t.Parallel()
 
-		l := mock.NewZeroLog()
+		l := mock2.NewZeroLog()
 		m := Must(nil, WithLog(l), WithSettings(s{}))
 
 		assert.Equal(t, l, m.log)

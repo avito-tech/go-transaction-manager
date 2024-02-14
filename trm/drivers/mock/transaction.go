@@ -5,11 +5,12 @@
 package mock
 
 import (
-	context "context"
-	reflect "reflect"
+	"context"
+	"reflect"
 
-	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // MockNestedTrFactory is a mock of NestedTrFactory interface.
@@ -72,6 +73,20 @@ func NewMockTransaction(ctrl *gomock.Controller) *MockTransaction {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockTransaction) EXPECT() *MockTransactionMockRecorder {
 	return m.recorder
+}
+
+// Closed mocks base method.
+func (m *MockTransaction) Closed() <-chan struct{} {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Closed")
+	ret0, _ := ret[0].(<-chan struct{})
+	return ret0
+}
+
+// Closed indicates an expected call of Closed.
+func (mr *MockTransactionMockRecorder) Closed() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Closed", reflect.TypeOf((*MockTransaction)(nil).Closed))
 }
 
 // Commit mocks base method.
@@ -167,6 +182,20 @@ func (m *MocktransactionWithSP) Begin(ctx context.Context, s trm.Settings) (cont
 func (mr *MocktransactionWithSPMockRecorder) Begin(ctx, s interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MocktransactionWithSP)(nil).Begin), ctx, s)
+}
+
+// Closed mocks base method.
+func (m *MocktransactionWithSP) Closed() <-chan struct{} {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Closed")
+	ret0, _ := ret[0].(<-chan struct{})
+	return ret0
+}
+
+// Closed indicates an expected call of Closed.
+func (mr *MocktransactionWithSPMockRecorder) Closed() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Closed", reflect.TypeOf((*MocktransactionWithSP)(nil).Closed))
 }
 
 // Commit mocks base method.

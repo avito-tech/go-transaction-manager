@@ -5,11 +5,12 @@
 package mock
 
 import (
-	context "context"
-	reflect "reflect"
+	"context"
+	"reflect"
 
-	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 )
 
 // MockManager is a mock of Manager interface.
