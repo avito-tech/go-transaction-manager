@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+
+## [1.5.0] - 2024-02-15
+
+### Added
+
+- fixed goroutine leak because of not closed context in some cases
+- fixed decrement of save points in sql
+
 ## [1.4.0] - 2023-09-01
 
 ### Added
