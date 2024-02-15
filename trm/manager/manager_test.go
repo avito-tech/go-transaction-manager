@@ -743,9 +743,9 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 				WithSettings(tt.fields.settings),
 			)
 
-			err := error(nil)
-			wg := sync.WaitGroup{}
+			var err error
 
+			wg := sync.WaitGroup{}
 			wg.Add(1)
 
 			ctx, cancel := tt.ctx(context.Background())
