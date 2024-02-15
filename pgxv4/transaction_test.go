@@ -196,6 +196,7 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
+
 			if tr != nil {
 				require.False(t, tr.IsActive())
 			}
@@ -203,6 +204,7 @@ func TestTransaction(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
+
 			assert.NoError(t, dbmock.ExpectationsWereMet())
 		})
 	}

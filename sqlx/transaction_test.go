@@ -215,6 +215,7 @@ func TestTransaction(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
+
 			assert.NoError(t, dbmock.ExpectationsWereMet())
 		})
 	}

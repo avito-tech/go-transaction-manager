@@ -146,6 +146,7 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
+
 			if tr != nil {
 				require.False(t, tr.IsActive())
 			}

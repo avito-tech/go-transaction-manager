@@ -98,7 +98,7 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 }
 
 func newNilClose(cancel context.CancelFunc) Closer {
-	return func(ctx context.Context, p interface{}, err *error) error {
+	return func(_ context.Context, p interface{}, err *error) error {
 		defer cancel()
 
 		if p != nil {
