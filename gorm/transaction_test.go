@@ -5,19 +5,19 @@ package gorm
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/mysql"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	"github.com/avito-tech/go-transaction-manager/internal/mock"
+	"github.com/avito-tech/go-transaction-manager/internal/test"
 	"github.com/avito-tech/go-transaction-manager/trm"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/context"
 	"github.com/avito-tech/go-transaction-manager/trm/manager"
@@ -31,6 +31,7 @@ func TestTransaction(t *testing.T) {
 		ctx context.Context
 	}
 
+	ctx := context.Background()
 	testErr := errors.New("error test")
 	testCommitErr := errors.New("error Commit test")
 	testRollbackErr := errors.New("error rollback test")
@@ -54,7 +55,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectCommit()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret:     nil,
 			wantErr: assert.NoError,
@@ -64,7 +65,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectBegin().WillReturnError(testErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
@@ -80,7 +81,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectCommit().WillReturnError(testCommitErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
@@ -99,13 +100,13 @@ func TestTransaction(t *testing.T) {
 				m.ExpectRollback().WillReturnError(testRollbackErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.NotNil(t, err, testRollbackErr) &&
-					assert.NotNil(t, err, trm.ErrRollback)
+					assert.ErrorIs(t, err, testRollbackErr) &&
+					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 		"begin_savepoint_error": {
@@ -116,7 +117,7 @@ func TestTransaction(t *testing.T) {
 					WillReturnError(testErr)
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
@@ -136,7 +137,7 @@ func TestTransaction(t *testing.T) {
 				m.ExpectRollback()
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -152,7 +153,7 @@ func TestTransaction(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			db, dbmock, _ := sqlmock.New()
+			db, dbmock := test.NewDBMockWithClose(t)
 			dbgorm, err := gorm.Open(mysql.New(mysql.Config{
 				Conn:                      db,
 				SkipInitializeWithVersion: true,
@@ -172,8 +173,10 @@ func TestTransaction(t *testing.T) {
 				manager.WithSettings(s),
 			)
 
-			var tr Transaction
+			var tr trm.Transaction
 			err = m.Do(tt.args.ctx, func(ctx context.Context) error {
+				tr = trmcontext.DefaultManager.Default(ctx)
+
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -189,28 +192,38 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
-			require.False(t, tr.IsActive())
+
+			if tr != nil {
+				require.False(t, tr.IsActive())
+			}
 
 			if !tt.wantErr(t, err) {
 				return
 			}
+
 			assert.NoError(t, dbmock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestTransaction_awaitDone(t *testing.T) {
+func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	db, dbmock, _ := sqlmock.New()
+	db, dbmock := test.NewDBMock()
 	dbmock.ExpectBegin()
-
-	dbgorm, err := gorm.Open(sqlite.Open(""), &gorm.Config{
-		ConnPool: db,
+	dbmock.ExpectRollback()
+	dbmock.ExpectClose()
+	test.Cleanup(t, func() {
+		require.NoError(t, db.Close())
 	})
+
+	dbgorm, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{})
 	require.NoError(t, err)
 
 	f := NewDefaultFactory(dbgorm)
@@ -220,14 +233,56 @@ func TestTransaction_awaitDone(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
 
 		cancel()
-		<-time.After(time.Second)
 
 		<-ctx.Done()
-
-		require.NoError(t, err)
+		require.True(t, tr.IsActive())
+		<-tr.Closed()
 		require.False(t, tr.IsActive())
+
+		require.Equal(t, context.Canceled, ctx.Err())
+		err = tr.Commit(ctx)
+		require.ErrorIs(t, err, sql.ErrTxDone)
+	}()
+
+	wg.Wait()
+}
+
+// TestTransaction_awaitDone_byRollback checks goroutine leak when we close transaction manually.
+func TestTransaction_awaitDone_byRollback(t *testing.T) {
+	t.Parallel()
+
+	db, dbmock := test.NewDBMock()
+	dbmock.ExpectBegin()
+	dbmock.ExpectRollback()
+	dbmock.ExpectClose()
+	test.Cleanup(t, func() {
+		require.NoError(t, db.Close())
+	})
+
+	dbgorm, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{})
+	require.NoError(t, err)
+
+	f := NewDefaultFactory(dbgorm)
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+
+		_, tr, err := f(ctx, settings.Must())
+		require.NoError(t, err)
+
+		require.NoError(t, tr.Rollback(ctx))
+		require.False(t, tr.IsActive())
+		require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
 	}()
 
 	wg.Wait()

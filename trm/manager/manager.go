@@ -68,7 +68,9 @@ func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ct
 	}
 
 	// Pointer to error is required for recovery and subsequent trm.Transaction rollback call.
-	defer func() { err = closer(ctx, recover(), &err) }()
+	defer func() {
+		err = closer(ctx, recover(), &err)
+	}()
 
 	return fn(ctx)
 }

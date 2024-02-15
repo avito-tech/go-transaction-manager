@@ -27,6 +27,7 @@ func Example() {
 	ctx := context.Background()
 
 	checkErr(client.Connect(ctx))
+	defer client.Disconnect(ctx)
 
 	collection := client.Database("test").Collection("users")
 

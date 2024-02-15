@@ -11,7 +11,10 @@ import (
 // NewDefaultFactory creates default trm.Transaction(redis.UniversalClient).
 func NewDefaultFactory(db redis.UniversalClient) trm.TrFactory {
 	return func(ctx context.Context, trms trm.Settings) (context.Context, trm.Transaction, error) {
-		s, _ := trms.(Settings)
+		s, ok := trms.(*Settings)
+		if !ok {
+			s, _ = NewSettings(trms)
+		}
 
 		return NewTransaction(ctx, db, s)
 	}

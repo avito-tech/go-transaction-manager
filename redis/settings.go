@@ -1,6 +1,8 @@
 package redis
 
 import (
+	"sync"
+
 	"github.com/go-redis/redis/v8"
 
 	"github.com/avito-tech/go-transaction-manager/trm"
@@ -20,30 +22,33 @@ type Settings struct {
 	isMulti     *bool
 	watchKeys   []string
 	txDecorator []TxDecorator
-	ret         *[]redis.Cmder
+
+	ret   *[]redis.Cmder
+	muRet sync.RWMutex
 }
 
 // NewSettings creates Settings.
-func NewSettings(trms trm.Settings, oo ...Opt) (Settings, error) {
+func NewSettings(trms trm.Settings, oo ...Opt) (*Settings, error) {
 	s := &Settings{
 		Settings:    trms,
 		isMulti:     nil,
 		watchKeys:   nil,
 		txDecorator: nil,
 		ret:         nil,
+		muRet:       sync.RWMutex{},
 	}
 
 	for _, o := range oo {
 		if err := o(s); err != nil {
-			return Settings{}, err
+			return nil, err
 		}
 	}
 
-	return *s, nil
+	return s, nil
 }
 
 // MustSettings returns Settings if err is nil and panics otherwise.
-func MustSettings(trms trm.Settings, oo ...Opt) Settings {
+func MustSettings(trms trm.Settings, oo ...Opt) *Settings {
 	s, err := NewSettings(trms, oo...)
 	if err != nil {
 		panic(err)
@@ -53,8 +58,8 @@ func MustSettings(trms trm.Settings, oo ...Opt) Settings {
 }
 
 // EnrichBy fills nil properties from external Settings.
-func (s Settings) EnrichBy(in trm.Settings) trm.Settings {
-	external, ok := in.(Settings)
+func (s *Settings) EnrichBy(in trm.Settings) trm.Settings {
+	external, ok := in.(*Settings)
 	if ok {
 		if s.IsMultiOrNil() == nil {
 			s = s.SetIsMulti(external.IsMultiOrNil())
@@ -68,8 +73,8 @@ func (s Settings) EnrichBy(in trm.Settings) trm.Settings {
 			s = s.SetTxDecorators(external.TxDecorators()...)
 		}
 
-		if s.Return() == nil {
-			s = s.SetReturn(external.Return())
+		if s.ReturnPtr() == nil {
+			s = s.SetReturn(external.ReturnPtr())
 		}
 	}
 
@@ -79,7 +84,7 @@ func (s Settings) EnrichBy(in trm.Settings) trm.Settings {
 }
 
 // IsMulti - true uses redis MULTI cmd.
-func (s Settings) IsMulti() bool {
+func (s *Settings) IsMulti() bool {
 	if s.isMulti == nil {
 		return DefaultMulti
 	}
@@ -88,64 +93,89 @@ func (s Settings) IsMulti() bool {
 }
 
 // IsMultiOrNil returns IsMulti or nil.
-func (s Settings) IsMultiOrNil() *bool {
+func (s *Settings) IsMultiOrNil() *bool {
 	return s.isMulti
 }
 
 // SetIsMulti set using or not Multi for transaction, see https://redis.uptrace.dev/guide/go-redis-pipelines.html#transactions.
-func (s Settings) SetIsMulti(in *bool) Settings {
+func (s *Settings) SetIsMulti(in *bool) *Settings {
 	return s.setIsMulti(in)
 }
 
-func (s Settings) setIsMulti(in *bool) Settings {
+func (s *Settings) setIsMulti(in *bool) *Settings {
 	s.isMulti = in
 
 	return s
 }
 
 // WatchKeys returns keys for watching.
-func (s Settings) WatchKeys() []string {
+func (s *Settings) WatchKeys() []string {
 	return s.watchKeys
 }
 
 // SetWatchKeys sets keys for watching, see https://redis.uptrace.dev/guide/go-redis-pipelines.html#watch.
-func (s Settings) SetWatchKeys(in []string) Settings {
+func (s *Settings) SetWatchKeys(in []string) *Settings {
 	return s.setWatchKeys(in)
 }
 
-func (s Settings) setWatchKeys(in []string) Settings {
+func (s *Settings) setWatchKeys(in []string) *Settings {
 	s.watchKeys = in
 
 	return s
 }
 
 // TxDecorators returns TxDecorator decorators.
-func (s Settings) TxDecorators() []TxDecorator {
+func (s *Settings) TxDecorators() []TxDecorator {
 	return s.txDecorator
 }
 
 // SetTxDecorators sets TxDecorator decorators.
-func (s Settings) SetTxDecorators(in ...TxDecorator) Settings {
+func (s *Settings) SetTxDecorators(in ...TxDecorator) *Settings {
 	return s.setTxDecorator(in...)
 }
 
-func (s Settings) setTxDecorator(in ...TxDecorator) Settings {
+func (s *Settings) setTxDecorator(in ...TxDecorator) *Settings {
 	s.txDecorator = in
 
 	return s
 }
 
-// Return returns []redis.Cmder from Transaction.
-func (s Settings) Return() *[]redis.Cmder {
+// ReturnPtr returns link to save []redis.Cmder from Transaction.
+func (s *Settings) ReturnPtr() *[]redis.Cmder {
+	s.muRet.RLock()
+	defer s.muRet.RUnlock()
+
 	return s.ret
 }
 
+// Return returns []redis.Cmder from Transaction.
+func (s *Settings) Return() []redis.Cmder {
+	res := s.ReturnPtr()
+	if res != nil {
+		return *s.ReturnPtr()
+	}
+
+	return nil
+}
+
+// AppendReturn append []redis.Cmder from Transaction.
+func (s *Settings) AppendReturn(cmds ...redis.Cmder) {
+	if s.ReturnPtr() == nil {
+		return
+	}
+
+	s.muRet.Lock()
+	defer s.muRet.Unlock()
+
+	*s.ret = append(*s.ret, cmds...)
+}
+
 // SetReturn sets link to save []redis.Cmder from Transaction.
-func (s Settings) SetReturn(in *[]redis.Cmder) Settings {
+func (s *Settings) SetReturn(in *[]redis.Cmder) *Settings {
 	return s.setReturn(in)
 }
 
-func (s Settings) setReturn(in *[]redis.Cmder) Settings {
+func (s *Settings) setReturn(in *[]redis.Cmder) *Settings {
 	s.ret = in
 
 	return s

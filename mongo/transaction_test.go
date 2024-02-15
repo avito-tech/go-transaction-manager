@@ -164,8 +164,10 @@ func TestTransaction(t *testing.T) {
 				manager.WithSettings(f.settings),
 			)
 
-			var tr Transaction
+			var tr trm.Transaction
 			err := m.Do(tt.args.ctx, func(ctx context.Context) error {
+				tr = trmcontext.DefaultManager.Default(ctx)
+
 				var trNested trm.Transaction
 				err := m.Do(ctx, func(ctx context.Context) error {
 					trNested = trmcontext.DefaultManager.Default(ctx)
@@ -181,7 +183,10 @@ func TestTransaction(t *testing.T) {
 
 				return err
 			})
-			require.False(t, false, tr.IsActive())
+
+			if tr != nil {
+				require.False(t, tr.IsActive())
+			}
 
 			if !tt.wantErr(t, err) {
 				return
@@ -190,7 +195,7 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-func TestTransaction_awaitDone(t *testing.T) {
+func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
 	mt := mtest.New(

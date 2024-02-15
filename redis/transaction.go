@@ -5,50 +5,48 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"sync/atomic"
 
 	"github.com/go-redis/redis/v8"
-)
 
-var errRollbackTx = errors.New("rollback transaction")
+	"github.com/avito-tech/go-transaction-manager/trm/drivers"
+)
 
 // TxDecorator is an interface for Transaction.tx decoration.
 type TxDecorator func(tx Cmdable, db redis.Cmdable) Cmdable
 
 // Transaction is trm.Transaction for sqlx.Tx.
 type Transaction struct {
-	tx Cmdable
-	// err is used to close transaction and get error from it
-	err      chan error
-	isActive int64
+	tx              txInterface
+	isClosed        *drivers.IsClosed
+	isClosedClosure *drivers.IsClosed
 }
 
 // NewTransaction creates trm.Transaction for sqlx.Tx.
 func NewTransaction(
 	ctx context.Context,
 	db redis.UniversalClient,
-	s Settings,
-) (context.Context, *Transaction, error) {
-	t := &Transaction{isActive: 1, err: make(chan error), tx: nil}
-
-	var err error
+	s *Settings,
+) (_ context.Context, _ *Transaction, err error) {
+	t := &Transaction{
+		tx:              nil,
+		isClosed:        drivers.NewIsClosed(),
+		isClosedClosure: drivers.NewIsClosed(),
+	}
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
 	go func() {
-		var cmds []redis.Cmder
-
 		err = db.Watch(ctx, func(rtx *redis.Tx) error {
 			fn := rtx.Pipelined
 			if s.IsMulti() {
 				fn = rtx.TxPipelined
 			}
 
-			cmds, err = fn(ctx, func(pipe redis.Pipeliner) error {
+			cmds, err := fn(ctx, func(pipe redis.Pipeliner) error {
 				t.tx = &tx{
-					tx:      rtx,
-					Cmdable: pipe,
+					tx:        rtx,
+					Pipeliner: pipe,
 				}
 
 				for _, d := range s.TxDecorators() {
@@ -57,18 +55,20 @@ func NewTransaction(
 
 				wg.Done()
 
-				return <-t.err
+				<-t.isClosedClosure.Closed()
+
+				return t.isClosedClosure.Err()
 			})
 
-			if len(cmds) > 0 && s.Return() != nil {
-				*s.Return() = append(*s.Return(), cmds...)
+			if len(cmds) > 0 {
+				s.AppendReturn(cmds...)
 			}
 
 			return err
 		}, s.WatchKeys()...)
 
 		if t.tx != nil {
-			t.err <- err
+			t.isClosed.CloseWithCause(err)
 		} else {
 			wg.Done()
 		}
@@ -90,9 +90,12 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 		return
 	}
 
-	<-ctx.Done()
-
-	t.deactivate()
+	select {
+	case <-ctx.Done():
+		// Rollback will be called by context.Err()
+		t.isClosedClosure.Close()
+	case <-t.isClosed.Closed():
+	}
 }
 
 // Transaction returns the real transaction sqlx.Tx.
@@ -102,34 +105,50 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // Commit closes the trm.Transaction.
-func (t *Transaction) Commit(_ context.Context) error {
-	defer t.deactivate()
+func (t *Transaction) Commit(ctx context.Context) error {
+	select {
+	case <-t.isClosed.Closed():
+		_, err := t.tx.Exec(ctx)
 
-	t.err <- nil
+		return err
+	default:
+		t.isClosedClosure.Close()
 
-	return <-t.err
+		<-t.isClosed.Closed()
+
+		return t.isClosed.Err()
+	}
 }
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(_ context.Context) error {
-	defer t.deactivate()
+	select {
+	case <-t.isClosed.Closed():
+		return t.tx.Discard()
+	default:
+		t.isClosedClosure.CloseWithCause(drivers.ErrRollbackTr)
 
-	t.err <- errRollbackTx
+		<-t.isClosed.Closed()
 
-	err := <-t.err
+		err := t.isClosed.Err()
+		if errors.Is(err, drivers.ErrRollbackTr) {
+			return nil
+		}
 
-	if errors.Is(err, errRollbackTx) {
-		return nil
+		// unreachable code, because of go-redis doesn't process error from Close
+		// https://github.com/redis/go-redis/blob/v8.11.5/tx.go#L69
+		// https://github.com/redis/go-redis/blob/v8.11.5/pipeline.go#L130
+
+		return err
 	}
-
-	return err
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
 func (t *Transaction) IsActive() bool {
-	return atomic.LoadInt64(&t.isActive) == 1
+	return t.isClosed.IsActive()
 }
 
-func (t *Transaction) deactivate() {
-	atomic.SwapInt64(&t.isActive, 0)
+// Closed returns a channel that's closed when transaction committed or rolled back.
+func (t *Transaction) Closed() <-chan struct{} {
+	return t.isClosed.Closed()
 }

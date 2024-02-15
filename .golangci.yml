@@ -89,6 +89,14 @@ issues:
       text: "only cuddled expressions if assigning variable or using from line above"
     - path: _test\.go
       linters:
+        - wsl
+      text: "assignments should only be cuddled with other assignments"
+    - path: _test\.go
+      linters:
+        - revive
+      text: "seems to be unused, consider removing or renaming it as _"
+    - path: _test\.go
+      linters:
         - revive
       text: "context-keys-type: should not use basic type string as key in context.WithValue"
     - path: _test\.go
