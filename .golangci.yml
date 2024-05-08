@@ -29,7 +29,7 @@ linters:
     - gocritic
     - gocyclo
     - godot
-    - goerr113
+    - err113
     - gofmt
     - gofumpt
     - goimports
@@ -129,7 +129,7 @@ issues:
         - goconst
         - gomnd
         - containedctx
-        - goerr113
+        - err113
         - errcheck
         - nolintlint
         - forcetypeassert
