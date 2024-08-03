@@ -2,6 +2,7 @@ package pgxv4
 
 import (
 	"context"
+	"sync"
 
 	"github.com/jackc/pgx/v4"
 
@@ -11,8 +12,17 @@ import (
 
 // Transaction is trm.Transaction for pgx.Tx.
 type Transaction struct {
+	mu       sync.Mutex
 	tx       pgx.Tx
 	isClosed *drivers.IsClosed
+}
+
+func newDefaultTransaction(tx pgx.Tx) *Transaction {
+	return &Transaction{
+		mu:       sync.Mutex{},
+		tx:       tx,
+		isClosed: drivers.NewIsClosed(),
+	}
 }
 
 // NewTransaction creates trm.Transaction for pgx.Tx.
@@ -26,10 +36,7 @@ func NewTransaction(
 		return ctx, nil, err
 	}
 
-	tr := &Transaction{
-		tx:       tx,
-		isClosed: drivers.NewIsClosed(),
-	}
+	tr := newDefaultTransaction(tx)
 
 	go tr.awaitDone(ctx)
 
@@ -43,7 +50,7 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 
 	select {
 	case <-ctx.Done():
-		t.isClosed.Close()
+		_ = t.Rollback(ctx)
 	case <-t.isClosed.Closed():
 	}
 }
@@ -60,16 +67,15 @@ func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Contex
 		return ctx, nil, err
 	}
 
-	tr := &Transaction{
-		tx:       tx,
-		isClosed: drivers.NewIsClosed(),
-	}
+	tr := newDefaultTransaction(tx)
 
 	return ctx, tr, nil
 }
 
 // Commit the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	defer t.isClosed.Close()
 
 	return t.tx.Commit(ctx)
@@ -77,6 +83,8 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	defer t.isClosed.Close()
 
 	return t.tx.Rollback(ctx)
