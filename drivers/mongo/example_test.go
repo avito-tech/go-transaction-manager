@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	_ "github.com/mattn/go-sqlite3"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -15,7 +14,6 @@ import (
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 
 	trmmongo "github.com/avito-tech/go-transaction-manager/drivers/mongo/v2"
-	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
@@ -29,7 +27,7 @@ func Example() {
 
 	collection := client.Database("test").Collection("users")
 
-	r := newRepo(collection, trmsql.DefaultCtxGetter)
+	r := newRepo(collection, trmmongo.DefaultCtxGetter)
 
 	u := &user{
 		ID:       1,
@@ -64,10 +62,10 @@ func Example() {
 
 type repo struct {
 	collection *mongo.Collection
-	getter     *trmsql.CtxGetter
+	getter     *trmmongo.CtxGetter
 }
 
-func newRepo(collection *mongo.Collection, c *trmsql.CtxGetter) *repo {
+func newRepo(collection *mongo.Collection, c *trmmongo.CtxGetter) *repo {
 	return &repo{
 		collection: collection,
 		getter:     c,

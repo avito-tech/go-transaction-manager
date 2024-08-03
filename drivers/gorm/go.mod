@@ -4,9 +4,10 @@ go 1.18
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.1
-	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc10
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/stretchr/testify v1.8.2
+	go.uber.org/goleak v1.3.0
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/driver/sqlite v1.5.4
 	gorm.io/gorm v1.25.5
