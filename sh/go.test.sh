@@ -15,7 +15,7 @@ golist() {
 gotest() {
   cd $driver
 
-  go test $(golist) "$@"
+  go test -mod=readonly $(golist) "$@"
 
   cd $ROOT
 }

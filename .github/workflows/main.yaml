@@ -131,7 +131,7 @@ jobs:
         uses: actions/checkout@v4
       - id: set-matrix
         run: |
-          DIRECTORIES=$(find .  -not -path "*/vendor/*" -type f -name go.mod -exec sh -c 'echo $(dirname {})' \; | jq -R -s -c 'split("\n")[:-1]')
+          DIRECTORIES=$(find .  -not -path "*/vendor/*" -not -path "*/internal/*" -type f -name go.mod -exec sh -c 'echo $(dirname {})' \; | jq -R -s -c 'split("\n")[:-1]')
           echo "matrix=${DIRECTORIES}" >> $GITHUB_OUTPUT
 
   lint:
