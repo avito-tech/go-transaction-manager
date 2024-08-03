@@ -62,7 +62,6 @@ linters-settings:
 
 issues:
   exclude-dirs:
-    - trm/mock
     - trm/manager/mock
     - sql/mock
   exclude-use-default: false
