@@ -167,3 +167,16 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 
 * To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.
 * To run all tests use `make go.test` or `make go.test.with_real_db` for integration tests.
+
+### Requirements
+
+- [golangci-lint](https://golangci-lint.run/welcome/install/)
+
+### Local Running
+
+To run database by docker, there is [docker-compose.yaml](trm/drivers/test/docker-compose.yaml).
+```bash
+docker compose -f trm/drivers/test/docker-compose.yaml up
+```
+
+For full GitHub Actions run, you can use [act](https://github.com/nektos/act).
