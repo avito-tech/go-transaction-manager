@@ -1,9 +1,3 @@
-run:
-  skip-dirs:
-    - trm/mock
-    - trm/manager/mock
-    - sql/mock
-
 linters:
   enable:
     - asasalint
@@ -16,7 +10,6 @@ linters:
     - errchkjson
     - errname
     - errorlint
-    - execinquery
     - exhaustive
     - exhaustruct
     - exportloopref # https://github.com/kyoh86/exportloopref#whats-this
@@ -68,6 +61,9 @@ linters-settings:
     allow-assign-and-anything: true
 
 issues:
+  exclude-dirs:
+    - trm/manager/mock
+    - sql/mock
   exclude-use-default: false
   exclude:
     - ST1000 # ST1000: at least one file in a package should have a package comment

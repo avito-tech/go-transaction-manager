@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.0-rc-9] - 2024-08-03
+## [2.0.0-rc-9.5] - 2024-08-09
+
+### Changes
+
+- Bumped tests up to go1.22.
+
+## [2.0.0-rc-9] - 2024-08-09
 
 ### Fixed
 
