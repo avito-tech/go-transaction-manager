@@ -12,12 +12,22 @@ golist() {
   go list ./... | grep -v mock | grep -v internal/
 }
 
+verlte() {
+    printf '%s\n%s' "$1" "$2" | sort -C -V
+}
+
 gotest() {
   cd $driver
 
-  go test -mod=readonly -race $(golist) "$@"
+  local go_mod_ver=$(sed -En 's/^go (.*)$/\1/p' go.mod)
+  local go_ver=$(go version | sed -n 's/.*go\([0-9.]*\).*/\1/p')
 
-  local exit_code=$?
+  local exit_code=0
+  if verlte $go_mod_ver $go_ver; then
+
+    go test -race -mod=readonly $(golist) "$@"
+    exit_code=$?
+  fi
 
   cd $ROOT
 

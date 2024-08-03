@@ -16,3 +16,5 @@ exclude (
 	github.com/jackc/pgconn v1.14.3
 	golang.org/x/text v0.14.0
 )
+
+exclude golang.org/x/text v0.14.0

@@ -24,7 +24,7 @@ func Example() {
 	client, err := mongo.Connect(ctx, options.Client().
 		ApplyURI("mongodb://127.0.0.1:27017/?directConnection=true"))
 	checkErr(err)
-	// defer client.Disconnect(ctx) TODO rollback
+	defer client.Disconnect(ctx)
 
 	collection := client.Database("test").Collection("users")
 
