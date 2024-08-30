@@ -42,6 +42,14 @@ For example `go get github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2
 The library is compatible with the most recent two versions of Go.
 Compatibility beyond that is not guaranteed.
 
+The critical bugs are firstly solved for the most recent two Golang versions and then for older ones if it is simple.
+
+#### Disclaimer: Keep your dependencies up to date, even indirect ones.
+
+`go get -u && go mod tidy` helps you.
+
+**Note**: The go-transaction-manager uses some old dependencies to support backwards compatibility for old versions of Go.
+
 ## Usage
 
 **To use multiple transactions from different databases**, you need to set CtxKey in [Settings](trm/settings.go)
@@ -162,17 +170,17 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 
 ## Contribution
 
-1. To local development sync dependencies use `make go.work.sync`.
-2. After finalizing of changes bump up version in all drivers.
-
-* To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.
-* To run all tests use `make go.test` or `make go.test.with_real_db` for integration tests.
-
 ### Requirements
 
 - [golangci-lint](https://golangci-lint.run/welcome/install/)
 
 ### Local Running
+
+1. `make go.work.sync` syncs dependencies for local development.
+2. After finalizing of changes bump up version for all drivers.
+
+* To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.
+* To run all tests use `make go.test` or `make go.test.with_real_db` for integration tests.
 
 To run database by docker, there is [docker-compose.yaml](trm/drivers/test/docker-compose.yaml).
 ```bash
@@ -180,3 +188,26 @@ docker compose -f trm/drivers/test/docker-compose.yaml up
 ```
 
 For full GitHub Actions run, you can use [act](https://github.com/nektos/act).
+
+#### Running old go versions 
+
+To stop Golang upgrading set environment variable `GOTOOLCHAIN=local` .
+
+```sh
+go install go1.16 # or older version
+go1.16 install
+```
+
+To run some tests
+```
+go1.16 test -race -mod=readonly ./...
+```
+
+To build `go.mod` compatible for old version use `go mod tidy -compat=1.13` ([docs](https://go.dev/ref/mod#go-mod-tidy)).
+
+### How to bump up Golang version in CI/CD
+
+1. Changes in [.github/workflows/main.yaml](.github/workflows/main.yaml).
+   1. Add all old version of Go in `go-version:` for `tests-units` job.
+   2. Update `go-version:` on current version of Go for `lint` and `tests-integration` jobs.
+2. Update build tags by replacing `build go1.xx` on new version.

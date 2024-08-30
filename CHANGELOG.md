@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.0.0-rc-9.5] - 2024-08-09
 
+### Fixed
+
+- CI/CD passed always even if some of them failed.
+
 ### Changes
 
-- Bumped tests up to go1.22.
+- Bumped tests up to go1.23.
 
 ## [2.0.0-rc-9] - 2024-08-09
 
