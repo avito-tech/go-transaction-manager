@@ -1,12 +1,16 @@
+//go:build go1.14
+// +build go1.14
+
 package mongo
 
 import (
 	"context"
+	"testing"
+
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
-	"testing"
 )
 
 func TestContext(t *testing.T) {
