@@ -173,11 +173,9 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 ### Requirements
 
 - [golangci-lint](https://golangci-lint.run/welcome/install/)
+- [make](https://www.gnu.org/software/make/#download)
 
 ### Local Running
-
-1. `make go.work.sync` syncs dependencies for local development.
-2. After finalizing of changes bump up version for all drivers.
 
 * To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.
 * To run all tests use `make go.test` or `make go.test.with_real_db` for integration tests.
@@ -198,12 +196,12 @@ go install go1.16 # or older version
 go1.16 install
 ```
 
-To run some tests
+Use `-mod=readonly` to prevent `go.mod` modification.
+
+To run tests
 ```
 go1.16 test -race -mod=readonly ./...
 ```
-
-To build `go.mod` compatible for old version use `go mod tidy -compat=1.13` ([docs](https://go.dev/ref/mod#go-mod-tidy)).
 
 ### How to bump up Golang version in CI/CD
 
@@ -211,3 +209,16 @@ To build `go.mod` compatible for old version use `go mod tidy -compat=1.13` ([do
    1. Add all old version of Go in `go-version:` for `tests-units` job.
    2. Update `go-version:` on current version of Go for `lint` and `tests-integration` jobs.
 2. Update build tags by replacing `build go1.xx` on new version.
+
+
+### Resolve problems with old version of dependencies
+
+To build `go.mod` compatible for old version use `go mod tidy -compat=1.13` ([docs](https://go.dev/ref/mod#go-mod-tidy)).
+
+However, `--compat` doesn't always work correct and we need to set some library versions manually.
+
+1. `go get go.uber.org/multierr@v1.9.0` in [trm](trm), [sql](drivers/sql), [sqlx](drivers/sqlx).
+2. `go get github.com/mattn/go-sqlite3@v1.14.14` in [trm](trm), [sql](drivers/sql), [sqlx](drivers/sqlx).
+3. `go get github.com/stretchr/testify@v1.8.2` in [trm](trm), [sql](drivers/sql), [sqlx](drivers/sqlx), [goredis8](drivers/goredis8), [mongo](drivers/mongo).
+4. `go get github.com/jackc/pgconn@v1.14.2` in [pgxv4](drivers/pgxv4). Golang version was bumped up from 1.12 to 1.17 in pgconn v1.14.3.
+5. `go get golang.org/x/text@v0.13.0` in [pgxv4](drivers/pgxv4).
