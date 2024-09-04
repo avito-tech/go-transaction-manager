@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2 v2.0.0-rc9.2
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc10
-	github.com/jackc/pgx/v5 v5.5.1
+	github.com/jackc/pgx/v5 v5.5.4
 )
 
 require (
@@ -13,6 +13,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 )
