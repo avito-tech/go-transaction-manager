@@ -178,7 +178,7 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 ### Local Running
 
 * To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.
-* To run all tests use `make go.test` or `make go.test.with_real_db` for integration tests.
+* To run all tests use `make test` or `make test.with_real_db` for integration tests.
 
 To run database by docker, there is [docker-compose.yaml](trm/drivers/test/docker-compose.yaml).
 ```bash
