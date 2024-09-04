@@ -6,7 +6,6 @@ package mongo_test
 import (
 	"context"
 	"fmt"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,8 +21,9 @@ func Example() {
 	ctx := context.Background()
 
 	client, err := mongo.Connect(ctx, options.Client().
-		ApplyURI("mongodb://127.0.0.1:27017"))
+		ApplyURI("mongodb://127.0.0.1:27017/?directConnection=true"))
 	checkErr(err)
+	defer client.Disconnect(ctx)
 
 	collection := client.Database("test").Collection("users")
 

@@ -1,5 +1,5 @@
-//go:build go1.20
-// +build go1.20
+//go:build go1.23
+// +build go1.23
 
 package pgxv5
 

@@ -42,6 +42,14 @@ For example `go get github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2
 The library is compatible with the most recent two versions of Go.
 Compatibility beyond that is not guaranteed.
 
+The critical bugs are firstly solved for the most recent two Golang versions and then for older ones if it is simple.
+
+#### Disclaimer: Keep your dependencies up to date, even indirect ones.
+
+`go get -u && go mod tidy` helps you.
+
+**Note**: The go-transaction-manager uses some old dependencies to support backwards compatibility for old versions of Go.
+
 ## Usage
 
 **To use multiple transactions from different databases**, you need to set CtxKey in [Settings](trm/settings.go)
@@ -162,8 +170,55 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 
 ## Contribution
 
-1. To local development sync dependencies use `make go.work.sync`.
-2. After finalizing of changes bump up version in all drivers.
+### Requirements
+
+- [golangci-lint](https://golangci-lint.run/welcome/install/)
+- [make](https://www.gnu.org/software/make/#download)
+
+### Local Running
 
 * To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.
-* To run all tests use `make go.test` or `make go.test.with_real_db` for integration tests.
+* To run all tests use `make test` or `make test.with_real_db` for integration tests.
+
+To run database by docker, there is [docker-compose.yaml](trm/drivers/test/docker-compose.yaml).
+```bash
+docker compose -f trm/drivers/test/docker-compose.yaml up
+```
+
+For full GitHub Actions run, you can use [act](https://github.com/nektos/act).
+
+#### Running old go versions 
+
+To stop Golang upgrading set environment variable `GOTOOLCHAIN=local` .
+
+```sh
+go install go1.16 # or older version
+go1.16 install
+```
+
+Use `-mod=readonly` to prevent `go.mod` modification.
+
+To run tests
+```
+go1.16 test -race -mod=readonly ./...
+```
+
+### How to bump up Golang version in CI/CD
+
+1. Changes in [.github/workflows/main.yaml](.github/workflows/main.yaml).
+   1. Add all old version of Go in `go-version:` for `tests-units` job.
+   2. Update `go-version:` on current version of Go for `lint` and `tests-integration` jobs.
+2. Update build tags by replacing `build go1.xx` on new version.
+
+
+### Resolve problems with old version of dependencies
+
+To build `go.mod` compatible for old version use `go mod tidy -compat=1.13` ([docs](https://go.dev/ref/mod#go-mod-tidy)).
+
+However, `--compat` doesn't always work correct and we need to set some library versions manually.
+
+1. `go get go.uber.org/multierr@v1.9.0` in [trm](trm), [sql](drivers/sql), [sqlx](drivers/sqlx).
+2. `go get github.com/mattn/go-sqlite3@v1.14.14` in [trm](trm), [sql](drivers/sql), [sqlx](drivers/sqlx).
+3. `go get github.com/stretchr/testify@v1.8.2` in [trm](trm), [sql](drivers/sql), [sqlx](drivers/sqlx), [goredis8](drivers/goredis8), [mongo](drivers/mongo).
+4. `go get github.com/jackc/pgconn@v1.14.2` in [pgxv4](drivers/pgxv4). Golang version was bumped up from 1.12 to 1.17 in pgconn v1.14.3.
+5. `go get golang.org/x/text@v0.13.0` in [pgxv4](drivers/pgxv4).
