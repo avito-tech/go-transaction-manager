@@ -8,9 +8,7 @@ require (
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/pashagolub/pgxmock v1.8.0
-	github.com/stretchr/objx v0.5.1 // indirect
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/goleak v1.3.0
-	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
 )
