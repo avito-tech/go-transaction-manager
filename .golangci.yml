@@ -12,7 +12,6 @@ linters:
     - errorlint
     - exhaustive
     - exhaustruct
-    - exportloopref # https://github.com/kyoh86/exportloopref#whats-this
     - forcetypeassert # https://github.com/gostaticanalysis/forcetypeassert#forcetypeassert
     - funlen
     - gochecknoglobals
@@ -93,6 +92,10 @@ issues:
       linters:
         - revive
       text: "context-keys-type: should not use basic type string as key in context.WithValue"
+    - path: _test\.go
+      linters:
+        - revive
+      text: "context-keys-type: should not use basic type untyped string as key in context.WithValue"
     - path: _test\.go
       linters:
         - staticcheck
