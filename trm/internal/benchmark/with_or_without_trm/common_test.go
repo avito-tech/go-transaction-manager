@@ -15,7 +15,7 @@ func dbMock(b *testing.B) (*sqlx.DB, sqlmock.Sqlmock) {
 
 	dbmock.MatchExpectationsInOrder(false)
 
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		dbmock.ExpectBegin()
 
 		dbmock.ExpectExec(".+").

@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changes
 
-- Bumped test/benchmarks/work up to go1.24.
-- Changed benchmark loop to b.Loop()
+- Bumped test up to go1.24.
 
 ## [2.0.0] - 2024-09-05
 

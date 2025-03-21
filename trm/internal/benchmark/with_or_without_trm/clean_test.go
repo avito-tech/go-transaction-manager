@@ -33,7 +33,7 @@ func BenchmarkClean_SQLite_Memory(b *testing.B) {
 func runClean(b *testing.B, db *sqlx.DB) {
 	r := newRepo(db)
 
-	for b.Loop() {
+	for i := 0; i < b.N; i++ {
 		err := func() error {
 			tx, err := db.Beginx()
 			require.NoError(b, err)
