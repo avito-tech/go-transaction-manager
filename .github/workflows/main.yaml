@@ -31,7 +31,6 @@ jobs:
           - "1.21"
           - "1.22"
           - "1.23"
-          - "1.24"
         os:
           - ubuntu-latest
           # - macos-latest
