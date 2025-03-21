@@ -10,5 +10,5 @@ require (
 	github.com/pashagolub/pgxmock v1.8.0
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/goleak v1.3.0
-	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 )
