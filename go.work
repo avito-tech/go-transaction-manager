@@ -1,4 +1,4 @@
-go 1.21
+go 1.24
 
 use (
 	./drivers/goredis8
@@ -9,4 +9,5 @@ use (
 	./drivers/sql
 	./drivers/sqlx
 	./trm
+	./trm/internal/benchmark/with_or_without_trm
 )

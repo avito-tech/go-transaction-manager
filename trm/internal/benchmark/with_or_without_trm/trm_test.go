@@ -40,7 +40,7 @@ func runTRM(b *testing.B, db *sqlx.DB) {
 	ctx := context.Background()
 	trManager := manager.Must(trmsqlx.NewDefaultFactory(db))
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		u := &user{Username: "username"}
 
 		err := trManager.Do(ctx, func(ctx context.Context) error {
