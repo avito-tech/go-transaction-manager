@@ -7,7 +7,7 @@ require (
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc9.2
 	github.com/golang/mock v1.6.0
 	github.com/mattn/go-sqlite3 v1.14.14
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.8.2
 	go.uber.org/goleak v1.3.0
 	go.uber.org/multierr v1.9.0
 )
