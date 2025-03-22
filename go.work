@@ -9,5 +9,4 @@ use (
 	./drivers/sql
 	./drivers/sqlx
 	./trm
-	./trm/internal/benchmark/with_or_without_trm
 )
