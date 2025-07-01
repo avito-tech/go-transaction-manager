@@ -4,6 +4,7 @@ use (
 	./drivers/goredis8
 	./drivers/gorm
 	./drivers/mongo
+	./drivers/mongov2
 	./drivers/pgxv4
 	./drivers/pgxv5
 	./drivers/sql
