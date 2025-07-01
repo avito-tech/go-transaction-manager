@@ -90,13 +90,12 @@ func TestSettings_EnrichBy(t *testing.T) {
 
 			got := tt.settings.EnrichBy(tt.args.external)
 
-			//assert.Equal(t, tt.want, got)
-
-			t.Helper()
 			assert.Equal(t, tt.want.CtxKey(), got.CtxKey())
 			assert.Equal(t, tt.want.Propagation(), got.Propagation())
 			assert.Equal(t, tt.want.Cancelable(), got.Cancelable())
 			assert.Equal(t, tt.want.TimeoutOrNil(), got.TimeoutOrNil())
+
+			assert.Equal(t, len(tt.want.(Settings).SessionOpts().List()), len(got.(Settings).SessionOpts().List()))
 		})
 	}
 }

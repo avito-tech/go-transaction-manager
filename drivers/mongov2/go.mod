@@ -4,13 +4,15 @@ go 1.21
 
 require (
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc10
+	github.com/davecgh/go-spew v1.1.1
+	github.com/google/go-cmp v0.6.0
 	github.com/stretchr/testify v1.8.2
 	go.mongodb.org/mongo-driver/v2 v2.0.0
 	go.uber.org/goleak v1.3.0
 )
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
