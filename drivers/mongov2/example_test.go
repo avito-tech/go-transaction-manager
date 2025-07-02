@@ -1,11 +1,11 @@
 //go:build with_real_db
-// +build with_real_db
 
 package mongov2_test
 
 import (
 	"context"
 	"fmt"
+	trmmongo "github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -18,7 +18,7 @@ import (
 func Example() {
 	ctx := context.Background()
 
-	client, err := mongo.Connect(ctx, options.Client().
+	client, err := mongo.Connect(options.Client().
 		ApplyURI("mongodb://127.0.0.1:27017/?directConnection=true"))
 	checkErr(err)
 	defer client.Disconnect(ctx)
