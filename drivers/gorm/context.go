@@ -12,7 +12,7 @@ import (
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
 var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
 
-// CtxGetter gets Tr from trm.СtxManager by casting trm.Transaction to *gorm.DB.
+// CtxGetter gets Tr from trm.CtxManager by casting trm.Transaction to *gorm.DB.
 type CtxGetter struct {
 	ctxManager trm.CtxManager
 }

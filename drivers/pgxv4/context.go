@@ -10,7 +10,7 @@ import (
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
 var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
 
-// CtxGetter gets Tr from trm.СtxManager by casting trm.Transaction to Tr.
+// CtxGetter gets Tr from trm.CtxManager by casting trm.Transaction to Tr.
 type CtxGetter struct {
 	ctxManager trm.CtxManager
 }

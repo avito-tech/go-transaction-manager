@@ -12,7 +12,7 @@ import (
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
 var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
 
-// CtxGetter gets goredis8.Pipeliner from trm.СtxManager by casting trm.Transaction to redis.UniversalClient.
+// CtxGetter gets goredis8.Pipeliner from trm.CtxManager by casting trm.Transaction to redis.UniversalClient.
 type CtxGetter struct {
 	ctxManager trm.CtxManager
 }

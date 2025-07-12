@@ -10,7 +10,7 @@ type CtxKey interface{}
 // CtxGetter gets Transaction from context.Context.
 type CtxGetter func(ctx context.Context) Transaction
 
-// СtxManager sets and gets a Transaction in/from context.Context.
+// CtxManager sets and gets a Transaction in/from context.Context.
 type CtxManager interface {
 	// Default gets Transaction from context.Context by default CtxKey.
 	Default(ctx context.Context) Transaction
