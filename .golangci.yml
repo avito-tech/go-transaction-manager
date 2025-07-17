@@ -63,6 +63,7 @@ issues:
   exclude-dirs:
     - trm/manager/mock
     - sql/mock
+    - drivers/mongov2/internal
   exclude-use-default: false
   exclude:
     - ST1000 # ST1000: at least one file in a package should have a package comment
