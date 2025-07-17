@@ -11,10 +11,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/bsonutil"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/handshake"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/ptrutil"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/internal/bsonutil"
-	"go.mongodb.org/mongo-driver/v2/internal/handshake"
-	"go.mongodb.org/mongo-driver/v2/internal/ptrutil"
 	"go.mongodb.org/mongo-driver/v2/mongo/address"
 	"go.mongodb.org/mongo-driver/v2/tag"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/description"

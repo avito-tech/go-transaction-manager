@@ -4,12 +4,14 @@ package mongov2
 
 import (
 	"context"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/mtest"
 	"testing"
+
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/mtest"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
-	"github.com/stretchr/testify/require"
 )
 
 func TestContext(t *testing.T) {

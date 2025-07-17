@@ -5,11 +5,13 @@ package mongov2_test
 import (
 	"context"
 	"fmt"
-	trmmongo "github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2"
-	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
+	trmmongo "github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )

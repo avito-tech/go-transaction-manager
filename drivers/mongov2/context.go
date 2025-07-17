@@ -2,8 +2,10 @@ package mongov2
 
 import (
 	"context"
-	"github.com/avito-tech/go-transaction-manager/trm/v2"
+
 	"go.mongodb.org/mongo-driver/v2/mongo"
+
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 )

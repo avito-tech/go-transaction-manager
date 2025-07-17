@@ -16,7 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/integtest"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -26,6 +25,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/connstring"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/description"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/topology"
+
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/integtest"
 )
 
 const (

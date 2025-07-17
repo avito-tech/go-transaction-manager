@@ -13,16 +13,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/assert"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/driverutil"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/require"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/spectest"
 	"github.com/google/go-cmp/cmp"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo/address"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 	"go.mongodb.org/mongo-driver/v2/tag"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/description"
+
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/assert"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/driverutil"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/require"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/spectest"
 )
 
 type lastWriteDate struct {

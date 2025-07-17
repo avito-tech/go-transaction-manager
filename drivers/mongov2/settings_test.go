@@ -1,9 +1,10 @@
 package mongov2
 
 import (
+	"testing"
+
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readconcern"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 

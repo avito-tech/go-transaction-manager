@@ -18,8 +18,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/require"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/serverselector"
 	"go.mongodb.org/mongo-driver/v2/event"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/x/bsonx/bsoncore"
@@ -27,6 +25,9 @@ import (
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/connstring"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/operation"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/topology"
+
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/require"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/serverselector"
 )
 
 var connectionString *connstring.ConnString

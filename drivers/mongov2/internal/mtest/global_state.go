@@ -10,11 +10,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/failpoint"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/connstring"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/topology"
+
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/failpoint"
 )
 
 // AuthEnabled returns whether or not the cluster requires auth.

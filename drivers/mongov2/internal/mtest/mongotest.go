@@ -15,11 +15,6 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/assert"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/csfle"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/failpoint"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/mongoutil"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/require"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/event"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -30,6 +25,12 @@ import (
 	"go.mongodb.org/mongo-driver/v2/x/bsonx/bsoncore"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver"
 	"go.mongodb.org/mongo-driver/v2/x/mongo/driver/drivertest"
+
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/assert"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/csfle"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/failpoint"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/mongoutil"
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/require"
 )
 
 var (

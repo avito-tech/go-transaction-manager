@@ -5,14 +5,16 @@ package mongov2
 import (
 	"context"
 	"errors"
-	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/mtest"
+	"sync"
+	"testing"
+	"time"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/writeconcern"
-	"sync"
-	"testing"
-	"time"
+
+	"github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2/internal/mtest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
