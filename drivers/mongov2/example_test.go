@@ -12,7 +12,6 @@ import (
 
 	trmmongo "github.com/avito-tech/go-transaction-manager/drivers/mongov2/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
