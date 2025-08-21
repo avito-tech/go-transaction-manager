@@ -11,6 +11,9 @@ type CtxKey interface{}
 type CtxGetter func(ctx context.Context) Transaction
 
 // СtxManager sets and gets a Transaction in/from context.Context.
+//
+// Deprecated: Type name contains first non-ASCII character.
+// Type is safed in term of backward compatibility, use below CtxManager instead.
 type СtxManager interface {
 	// Default gets Transaction from context.Context by default CtxKey.
 	Default(ctx context.Context) Transaction
@@ -22,3 +25,6 @@ type СtxManager interface {
 	// SetByKey sets Transaction in context.Context by.CtxKey.
 	SetByKey(ctx context.Context, key CtxKey, t Transaction) context.Context
 }
+
+// CtxManager sets and gets a Transaction in/from context.Context.
+type CtxManager = СtxManager
