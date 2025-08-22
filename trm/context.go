@@ -23,6 +23,7 @@ type CtxManager interface {
 	SetByKey(ctx context.Context, key CtxKey, t Transaction) context.Context
 }
 
+// СtxManager is old name with first non-ASCII character.
 // Deprecated: Type name contains first non-ASCII character.
 // Type is safed in term of backward compatibility, use above CtxManager instead.
 type СtxManager = CtxManager
