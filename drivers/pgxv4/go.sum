@@ -1,8 +1,8 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DATA-DOG/go-sqlmock v1.5.1/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc10 h1:SqfNHnRw9CeroyLp4aVJVnmNaSemjbGy0nhiSGerGW4=
-github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc10/go.mod h1:qUNVecb/ahohzAvtGvjfWTeCOejgRRiO/2C4cDvtLjI=
+github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1-rc2 h1:3RYA1LmuQg3fqyKXJzcaWuBgutW2Y47s9sHRtLius5U=
+github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1-rc2/go.mod h1:otlaQXoetr+QHoeiwpi+1z/QIz7cL0/hIlptvEZ2Xi4=
 github.com/cockroachdb/apd v1.1.0 h1:3LFP3629v+1aKXU5Q37mxmRxX/pIu1nijXydLShEq5I=
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
 github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
