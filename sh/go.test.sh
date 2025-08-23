@@ -28,12 +28,12 @@ gotest() {
     output=$(go test -race -mod=readonly $(golist) "$@" 2>&1)
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
-      local result="go test failed for driver: $driver
+      output="go test failed for driver: $driver
 Command: go test -race -mod=readonly $(golist) $@
 Output:
 $output"
-      echo "$result"
     fi
+    echo "$output"
   fi
 
   cd $ROOT

@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.1] - 2025-03-19
+## [2.0.1] - 2025-08-23
+
+### Fixed
+
+- Renamed СtxManager to CtxManager without "С" cyrillic letter.
 
 ### Changes
 
-- Bumped test up to go1.24.
+- Bumped test up to go1.25.
 
 ## [2.0.0] - 2024-09-05
 
