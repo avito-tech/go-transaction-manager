@@ -23,10 +23,17 @@ gotest() {
   local go_ver=$(go version | sed -n 's/.*go\([0-9.]*\).*/\1/p')
 
   local exit_code=0
+  local output
   if verlte $go_mod_ver $go_ver; then
-
-    go test -race -mod=readonly $(golist) "$@"
+    output=$(go test -race -mod=readonly $(golist) "$@" 2>&1)
     exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+      local result="go test failed for driver: $driver
+Command: go test -race -mod=readonly $(golist) $@
+Output:
+$output"
+      echo "$result"
+    fi
   fi
 
   cd $ROOT
@@ -34,7 +41,8 @@ gotest() {
   (exit $exit_code);
 }
 
-cd trm && go test $(golist) $@ &
+cd trm
+go test $(golist) $@
 cd $ROOT
 
 pids=()
