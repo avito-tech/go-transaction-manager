@@ -139,4 +139,6 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
+          # see https://github.com/avito-tech/go-transaction-manager/pull/126#issuecomment-3217011035
+          version: v1.56.2
           args: --timeout=3m -v

@@ -12,13 +12,13 @@ import (
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.
 var DefaultCtxGetter = NewCtxGetter(trmcontext.DefaultManager)
 
-// CtxGetter gets redis.Pipeliner from trm.СtxManager by casting trm.Transaction to redis.UniversalClient.
+// CtxGetter gets redis.Pipeliner from trm.CtxManager by casting trm.Transaction to redis.UniversalClient.
 type CtxGetter struct {
-	ctxManager trm.СtxManager
+	ctxManager trm.CtxManager
 }
 
 // NewCtxGetter returns *CtxGetter to get Cmdable from context.Context.
-func NewCtxGetter(c trm.СtxManager) *CtxGetter {
+func NewCtxGetter(c trm.CtxManager) *CtxGetter {
 	return &CtxGetter{ctxManager: c}
 }
 

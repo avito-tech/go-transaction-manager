@@ -8,10 +8,10 @@ import (
 	"github.com/avito-tech/go-transaction-manager/trm/settings"
 )
 
-// DefaultManager is a trm.СtxManager with settings.DefaultCtxKey.
+// DefaultManager is a trm.CtxManager with settings.DefaultCtxKey.
 var DefaultManager = New(settings.DefaultCtxKey) //nolint:gochecknoglobals
 
-// Manager implements trm.СtxManager.
+// Manager implements trm.CtxManager.
 type Manager struct {
 	ctxKey trm.CtxKey
 }

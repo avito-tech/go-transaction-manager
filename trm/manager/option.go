@@ -21,7 +21,7 @@ func WithSettings(s trm.Settings) Opt {
 }
 
 // WithCtxManager sets trm.Settings for Manager.
-func WithCtxManager(c trm.СtxManager) Opt {
+func WithCtxManager(c trm.CtxManager) Opt {
 	return func(m *Manager) error {
 		m.ctxManager = c
 

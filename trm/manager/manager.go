@@ -18,7 +18,7 @@ type Opt func(*Manager) error
 type Manager struct {
 	getTransaction trm.TrFactory
 	settings       trm.Settings
-	ctxManager     trm.СtxManager
+	ctxManager     trm.CtxManager
 	log            logger
 }
 
