@@ -1,7 +1,6 @@
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 github.com/DATA-DOG/go-sqlmock v1.5.2/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
-github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1-rc3 h1:5KV6IEIji8h2K+PVzveg5uazbxTe8jbSW6YuWPRIuLI=
-github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1-rc3/go.mod h1:RftHdsefhv39lGvjmsqM5xB15n/tiQxlw1sLYusF3yg=
+github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1 h1:7tdDZWLdu/E+usVgQrRYmjj6VisfWDrcZyTZIqhqdwE=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

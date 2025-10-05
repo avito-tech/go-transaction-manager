@@ -1,7 +1,9 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
 github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0-rc10/go.mod h1:VTqEvAHTY4geuXbfC3SJVvsFaS76M0ikFmPrRGgh4hI=
+github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.1/go.mod h1:5rT9U9b/LVPhEPr4QvSOd4KDd5Vvj/dCk8G3Y0lOx5U=
 github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc9/go.mod h1:70UhdxnEKj+no0/bTVxsAZ7scTb2+2DagtZu5OZ6bRg=
+github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1/go.mod h1:RftHdsefhv39lGvjmsqM5xB15n/tiQxlw1sLYusF3yg=
 github.com/chzyer/logex v1.1.10 h1:Swpa1K6QvQznwJRcfTfQJmTE72DqScAa40E+fbHEXEE=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e h1:fY5BOSpyZCqRo5OhCuC+XN+r/bBCmeuuJtjz+bCNIf8=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 h1:q763qf9huN11kDQavWsoZXJNW3xEE4JJyHa5Q25/sd8=

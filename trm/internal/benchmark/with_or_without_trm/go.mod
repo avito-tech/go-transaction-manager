@@ -4,8 +4,8 @@ go 1.21
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.1
-	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc9.2
-	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1-rc2
+	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.1
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/stretchr/testify v1.8.2

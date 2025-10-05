@@ -4,8 +4,8 @@ go 1.21
 toolchain go1.24.1
 
 require (
-	github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2 v2.0.0-rc9.2
-	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1-rc2
+	github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2 v2.0.1
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1
 	github.com/jackc/pgx/v5 v5.5.4
 )
 

@@ -222,3 +222,7 @@ However, `--compat` doesn't always work correct and we need to set some library 
 3. `go get github.com/stretchr/testify@v1.8.2` in [trm](trm), [sql](drivers/sql), [sqlx](drivers/sqlx), [goredis8](drivers/goredis8), [mongo](drivers/mongo).
 4. `go get github.com/jackc/pgconn@v1.14.2` in [pgxv4](drivers/pgxv4). Golang version was bumped up from 1.12 to 1.17 in pgconn v1.14.3.
 5. `go get golang.org/x/text@v0.13.0` in [pgxv4](drivers/pgxv4).
+
+## Authors
+
+- Ilia Sergunin [github/maranqz](https://github.com/maranqz)
