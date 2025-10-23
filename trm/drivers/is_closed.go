@@ -70,7 +70,7 @@ func (a *IsClosed) CloseWithCause(err error) {
 // Err is inspired function Err in https://pkg.go.dev/context#Context
 func (a *IsClosed) Err() error {
 	a.mu.RLock()
-	defer a.mu.RLock()
+	defer a.mu.RUnlock()
 
 	return a.err
 }
