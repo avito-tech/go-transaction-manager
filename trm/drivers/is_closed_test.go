@@ -18,6 +18,7 @@ func TestIsClose(t *testing.T) {
 
 	require.True(t, isClosed.IsActive())
 	require.False(t, isClosed.IsClosed())
+	require.NoError(t, isClosed.Err())
 
 	wg := sync.WaitGroup{}
 
