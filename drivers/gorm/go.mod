@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.1
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.2
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/goleak v1.3.0
