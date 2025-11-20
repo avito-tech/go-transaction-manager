@@ -1,6 +1,6 @@
 module github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2
 
-go 1.19
+go 1.24.0
 
 require (
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.2
@@ -19,8 +19,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
