@@ -15,10 +15,18 @@ type client interface {
 	Ping(ctx context.Context, rp *readpref.ReadPref) error
 	StartSession(opts ...*options.SessionOptions) (mongo.Session, error)
 	Database(name string, opts ...*options.DatabaseOptions) *mongo.Database
-	ListDatabases(ctx context.Context, filter interface{}, opts ...*options.ListDatabasesOptions) (mongo.ListDatabasesResult, error)
+	ListDatabases(
+		ctx context.Context,
+		filter interface{},
+		opts ...*options.ListDatabasesOptions,
+	) (mongo.ListDatabasesResult, error)
 	ListDatabaseNames(ctx context.Context, filter interface{}, opts ...*options.ListDatabasesOptions) ([]string, error)
 	UseSession(ctx context.Context, fn func(sessionContext mongo.SessionContext) error) error
-	UseSessionWithOptions(ctx context.Context, opts *options.SessionOptions, fn func(sessionContext mongo.SessionContext) error) error
+	UseSessionWithOptions(
+		ctx context.Context,
+		opts *options.SessionOptions,
+		fn func(sessionContext mongo.SessionContext) error,
+	) error
 	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*mongo.ChangeStream, error)
 	NumberSessionsInProgress() int
 }

@@ -98,7 +98,8 @@ func (s *Settings) IsMultiOrNil() *bool {
 	return s.isMulti
 }
 
-// SetIsMulti set using or not Multi for transaction, see https://redis.uptrace.dev/guide/go-redis-pipelines.html#transactions.
+// SetIsMulti set using or not Multi for transaction,
+// see https://redis.uptrace.dev/guide/go-redis-pipelines.html#transactions.
 func (s *Settings) SetIsMulti(in *bool) *Settings {
 	return s.setIsMulti(in)
 }
