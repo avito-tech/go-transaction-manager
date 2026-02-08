@@ -5,18 +5,15 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 	"github.com/jackc/pgx/v4"
 	"github.com/pashagolub/pgxmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
-
-	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2"
-	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
-	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 func TestTransaction(t *testing.T) {

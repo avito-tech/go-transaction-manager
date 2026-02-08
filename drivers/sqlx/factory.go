@@ -3,11 +3,9 @@ package sqlx
 import (
 	"context"
 
-	"github.com/jmoiron/sqlx"
-
-	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
-
 	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
+	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 // NewDefaultFactory creates default trm.Transaction(sqlx.Tx).

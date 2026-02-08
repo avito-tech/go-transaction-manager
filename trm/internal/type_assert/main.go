@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"log"
+)
 
 type transaction interface {
 	isTransaction()
@@ -25,18 +27,18 @@ func main() {
 	tr := retTransaction()
 
 	_, ok := tr.(expTransaction)
-	fmt.Printf("tr: %+v, isExp: %v\n", tr, ok)
+	log.Printf("tr: %+v, isExp: %v", tr, ok)
 
 	expTr := retExpTransaction()
 
 	_, ok = expTr.(expTransaction)
-	fmt.Printf("expTr: %+v, isExp: %v\n", expTr, ok)
+	log.Printf("expTr: %+v, isExp: %v", expTr, ok)
 }
 
-func retTransaction() transaction {
+func retTransaction() interface{} {
 	return tr{}
 }
 
-func retExpTransaction() expTransaction {
+func retExpTransaction() interface{} {
 	return exTr{}
 }

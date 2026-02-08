@@ -9,6 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,13 +21,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
-
-	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
-	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2"
-	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
-	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 type user struct {

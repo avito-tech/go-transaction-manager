@@ -3,9 +3,8 @@ package goredis8
 import (
 	"sync"
 
-	"github.com/go-redis/redis/v8"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/go-redis/redis/v8"
 )
 
 const (

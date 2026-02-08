@@ -26,7 +26,7 @@ const (
 
 // HookOption configures hook registration.
 type HookOption interface {
-	apply(*HookOpts)
+	apply(o *HookOpts)
 }
 
 // HookOpts holds resolved options for a hook registration (used by XTransaction implementations).
@@ -45,6 +45,7 @@ func ApplyOpts(opts []HookOption) *HookOpts {
 	if opts == nil {
 		return oo
 	}
+
 	for _, opt := range opts {
 		opt.apply(oo)
 	}
@@ -57,6 +58,8 @@ func applyOpts(opts []HookOption) *HookOpts {
 }
 
 // WithScope sets the scope for registered hooks.
+//
+//nolint:ireturn // returns HookOption interface intentionally
 func WithScope(scope HookScope) HookOption {
 	return hookOptFunc(func(o *HookOpts) {
 		o.Scope = scope
@@ -64,6 +67,8 @@ func WithScope(scope HookScope) HookOption {
 }
 
 // WithOrder sets the execution order; lower runs first. Default is 0. FIFO preserved within same order.
+//
+//nolint:ireturn // returns HookOption interface intentionally
 func WithOrder(order int) HookOption {
 	return hookOptFunc(func(o *HookOpts) {
 		o.Order = order
@@ -106,26 +111,36 @@ type savepointReg struct {
 
 // NewHookRegistry creates a new hook registry.
 func NewHookRegistry() *HookRegistry {
-	return &HookRegistry{}
+	return &HookRegistry{
+		mu:             sync.RWMutex{},
+		txCommit:       nil,
+		txRollback:     nil,
+		savepointStack: nil,
+	}
 }
 
 func (r *HookRegistry) registerCommit(hooks []CommitHook, opts *HookOpts) {
 	if opts == nil {
 		opts = &HookOpts{Scope: ScopeTransaction, Order: 0}
 	}
+
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	base := len(r.txCommit)
 	if opts.Scope == ScopeSavepoint {
 		if len(r.savepointStack) == 0 {
 			return
 		}
+
 		sp := &r.savepointStack[len(r.savepointStack)-1]
 		for i, h := range hooks {
 			sp.commit = append(sp.commit, commitEntry{hook: h, order: opts.Order, index: base + i})
 		}
+
 		return
 	}
+
 	for i, h := range hooks {
 		r.txCommit = append(r.txCommit, commitEntry{hook: h, order: opts.Order, index: base + i})
 	}
@@ -145,21 +160,32 @@ func (r *HookRegistry) registerRollback(hooks []RollbackHook, opts *HookOpts) {
 	if opts == nil {
 		opts = &HookOpts{Scope: ScopeTransaction, Order: 0}
 	}
+
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	base := len(r.txRollback)
 	if opts.Scope == ScopeSavepoint {
 		if len(r.savepointStack) == 0 {
 			return
 		}
+
 		sp := &r.savepointStack[len(r.savepointStack)-1]
 		for i, h := range hooks {
-			sp.rollback = append(sp.rollback, rollbackEntry{hook: h, order: opts.Order, index: base + i})
+			sp.rollback = append(
+				sp.rollback,
+				rollbackEntry{hook: h, order: opts.Order, index: base + i},
+			)
 		}
+
 		return
 	}
+
 	for i, h := range hooks {
-		r.txRollback = append(r.txRollback, rollbackEntry{hook: h, order: opts.Order, index: base + i})
+		r.txRollback = append(
+			r.txRollback,
+			rollbackEntry{hook: h, order: opts.Order, index: base + i},
+		)
 	}
 }
 
@@ -167,13 +193,17 @@ func (r *HookRegistry) registerRollback(hooks []RollbackHook, opts *HookOpts) {
 func (r *HookRegistry) PushSavepoint() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.savepointStack = append(r.savepointStack, savepointReg{})
+	r.savepointStack = append(r.savepointStack, savepointReg{
+		commit:   nil,
+		rollback: nil,
+	})
 }
 
 // PopSavepoint pops the current savepoint-level registry.
 func (r *HookRegistry) PopSavepoint() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	if len(r.savepointStack) > 0 {
 		r.savepointStack = r.savepointStack[:len(r.savepointStack)-1]
 	}
@@ -186,11 +216,13 @@ func (r *HookRegistry) RunTransactionCommitHooks(ctx context.Context, xtx XTrans
 	copy(entries, r.txCommit)
 	r.mu.RUnlock()
 	sortCommitEntries(entries)
+
 	for _, e := range entries {
 		if err := e.hook(ctx, xtx); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -201,6 +233,7 @@ func (r *HookRegistry) RunTransactionRollbackHooks(ctx context.Context, xtx XTra
 	copy(entries, r.txRollback)
 	r.mu.RUnlock()
 	sortRollbackEntries(entries)
+
 	for _, e := range entries {
 		e.hook(ctx, xtx)
 	}
@@ -209,31 +242,38 @@ func (r *HookRegistry) RunTransactionRollbackHooks(ctx context.Context, xtx XTra
 // RunSavepointCommitHooks runs savepoint-scope commit hooks for the current level. Caller must pop after.
 func (r *HookRegistry) RunSavepointCommitHooks(ctx context.Context, xtx XTransaction) error {
 	r.mu.RLock()
+
 	var entries []commitEntry
 	if len(r.savepointStack) > 0 {
 		entries = make([]commitEntry, len(r.savepointStack[len(r.savepointStack)-1].commit))
 		copy(entries, r.savepointStack[len(r.savepointStack)-1].commit)
 	}
+
 	r.mu.RUnlock()
 	sortCommitEntries(entries)
+
 	for _, e := range entries {
 		if err := e.hook(ctx, xtx); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
 // RunSavepointRollbackHooks runs savepoint-scope rollback hooks for the current level. Caller must pop after.
 func (r *HookRegistry) RunSavepointRollbackHooks(ctx context.Context, xtx XTransaction) {
 	r.mu.RLock()
+
 	var entries []rollbackEntry
 	if len(r.savepointStack) > 0 {
 		entries = make([]rollbackEntry, len(r.savepointStack[len(r.savepointStack)-1].rollback))
 		copy(entries, r.savepointStack[len(r.savepointStack)-1].rollback)
 	}
+
 	r.mu.RUnlock()
 	sortRollbackEntries(entries)
+
 	for _, e := range entries {
 		e.hook(ctx, xtx)
 	}
@@ -244,6 +284,7 @@ func sortCommitEntries(entries []commitEntry) {
 		if entries[i].order != entries[j].order {
 			return entries[i].order < entries[j].order
 		}
+
 		return entries[i].index < entries[j].index
 	})
 }
@@ -253,6 +294,7 @@ func sortRollbackEntries(entries []rollbackEntry) {
 		if entries[i].order != entries[j].order {
 			return entries[i].order < entries[j].order
 		}
+
 		return entries[i].index < entries[j].index
 	})
 }
@@ -264,18 +306,21 @@ func RegisterCommit(ctx context.Context, hooks []CommitHook, opts ...HookOption)
 	if len(hooks) == 0 {
 		return nil
 	}
-	xtx, ok := XTransactionFromContext(ctx)
+
+	xTx, ok := XTransactionFromContext(ctx)
 	if !ok {
 		return ErrNoActiveTransaction
 	}
-	reg, ok := xtx.(interface {
-		RegisterCommitHooks([]CommitHook, *HookOpts)
+
+	reg, ok := xTx.(interface {
+		RegisterCommitHooks(hooks []CommitHook, opts *HookOpts)
 	})
 	if !ok {
 		return ErrNoActiveTransaction
 	}
 	o := applyOpts(opts)
 	reg.RegisterCommitHooks(hooks, o)
+
 	return nil
 }
 
@@ -284,17 +329,20 @@ func RegisterRollback(ctx context.Context, hooks []RollbackHook, opts ...HookOpt
 	if len(hooks) == 0 {
 		return nil
 	}
-	xtx, ok := XTransactionFromContext(ctx)
+
+	xTx, ok := XTransactionFromContext(ctx)
 	if !ok {
 		return ErrNoActiveTransaction
 	}
-	reg, ok := xtx.(interface {
-		RegisterRollbackHooks([]RollbackHook, *HookOpts)
+
+	reg, ok := xTx.(interface {
+		RegisterRollbackHooks(hooks []RollbackHook, opts *HookOpts)
 	})
 	if !ok {
 		return ErrNoActiveTransaction
 	}
 	o := applyOpts(opts)
 	reg.RegisterRollbackHooks(hooks, o)
+
 	return nil
 }

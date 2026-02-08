@@ -3,10 +3,9 @@ package sqlx
 import (
 	"context"
 
-	"github.com/jmoiron/sqlx"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	"github.com/jmoiron/sqlx"
 )
 
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.

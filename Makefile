@@ -25,6 +25,9 @@ fmt:
 lint:
 	cd sh && sh ./lint.sh
 
+lint-with-fix:
+	cd sh && sh ./lint.sh --fix
+
 lint.verbose:
 	cd sh && sh ./lint.sh -v
 

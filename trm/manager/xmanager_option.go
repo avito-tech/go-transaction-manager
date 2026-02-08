@@ -7,6 +7,7 @@ func WithDefaultCommitHooks(hooks []trm.CommitHook, opts ...trm.HookOption) Mana
 	return func(xm *XManager) error {
 		xm.defaultCommitHooks = hooks
 		xm.defaultCommitOpts = opts
+
 		return nil
 	}
 }
@@ -16,6 +17,7 @@ func WithDefaultRollbackHooks(hooks []trm.RollbackHook, opts ...trm.HookOption) 
 	return func(xm *XManager) error {
 		xm.defaultRollbackHooks = hooks
 		xm.defaultRollbackOpts = opts
+
 		return nil
 	}
 }

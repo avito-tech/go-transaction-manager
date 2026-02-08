@@ -59,6 +59,7 @@ type atomicState struct {
 func newAtomicState() *atomicState {
 	st := &atomicState{}
 	st.v.Store(&TxInfo{})
+
 	return st
 }
 
@@ -87,6 +88,7 @@ func (st *atomicState) readAndWrite() {
 func BenchmarkRWMutex_TxInfo_3Read_1Write(b *testing.B) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	st := &rwState{}
+
 	b.ReportAllocs()
 
 	b.RunParallel(func(pb *testing.PB) {
@@ -102,6 +104,7 @@ func BenchmarkRWMutex_TxInfo_3Read_1Write(b *testing.B) {
 func BenchmarkAtomicValue_TxInfo_3Read_1Write(b *testing.B) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	st := newAtomicState()
+
 	b.ReportAllocs()
 
 	b.RunParallel(func(pb *testing.PB) {
@@ -146,6 +149,7 @@ func (st *mutexState) readAndWrite() {
 func BenchmarkMutex_TxInfo_3Read_1Write(b *testing.B) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	st := &mutexState{}
+
 	b.ReportAllocs()
 
 	b.RunParallel(func(pb *testing.PB) {

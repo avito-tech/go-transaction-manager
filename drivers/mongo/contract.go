@@ -20,13 +20,21 @@ type client interface {
 		filter interface{},
 		opts ...*options.ListDatabasesOptions,
 	) (mongo.ListDatabasesResult, error)
-	ListDatabaseNames(ctx context.Context, filter interface{}, opts ...*options.ListDatabasesOptions) ([]string, error)
+	ListDatabaseNames(
+		ctx context.Context,
+		filter interface{},
+		opts ...*options.ListDatabasesOptions,
+	) ([]string, error)
 	UseSession(ctx context.Context, fn func(sessionContext mongo.SessionContext) error) error
 	UseSessionWithOptions(
 		ctx context.Context,
 		opts *options.SessionOptions,
 		fn func(sessionContext mongo.SessionContext) error,
 	) error
-	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*mongo.ChangeStream, error)
+	Watch(
+		ctx context.Context,
+		pipeline interface{},
+		opts ...*options.ChangeStreamOptions,
+	) (*mongo.ChangeStream, error)
 	NumberSessionsInProgress() int
 }

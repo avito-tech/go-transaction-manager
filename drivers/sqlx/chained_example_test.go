@@ -4,14 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	_ "github.com/mattn/go-sqlite3"
-
+	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
-
-	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Example demonstrates a work of manager.ChainedMW.
