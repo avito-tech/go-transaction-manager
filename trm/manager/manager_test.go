@@ -7,18 +7,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 	mock2 "github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
 	mock_log "github.com/avito-tech/go-transaction-manager/trm/v2/manager/mock"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
+//nolint:maintidx
 func Test_transactionManager_Do(t *testing.T) {
 	t.Parallel()
 
@@ -749,6 +748,7 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 			wg.Add(1)
 
 			ctx, cancel := tt.ctx(context.Background())
+
 			go func() {
 				err = m.Do(ctx, func(ctx context.Context) error {
 					return m.Do(ctx, func(ctx context.Context) error {

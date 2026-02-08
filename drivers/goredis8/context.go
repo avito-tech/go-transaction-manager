@@ -3,10 +3,9 @@ package goredis8
 import (
 	"context"
 
-	"github.com/go-redis/redis/v8"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	"github.com/go-redis/redis/v8"
 )
 
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.

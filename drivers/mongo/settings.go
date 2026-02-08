@@ -1,9 +1,8 @@
 package mongo
 
 import (
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	trm "github.com/avito-tech/go-transaction-manager/trm/v2"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Opt is a type to configure Settings.

@@ -2,8 +2,6 @@ package sql
 
 //go:generate mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock
 
-import "fmt"
-
 // This file copies an interface from https://github.com/DATA-DOG/go-txdb
 
 // SavePoint defines the syntax to create savepoints
@@ -23,15 +21,15 @@ func NewSavePoint() DefaultSavePoint {
 }
 
 func (dsp DefaultSavePoint) Create(id string) string {
-	return fmt.Sprintf("SAVEPOINT %s", id)
+	return "SAVEPOINT " + id
 }
 
 func (dsp DefaultSavePoint) Release(id string) string {
-	return fmt.Sprintf("RELEASE SAVEPOINT %s", id)
+	return "RELEASE SAVEPOINT " + id
 }
 
 func (dsp DefaultSavePoint) Rollback(id string) string {
-	return fmt.Sprintf("ROLLBACK TO SAVEPOINT %s", id)
+	return "ROLLBACK TO SAVEPOINT " + id
 }
 
 //revive:enabled:exported

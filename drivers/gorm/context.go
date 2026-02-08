@@ -3,10 +3,9 @@ package gorm
 import (
 	"context"
 
-	"gorm.io/gorm"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	"gorm.io/gorm"
 )
 
 // DefaultCtxGetter is the CtxGetter with settings.DefaultCtxKey.

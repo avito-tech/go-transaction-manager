@@ -8,14 +8,17 @@ import (
 
 type xSettingsCtxKey struct{}
 
+// TODO: check if it is required.
 func withXSettings(ctx context.Context, xs trm.XSettings) context.Context {
 	return context.WithValue(ctx, xSettingsCtxKey{}, xs)
 }
 
-func xSettingsFromContext(ctx context.Context) trm.XSettings {
+// TODO: check if it is required.
+func XSettingsFromContext(ctx context.Context) trm.XSettings {
 	if xs, ok := ctx.Value(xSettingsCtxKey{}).(trm.XSettings); ok {
 		return xs
 	}
+
 	return nil
 }
 
@@ -35,13 +38,20 @@ type XManager struct {
 
 // NewXManager creates an XManager from an existing Manager.
 func NewXManager(m *Manager, oo ...ManagerXOpt) (*XManager, error) {
-	xm := &XManager{manager: m}
+	xManager := &XManager{
+		manager:              m,
+		defaultCommitHooks:   nil,
+		defaultCommitOpts:    nil,
+		defaultRollbackHooks: nil,
+		defaultRollbackOpts:  nil,
+	}
 	for _, o := range oo {
-		if err := o(xm); err != nil {
+		if err := o(xManager); err != nil {
 			return nil, err
 		}
 	}
-	return xm, nil
+
+	return xManager, nil
 }
 
 // MustXManager returns XManager if err is nil and panics otherwise.
@@ -50,6 +60,7 @@ func MustXManager(m *Manager, oo ...ManagerXOpt) *XManager {
 	if err != nil {
 		panic(err)
 	}
+
 	return xm
 }
 
@@ -60,7 +71,11 @@ func (xm *XManager) XDo(ctx context.Context, fn func(ctx context.Context) error)
 
 // XDoWithSettings runs fn inside a transaction with the given XSettings.
 // The transaction in context is an XTransaction; RegisterCommit/RegisterRollback can be used inside fn.
-func (xm *XManager) XDoWithSettings(ctx context.Context, xs trm.XSettings, fn func(ctx context.Context) error) (err error) {
+func (xm *XManager) XDoWithSettings(
+	ctx context.Context,
+	xs trm.XSettings,
+	fn func(ctx context.Context) error,
+) (err error) {
 	s := xs.EnrichBy(xm.manager.settings)
 	enableSavepointHooks := xs.EnableSavepointHooks()
 
@@ -70,10 +85,12 @@ func (xm *XManager) XDoWithSettings(ctx context.Context, xs trm.XSettings, fn fu
 			return ctx, nil, err
 		}
 		xtx := newXTransaction(tr, s.Propagation(), enableSavepointHooks)
+
 		return ctx, xtx, nil
 	}
 
 	ctx = withXSettings(ctx, xs)
+
 	ctx, closer, err := xm.manager.initWithFactory(ctx, s, factory)
 	if err != nil {
 		return err
@@ -89,28 +106,31 @@ func (xm *XManager) XDoWithSettings(ctx context.Context, xs trm.XSettings, fn fu
 	}
 
 	defer func() { err = closer(ctx, recover(), &err) }()
+
 	return fn(ctx)
 }
 
-func registerDefaults(xm *XManager, x *xTransaction) {
-	opts := trm.ApplyOpts(xm.defaultCommitOpts)
-	if len(xm.defaultCommitHooks) > 0 {
-		x.RegisterCommitHooks(xm.defaultCommitHooks, opts)
+func registerDefaults(xManager *XManager, xTr *xTransaction) {
+	opts := trm.ApplyOpts(xManager.defaultCommitOpts)
+	if len(xManager.defaultCommitHooks) > 0 {
+		xTr.RegisterCommitHooks(xManager.defaultCommitHooks, opts)
 	}
-	opts = trm.ApplyOpts(xm.defaultRollbackOpts)
-	if len(xm.defaultRollbackHooks) > 0 {
-		x.RegisterRollbackHooks(xm.defaultRollbackHooks, opts)
+
+	opts = trm.ApplyOpts(xManager.defaultRollbackOpts)
+	if len(xManager.defaultRollbackHooks) > 0 {
+		xTr.RegisterRollbackHooks(xManager.defaultRollbackHooks, opts)
 	}
 }
 
-func registerInitialHooks(x *xTransaction, initial []trm.Hooks) {
-	for _, h := range initial {
-		opts := trm.ApplyOpts(h.Opts)
-		if len(h.Commits) > 0 {
-			x.RegisterCommitHooks(h.Commits, opts)
+func registerInitialHooks(xTr *xTransaction, initialHooks []trm.Hooks) {
+	for _, hook := range initialHooks {
+		opts := trm.ApplyOpts(hook.Opts)
+		if len(hook.Commits) > 0 {
+			xTr.RegisterCommitHooks(hook.Commits, opts)
 		}
-		if len(h.Rollbacks) > 0 {
-			x.RegisterRollbackHooks(h.Rollbacks, opts)
+
+		if len(hook.Rollbacks) > 0 {
+			xTr.RegisterRollbackHooks(hook.Rollbacks, opts)
 		}
 	}
 }

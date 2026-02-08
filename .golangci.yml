@@ -20,17 +20,23 @@ linters:
         - tr
         - tx
         - t
-        - xtx
+        - xTx
+        - xTr
         - sp
         - in
         - s
+        - xs
         - oo
+        - fn
+        - ok
       ignore-decls:
         - wg sync.WaitGroup
         - wg *sync.WaitGroup
         - db *gorm.DB
         - db redis.UniversalClient
-        - m Manager
+        - db *sql.DB
+        - m *Manager
+        - m trm.Manager
     wsl_v5:
       default: all
       disable:
@@ -92,6 +98,16 @@ linters:
           - wsl_v5
         text: 'missing whitespace above this line'
 
+      - path: 'trm/trm/context/'
+        linters:
+          - revive
+        text: 'var-naming: avoid package names that conflict with Go standard library package names'
+
+      - path: 'trm/trm/internal/.+\.go'
+        linters:
+          - revive
+        text: 'var-naming: avoid meaningless package names'
+
       - path: '_test\.go'
         linters:
           - revive
@@ -121,6 +137,16 @@ linters:
           - ireturn
         source: '\) Begin\(ctx'
 
+      - path: '(.+/)?xsettings\.go'
+        linters:
+          - ireturn
+        source: 'func DefaultXSettings\('
+
+      - path: '(.+/)?xsettings\.go'
+        linters:
+          - ireturn
+        source: 'func NewXSettings\('
+
       - path: '(.+/)?settings\.go'
         linters:
           - ireturn
@@ -129,6 +155,18 @@ linters:
       - linters:
           - gochecknoglobals
         source: 'DefaultCtxGetter'
+
+
+      - path: 'trm/trm/drivers/mock'
+        text: ' package has more than one godoc ("mock")'
+        linters:
+          - godoclint
+
+      - path: '_test\.go'
+        source: 'do: func\('
+        text: 'test helper function should start from t.Helper()'
+        linters:
+          - thelper
 
       - path: '_test\.go'
         source: 'prepare: func\('
@@ -166,8 +204,14 @@ linters:
 formatters:
   enable:
     - gofmt
+    - gci
     - gofumpt
     - goimports
+    - golines
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/avito-tech/go-transaction-manager/trm/v2
 
   exclusions:
     paths:

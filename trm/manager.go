@@ -12,9 +12,9 @@ import (
 // Manager manages a transaction from Begin to Commit or Rollback.
 type Manager interface {
 	// Do processes a transaction inside a closure.
-	Do(context.Context, func(ctx context.Context) error) error
+	Do(ctx context.Context, fn func(ctx context.Context) error) error
 	// DoWithSettings processes a transaction inside a closure with custom trm.Settings.
-	DoWithSettings(context.Context, Settings, func(ctx context.Context) error) error
+	DoWithSettings(ctx context.Context, s Settings, fn func(ctx context.Context) error) error
 }
 
 // ErrSkip marks error to skip rollback for transaction because of inside error.
@@ -39,8 +39,8 @@ func UnSkippable(err error) error {
 	res := make([]error, 0, len(ee))
 
 	for _, e := range ee {
-		//nolint:errorlint,goerr113
-		if e != ErrSkip {
+		//nolint:errorlint,goerr113,nolintlint
+		if !errors.Is(e, ErrSkip) {
 			res = append(res, e)
 		}
 	}

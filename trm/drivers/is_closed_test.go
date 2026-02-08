@@ -27,6 +27,7 @@ func TestIsClose(t *testing.T) {
 
 		go func() {
 			defer wg.Done()
+
 			require.NotPanics(t, func() {
 				<-isClosed.Closed()
 

@@ -17,21 +17,22 @@ type ChainedMW struct {
 }
 
 // NewChained creates *ChainedMW or chained trm.Manager.
-func NewChained(mm []trm.Manager, _ ...Opt) (*ChainedMW, error) {
-	if len(mm) == 0 {
+func NewChained(managers []trm.Manager, _ ...Opt) (*ChainedMW, error) {
+	if len(managers) == 0 {
 		return &ChainedMW{
 			do:             nilNextDo,
 			doWithSettings: nilNextDoWithSettings,
 		}, nil
 	}
 
-	last := len(mm) - 1
-	do := newLastDo(mm[last])
-	doWithSettings := newLastDoWithSettings(mm[last])
+	last := len(managers) - 1
+	//nolint:varnamelen
+	do := newLastDo(managers[last])
+	doWithSettings := newLastDoWithSettings(managers[last])
 
 	for index := last - 1; index >= 0; index-- {
-		do = newNextDo(mm[index], do)
-		doWithSettings = newNextDoWithSettings(mm[index], doWithSettings)
+		do = newNextDo(managers[index], do)
+		doWithSettings = newNextDoWithSettings(managers[index], doWithSettings)
 	}
 
 	return &ChainedMW{
@@ -82,7 +83,8 @@ func newLastDo(m trm.Manager) nextDo {
 
 // DoWithSettings is an implementation of trm.Manager.
 //
-// WARNING: trm.CtxKey should not be set in trm.Settings otherwise all trm.Manager would get same trm.Transaction from context.Context.
+// WARNING: trm.CtxKey should not be set in trm.Settings
+// otherwise all trm.Manager would get same trm.Transaction from context.Context.
 func (c *ChainedMW) DoWithSettings(
 	ctx context.Context,
 	s trm.Settings,
@@ -101,14 +103,14 @@ func nilNextDoWithSettings(
 	return fn(ctx)
 }
 
-func newNextDoWithSettings(m trm.Manager, n nextDoWithSettings) nextDoWithSettings {
+func newNextDoWithSettings(m trm.Manager, next nextDoWithSettings) nextDoWithSettings {
 	return func(
 		ctx context.Context,
 		s trm.Settings,
 		fn callback,
 	) error {
 		return m.DoWithSettings(ctx, s, func(ctx context.Context) error {
-			return n(ctx, s, fn)
+			return next(ctx, s, fn)
 		})
 	}
 }

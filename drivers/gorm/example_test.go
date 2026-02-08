@@ -4,15 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	_ "github.com/mattn/go-sqlite3"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-
 	trmgorm "github.com/avito-tech/go-transaction-manager/drivers/gorm/v2"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.

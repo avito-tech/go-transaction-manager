@@ -9,19 +9,14 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/test"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2"
-
-	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTransaction(t *testing.T) {

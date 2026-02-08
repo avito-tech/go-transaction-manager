@@ -29,19 +29,27 @@ type xTransaction struct {
 	enableSavepointHooks bool
 }
 
-func newXTransaction(underlying trm.Transaction, propagation trm.Propagation, enableSavepointHooks bool) *xTransaction {
+func newXTransaction(
+	underlying trm.Transaction,
+	propagation trm.Propagation,
+	enableSavepointHooks bool,
+) *xTransaction {
 	return &xTransaction{
 		underlying:           underlying,
-		info:                 &txInfoImpl{propagation: propagation},
+		info:                 &txInfoImpl{propagation: propagation, level: 0},
 		registry:             trm.NewHookRegistry(),
 		enableSavepointHooks: enableSavepointHooks,
 	}
 }
 
 func (x *xTransaction) Transaction() interface{} { return x.underlying.Transaction() }
-func (x *xTransaction) TxInfo() trm.TxInfo       { return x.info }
-func (x *xTransaction) IsActive() bool           { return x.underlying.IsActive() }
-func (x *xTransaction) Closed() <-chan struct{}  { return x.underlying.Closed() }
+
+//nolint:ireturn
+func (x *xTransaction) TxInfo() trm.TxInfo { return x.info }
+
+func (x *xTransaction) IsActive() bool { return x.underlying.IsActive() }
+
+func (x *xTransaction) Closed() <-chan struct{} { return x.underlying.Closed() }
 
 func (x *xTransaction) Commit(ctx context.Context) error {
 	level := x.info.NestingLevel()
@@ -49,15 +57,20 @@ func (x *xTransaction) Commit(ctx context.Context) error {
 		if x.enableSavepointHooks {
 			if err := x.registry.RunSavepointCommitHooks(ctx, x); err != nil {
 				_ = x.underlying.Rollback(ctx)
+
 				return err
 			}
+
 			x.registry.PopSavepoint()
 		} else {
 			x.registry.PopSavepoint()
 		}
+
 		x.info.decrement()
+
 		return x.underlying.Commit(ctx)
 	}
+
 	if err := x.registry.RunTransactionCommitHooks(ctx, x); err != nil {
 		_ = x.underlying.Rollback(ctx)
 
@@ -76,24 +89,35 @@ func (x *xTransaction) Rollback(ctx context.Context) error {
 		} else {
 			x.registry.PopSavepoint()
 		}
+
 		x.info.decrement()
+
 		return x.underlying.Rollback(ctx)
 	}
+
 	x.registry.RunTransactionRollbackHooks(ctx, x)
+
 	return x.underlying.Rollback(ctx)
 }
 
-func (x *xTransaction) Begin(ctx context.Context, s trm.Settings) (context.Context, trm.Transaction, error) {
+func (x *xTransaction) Begin(ctx context.Context, s trm.Settings) (
+	context.Context,
+	trm.Transaction,
+	error,
+) {
 	nested, ok := x.underlying.(trm.NestedTrFactory)
 	if !ok {
 		return ctx, x, nil
 	}
+
 	ctx, _, err := nested.Begin(ctx, s)
 	if err != nil {
 		return ctx, nil, err
 	}
+
 	x.registry.PushSavepoint()
 	x.info.increment()
+
 	return ctx, x, nil
 }
 

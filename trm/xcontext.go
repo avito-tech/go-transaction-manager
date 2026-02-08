@@ -9,6 +9,7 @@ func XTransactionFromContext(ctx context.Context) (XTransaction, bool) {
 	if tx, ok := ctx.Value(xCtxKey{}).(XTransaction); ok {
 		return tx, true
 	}
+
 	return nil, false
 }
 

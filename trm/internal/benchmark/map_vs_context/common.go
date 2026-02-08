@@ -4,9 +4,8 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/jinzhu/copier"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	"github.com/jinzhu/copier"
 )
 
 func getDB() *sql.DB {
