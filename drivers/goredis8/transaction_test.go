@@ -67,7 +67,11 @@ func TestTransaction(t *testing.T) {
 				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
-				return assert.ErrorContains(t, err, "all expectations were already fulfilled, call to cmd '[watch key1]' was not expected") &&
+				return assert.ErrorContains(
+					t,
+					err,
+					"all expectations were already fulfilled, call to cmd '[watch key1]' was not expected",
+				) &&
 					assert.ErrorIs(t, err, trm.ErrBegin)
 			},
 		},

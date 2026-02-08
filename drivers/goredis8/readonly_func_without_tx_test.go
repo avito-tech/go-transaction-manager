@@ -39,8 +39,8 @@ const (
 
 	group = "group"
 
-	min = "min"
-	max = "max"
+	minValue = "min"
+	maxValue = "max"
 )
 
 var (
@@ -57,6 +57,8 @@ func newReadOnlyFuncWithoutTxDecorator() (Cmdable, redismock.ClientMock) {
 }
 
 func check(t *testing.T, cmd redis.Cmder, mock redismock.ClientMock) {
+	t.Helper()
+
 	require.NoError(t, cmd.Err())
 	require.NoError(t, mock.ExpectationsWereMet())
 }
@@ -573,9 +575,9 @@ func Test_readonlyFuncWithoutTxDecorator_ZCount(t *testing.T) {
 	t.Parallel()
 
 	cmdable, mock := newReadOnlyFuncWithoutTxDecorator()
-	mock.ExpectZCount(key1, min, max).SetVal(0)
+	mock.ExpectZCount(key1, minValue, maxValue).SetVal(0)
 
-	cmd := cmdable.ZCount(context.Background(), key1, min, max)
+	cmd := cmdable.ZCount(context.Background(), key1, minValue, maxValue)
 
 	check(t, cmd, mock)
 }
@@ -584,9 +586,9 @@ func Test_readonlyFuncWithoutTxDecorator_ZLexCount(t *testing.T) {
 	t.Parallel()
 
 	cmdable, mock := newReadOnlyFuncWithoutTxDecorator()
-	mock.ExpectZLexCount(key1, min, max).SetVal(0)
+	mock.ExpectZLexCount(key1, minValue, maxValue).SetVal(0)
 
-	cmd := cmdable.ZLexCount(context.Background(), key1, min, max)
+	cmd := cmdable.ZLexCount(context.Background(), key1, minValue, maxValue)
 
 	check(t, cmd, mock)
 }

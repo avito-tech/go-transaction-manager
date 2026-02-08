@@ -21,12 +21,8 @@ type Watch interface {
 
 type tx struct {
 	redis.Pipeliner
-	tx *redis.Tx
-}
 
-type txInterface interface {
-	redis.Pipeliner
-	Watch
+	tx *redis.Tx
 }
 
 func (t *tx) Watch(ctx context.Context, keys ...string) *redis.StatusCmd {

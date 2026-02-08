@@ -9,6 +9,7 @@ import (
 // readonlyFuncWithoutTxDecorator calls readonly commands outside of a transaction.
 type readonlyFuncWithoutTxDecorator struct {
 	Cmdable
+
 	readOnly redis.Cmdable
 }
 
@@ -199,12 +200,12 @@ func (r *readonlyFuncWithoutTxDecorator) ZCard(ctx context.Context, key string) 
 	return r.readOnly.ZCard(ctx, key)
 }
 
-func (r *readonlyFuncWithoutTxDecorator) ZCount(ctx context.Context, key, min, max string) *redis.IntCmd {
-	return r.readOnly.ZCount(ctx, key, min, max)
+func (r *readonlyFuncWithoutTxDecorator) ZCount(ctx context.Context, key, minValue, maxValue string) *redis.IntCmd {
+	return r.readOnly.ZCount(ctx, key, minValue, maxValue)
 }
 
-func (r *readonlyFuncWithoutTxDecorator) ZLexCount(ctx context.Context, key, min, max string) *redis.IntCmd {
-	return r.readOnly.ZLexCount(ctx, key, min, max)
+func (r *readonlyFuncWithoutTxDecorator) ZLexCount(ctx context.Context, key, minValue, maxValue string) *redis.IntCmd {
+	return r.readOnly.ZLexCount(ctx, key, minValue, maxValue)
 }
 
 func (r *readonlyFuncWithoutTxDecorator) ZInter(ctx context.Context, store *redis.ZStore) *redis.StringSliceCmd {

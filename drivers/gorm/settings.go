@@ -21,6 +21,7 @@ func WithTxOptions(opts *sql.TxOptions) Opt {
 // Settings contains settings for Transaction.
 type Settings struct {
 	trm.Settings
+
 	txOpts *sql.TxOptions
 }
 
@@ -48,7 +49,7 @@ func MustSettings(trms trm.Settings, oo ...Opt) Settings {
 }
 
 // EnrichBy fills nil properties from external Settings.
-func (s Settings) EnrichBy(in trm.Settings) (res trm.Settings) {
+func (s Settings) EnrichBy(in trm.Settings) trm.Settings {
 	external, ok := in.(Settings)
 	if ok {
 		if s.TxOpts() == nil {

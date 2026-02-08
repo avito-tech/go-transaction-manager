@@ -78,6 +78,12 @@ func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ct
 // Required to explicitly close the transaction by calling Closer.
 // Nested goroutines would be canceled after the transaction closing by context.CancelFunc.
 func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Closer, error) {
+	return m.initWithFactory(ctx, s, nil)
+}
+
+// initWithFactory is like Init but uses the given factory when creating a new transaction.
+// If factory is nil, m.getTransaction is used. Used by XManager to inject wrapped transactions.
+func (m *Manager) initWithFactory(ctx context.Context, s trm.Settings, factory trm.TrFactory) (context.Context, Closer, error) {
 	tr := m.ctxManager.ByKey(ctx, s.CtxKey())
 	isOpened := tr != nil
 
@@ -118,7 +124,11 @@ func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Cl
 		return ctx, newNilClose(cancel), nil
 	}
 
-	ctx, tr, err := m.getTransaction(ctx, s)
+	getTr := m.getTransaction
+	if factory != nil {
+		getTr = factory
+	}
+	ctx, tr, err := getTr(ctx, s)
 	if err != nil {
 		return nil, nil, multierr.Combine(trm.ErrBegin, err)
 	}

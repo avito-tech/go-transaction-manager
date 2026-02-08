@@ -16,7 +16,7 @@ type TxDecorator func(tx Cmdable, db redis.Cmdable) Cmdable
 
 // Transaction is trm.Transaction for sqlx.Tx.
 type Transaction struct {
-	tx              txInterface
+	tx              Cmdable
 	isClosed        *drivers.IsClosed
 	isClosedClosure *drivers.IsClosed
 }
