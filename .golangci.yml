@@ -1,3 +1,4 @@
+version: "2"
 linters:
   enable:
     - asasalint
@@ -7,12 +8,13 @@ linters:
     - dogsled
     - dupl
     - durationcheck
+    - err113
     - errchkjson
     - errname
     - errorlint
     - exhaustive
     - exhaustruct
-    - forcetypeassert # https://github.com/gostaticanalysis/forcetypeassert#forcetypeassert
+    - forcetypeassert
     - funlen
     - gochecknoglobals
     - gochecknoinits
@@ -21,115 +23,124 @@ linters:
     - gocritic
     - gocyclo
     - godot
-    - err113
-    - gofmt
-    - gofumpt
-    - goimports
     - gomoddirectives
-    - goprintffuncname # https://github.com/jirfag/go-printf-func-name#go-printf-func-name
-    - grouper
+    - goprintffuncname
     - gosec
+    - grouper
     - importas
     - interfacebloat
     - ireturn
     - lll
-    - makezero # https://github.com/ashanbrown/makezero#purpose
+    - makezero
     - misspell
     - nakedret
     - nestif
-    - nilerr # https://github.com/gostaticanalysis/nilerr#nilerr
-    - nilnil # https://github.com/Antonboom/nilnil#motivation
-    - nolintlint # https://github.com/golangci/golangci-lint/blob/master/pkg/golinters/nolintlint/README.md#purpose
+    - nilerr
+    - nilnil
+    - nolintlint
     - paralleltest
-    - prealloc # https://github.com/alexkohler/prealloc#purpose
+    - prealloc
     - revive
     - rowserrcheck
     - sqlclosecheck
-    - stylecheck
+    - staticcheck
     - tagliatelle
-    - tparallel # https://github.com/moricho/tparallel
-    - unconvert # https://github.com/mdempsky/unconvert#usage
+    - tparallel
+    - unconvert
     - unparam
     - usestdlibvars
     - wastedassign
     - whitespace
-    - wsl # https://github.com/bombsimon/wsl/blob/master/doc/rules.md
-
-linters-settings:
-  wsl:
-    allow-assign-and-anything: true
-
-issues:
-  exclude-dirs:
-    - trm/manager/mock
-    - sql/mock
-  exclude-use-default: false
-  exclude:
-    - ST1000 # ST1000: at least one file in a package should have a package comment
-  exclude-rules:
-    - linters:
-        - lll
-      source: "^//go:generate "
-    - linters:
-        - lll
-      source: "(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+"
-    - linters:
-        - lll
-      source: "// ?TODO "
-    - path: _test\.go
-      linters:
-        - wsl
-      text: "only cuddled expressions if assigning variable or using from line above"
-    - path: _test\.go
-      linters:
-        - wsl
-      text: "assignments should only be cuddled with other assignments"
-    - path: _test\.go
-      linters:
-        - revive
-      text: "seems to be unused, consider removing or renaming it as _"
-    - path: _test\.go
-      linters:
-        - revive
-      text: "context-keys-type: should not use basic type string as key in context.WithValue"
-    - path: _test\.go
-      linters:
-        - revive
-      text: "context-keys-type: should not use basic type untyped string as key in context.WithValue"
-    - path: _test\.go
-      linters:
-        - staticcheck
-      text: "SA1029: should not use built-in type string as key for value; define your own type to avoid collisions"
-    - path: (.+/)?context\.go
-      linters:
-        - ireturn
-    - path: (.+/)?transaction\.go
-      linters:
-        - ireturn
-      source: \) Begin\(ctx
-    - path: (.+/)?settings\.go
-      linters:
-        - ireturn
-      source: "(?:EnrichBy|SetPropagation|SetCtxKey|CtxKey|SetCancelable|SetTimeout)"
-    - linters:
-        - gochecknoglobals
-      source: "DefaultCtxGetter"
-    - &internal_text
-      path: (^trm/internal|^internal)
-      text: "var-naming: don't use an underscore in package name"
-    - <<: *internal_text
-      text: "package-comments: should have a package comment"
-    - <<: *internal_text
-      text: "ST1003: should not use underscores in package names"
-    - path: (_test\.go|^trm/internal|^internal)
-      linters:
-        - funlen
-        - gochecknoglobals
-        - goconst
-        - gomnd
-        - containedctx
-        - err113
-        - errcheck
-        - nolintlint
-        - forcetypeassert
-        - exhaustruct
+    - wsl
+  settings:
+    wsl:
+      allow-assign-and-anything: true
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - lll
+        source: '^//go:generate '
+      - linters:
+          - lll
+        source: (?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+
+      - linters:
+          - lll
+        source: '// ?TODO '
+      - linters:
+          - wsl
+        path: _test\.go
+        text: only cuddled expressions if assigning variable or using from line above
+      - linters:
+          - wsl
+        path: _test\.go
+        text: assignments should only be cuddled with other assignments
+      - linters:
+          - revive
+        path: _test\.go
+        text: seems to be unused, consider removing or renaming it as _
+      - linters:
+          - revive
+        path: _test\.go
+        text: 'context-keys-type: should not use basic type string as key in context.WithValue'
+      - linters:
+          - revive
+        path: _test\.go
+        text: 'context-keys-type: should not use basic type untyped string as key in context.WithValue'
+      - linters:
+          - staticcheck
+        path: _test\.go
+        text: 'SA1029: should not use built-in type string as key for value; define your own type to avoid collisions'
+      - linters:
+          - ireturn
+        path: (.+/)?context\.go
+      - linters:
+          - ireturn
+        path: (.+/)?transaction\.go
+        source: \) Begin\(ctx
+      - linters:
+          - ireturn
+        path: (.+/)?settings\.go
+        source: (?:EnrichBy|SetPropagation|SetCtxKey|CtxKey|SetCancelable|SetTimeout)
+      - linters:
+          - gochecknoglobals
+        source: DefaultCtxGetter
+      - path: (^trm/internal|^internal)
+        text: 'var-naming: don''t use an underscore in package name'
+      - path: (^trm/internal|^internal)
+        text: 'package-comments: should have a package comment'
+      - path: (^trm/internal|^internal)
+        text: 'ST1003: should not use underscores in package names'
+      - linters:
+          - containedctx
+          - err113
+          - errcheck
+          - exhaustruct
+          - forcetypeassert
+          - funlen
+          - gochecknoglobals
+          - goconst
+          - mnd
+          - nolintlint
+        path: (_test\.go|^trm/internal|^internal)
+      - path: (.+)\.go$
+        text: ST1000
+    paths:
+      - trm/manager/mock
+      - sql/mock
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - trm/manager/mock
+      - sql/mock
+      - third_party$
+      - builtin$
+      - examples$
