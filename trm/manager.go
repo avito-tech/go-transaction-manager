@@ -39,7 +39,7 @@ func UnSkippable(err error) error {
 	res := make([]error, 0, len(ee))
 
 	for _, e := range ee {
-		//nolint:errorlint,goerr113
+		//nolint:errorlint,goerr113,err113
 		if e != ErrSkip {
 			res = append(res, e)
 		}

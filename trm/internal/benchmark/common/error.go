@@ -1,3 +1,4 @@
+//nolint:revive
 package common
 
 // CheckErr throws panic if there is an error.

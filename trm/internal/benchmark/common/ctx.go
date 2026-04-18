@@ -1,3 +1,4 @@
+//nolint:revive
 package common
 
 // IDKey is a type for context.Context value.
