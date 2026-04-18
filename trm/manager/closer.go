@@ -50,7 +50,6 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 	isCtxErr := isCtxCanceled || isCtxDeadlineExceeded
 
 	ctxErr := ctx.Err()
-
 	if ctxErr != nil {
 		if !hasError {
 			*errInProcessTr = ctxErr
