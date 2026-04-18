@@ -8,7 +8,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	benchutil "github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
 )
 
 const (
@@ -50,7 +50,7 @@ func benchmarkContext(creator creator) {
 
 	tr := creator()
 
-	ctx = context.WithValue(ctx, common.CtxKey{}, tr)
+	ctx = context.WithValue(ctx, benchutil.CtxKey{}, tr)
 
 	contextRunNested(ctx)
 }
@@ -70,7 +70,7 @@ func contextRunNested(ctx context.Context) {
 func contextNested(ctx context.Context, wgNested *sync.WaitGroup) {
 	defer wgNested.Done()
 
-	t := ctx.Value(common.CtxKey{}).(*sql.Tx)
+	t := ctx.Value(benchutil.CtxKey{}).(*sql.Tx)
 
 	_ = t
 }

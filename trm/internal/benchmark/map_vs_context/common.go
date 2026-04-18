@@ -6,7 +6,7 @@ import (
 
 	"github.com/jinzhu/copier"
 
-	"github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	benchutil "github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
 )
 
 func getDB() *sql.DB {
@@ -30,13 +30,13 @@ func creatorEmpty() creator {
 
 func creatorCopy(db *sql.DB) creator {
 	srcTr, err := db.Begin()
-	common.CheckErr(err)
+	benchutil.CheckErr(err)
 
 	return func() *sql.Tx {
 		tr := &sql.Tx{}
 
 		err := copier.CopyWithOption(tr, &srcTr, copier.Option{DeepCopy: true})
-		common.CheckErr(err)
+		benchutil.CheckErr(err)
 
 		return tr
 	}
@@ -45,7 +45,7 @@ func creatorCopy(db *sql.DB) creator {
 func creatorRealTransaction(db *sql.DB) creator {
 	return func() *sql.Tx {
 		tr, err := db.Begin()
-		common.CheckErr(err)
+		benchutil.CheckErr(err)
 
 		return tr
 	}

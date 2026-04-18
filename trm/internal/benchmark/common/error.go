@@ -1,5 +1,4 @@
-//nolint:revive
-package common
+package benchutil
 
 // CheckErr throws panic if there is an error.
 func CheckErr(err error) {

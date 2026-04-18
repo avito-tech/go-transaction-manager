@@ -4,14 +4,14 @@ import (
 	"context"
 	"sync"
 
-	"github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	benchutil "github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
 )
 
 func keyInContext() {
 	ctx := context.Background()
 
-	key := common.CtxKey{}
-	idKey := common.IDKey(1)
+	key := benchutil.CtxKey{}
+	idKey := benchutil.IDKey(1)
 	ctx = context.WithValue(ctx, key, idKey)
 
 	wg := sync.WaitGroup{}
