@@ -22,6 +22,8 @@ func TestInline(t *testing.T) {
 }
 
 func recoverer(t *testing.T) func() {
+	t.Helper()
+
 	return func() {
 		assert.Equal(t, panicText, recover())
 	}
@@ -38,18 +40,32 @@ func TestNestedFunc(t *testing.T) {
 }
 
 func emptyRecoverer(t *testing.T) func() {
+	t.Helper()
+
 	return func() {
 		assert.Empty(t, recover())
 	}
 }
 
-func TestNestedFuncInline(t *testing.T) {
+func TestNestedFuncInlineWithVariable(t *testing.T) {
 	t.Parallel()
 
 	d := emptyRecoverer(t)
 
 	defer func() {
 		d()
+
+		assert.NotNil(t, recover())
+	}()
+
+	panic("panic")
+}
+
+func TestNestedFuncInline(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		emptyRecoverer(t)
 
 		assert.NotNil(t, recover())
 	}()

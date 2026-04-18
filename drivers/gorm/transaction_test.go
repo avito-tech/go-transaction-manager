@@ -8,21 +8,16 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/test"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
-	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/test"
-
-	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 )
 
 func TestTransaction(t *testing.T) {

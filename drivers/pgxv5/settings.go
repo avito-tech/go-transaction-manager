@@ -1,9 +1,8 @@
 package pgxv5
 
 import (
-	"github.com/jackc/pgx/v5"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/jackc/pgx/v5"
 )
 
 // Opt is a type to configure Settings.
@@ -21,6 +20,7 @@ func WithTxOptions(opts pgx.TxOptions) Opt {
 // Settings contains settings for pgxv5.Transaction.
 type Settings struct {
 	trm.Settings
+
 	txOpts pgx.TxOptions
 }
 

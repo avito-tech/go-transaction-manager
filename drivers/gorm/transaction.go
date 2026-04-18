@@ -7,10 +7,9 @@ import (
 	"errors"
 	"sync"
 
-	"gorm.io/gorm"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers"
+	"gorm.io/gorm"
 )
 
 // Transaction is trm.Transaction for sqlx.Tx.
@@ -101,7 +100,11 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // Begin nested transaction by save point.
-func (t *Transaction) Begin(ctx context.Context, s trm.Settings) (context.Context, trm.Transaction, error) {
+func (t *Transaction) Begin(ctx context.Context, s trm.Settings) (
+	context.Context,
+	trm.Transaction,
+	error,
+) {
 	t.txMutex.Lock()
 	defer t.txMutex.Unlock()
 

@@ -4,10 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/jackc/pgx/v5"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers"
+	"github.com/jackc/pgx/v5"
 )
 
 // Transaction is trm.Transaction for pgx.Tx.
@@ -61,7 +60,11 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // Begin nested transaction by save point.
-func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
+func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (
+	context.Context,
+	trm.Transaction,
+	error,
+) {
 	tx, err := t.tx.Begin(ctx)
 	if err != nil {
 		return ctx, nil, err

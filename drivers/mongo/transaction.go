@@ -4,10 +4,9 @@ package mongo
 import (
 	"context"
 
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers"
 )
 
 // Transaction is trm.Transaction for mongo.Client.

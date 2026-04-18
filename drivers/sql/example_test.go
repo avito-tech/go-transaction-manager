@@ -5,13 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/mattn/go-sqlite3"
-
 	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sql/v2"
-
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Example demonstrates the implementation of the Repository pattern by trm.Manager.
@@ -80,7 +77,9 @@ func (r *repo) GetByID(ctx context.Context, id int64) (*user, error) {
 
 	u := &user{}
 
-	err := r.getter.DefaultTrOrDB(ctx, r.db).QueryRowContext(ctx, query, id).Scan(&u.ID, &u.Username)
+	err := r.getter.DefaultTrOrDB(ctx, r.db).
+		QueryRowContext(ctx, query, id).
+		Scan(&u.ID, &u.Username)
 	if err != nil {
 		return nil, err
 	}

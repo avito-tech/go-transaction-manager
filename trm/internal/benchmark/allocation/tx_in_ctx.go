@@ -4,9 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/jmoiron/sqlx"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	"github.com/jmoiron/sqlx"
 )
 
 func trInContext() {

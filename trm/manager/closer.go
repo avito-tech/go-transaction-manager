@@ -5,9 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"go.uber.org/multierr"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"go.uber.org/multierr"
 )
 
 // Closer closes trm.Transaction.
@@ -27,30 +26,29 @@ func newTxCommit(tr trm.Transaction, l logger, c context.CancelFunc) Closer {
 	}).close
 }
 
-//nolint:funlen
-func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *error) error {
+//nolint:funlen,cyclop // rethrowing recovered panic is intentional
+func (c *trCloser) close(ctx context.Context, panicVal interface{}, errInProcessTr *error) error {
 	defer c.cancel()
 
 	// recovering from panic
-	if p != nil {
+	if panicVal != nil {
 		if c.tr.IsActive() {
 			if err := c.tr.Rollback(ctx); err != nil {
-				c.log.Warning(ctx, fmt.Sprintf("%v, %v", err, p))
+				c.log.Warning(ctx, fmt.Sprintf("%v, %v", err, panicVal))
 			}
 		}
 
-		panic(p)
+		panic(panicVal)
 	}
 
 	hasError := *errInProcessTr != nil
 	isErrSkippable := hasError && trm.IsSkippable(*errInProcessTr)
-	// TODO not sure that context errors should be propagated.
+	// NOTE: uncertainty whether context errors should be propagated.
 	isCtxCanceled := errors.Is(*errInProcessTr, context.Canceled)
 	isCtxDeadlineExceeded := errors.Is(*errInProcessTr, context.DeadlineExceeded)
 	isCtxErr := isCtxCanceled || isCtxDeadlineExceeded
 
 	ctxErr := ctx.Err()
-
 	if ctxErr != nil {
 		if !hasError {
 			*errInProcessTr = ctxErr
@@ -98,11 +96,11 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 }
 
 func newNilClose(cancel context.CancelFunc) Closer {
-	return func(_ context.Context, p interface{}, err *error) error {
+	return func(_ context.Context, panicVal interface{}, err *error) error {
 		defer cancel()
 
-		if p != nil {
-			panic(p)
+		if panicVal != nil {
+			panic(panicVal)
 		}
 
 		if *err != nil {

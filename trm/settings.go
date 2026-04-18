@@ -19,19 +19,19 @@ type Settings interface {
 	// CtxKey returns trm.CtxKey for the trm.Transaction.
 	CtxKey() CtxKey
 	CtxKeyOrNil() *CtxKey
-	SetCtxKey(*CtxKey) Settings
+	SetCtxKey(key *CtxKey) Settings
 
 	// Propagation returns trm.Propagation.
 	Propagation() Propagation
 	PropagationOrNil() *Propagation
-	SetPropagation(*Propagation) Settings
+	SetPropagation(p *Propagation) Settings
 
 	// Cancelable defines that parent trm.Transaction can cancel child trm.Transaction or goroutines.
 	Cancelable() bool
 	CancelableOrNil() *bool
-	SetCancelable(*bool) Settings
+	SetCancelable(b *bool) Settings
 
 	// TimeoutOrNil returns time.Duration of the trm.Transaction.
 	TimeoutOrNil() *time.Duration
-	SetTimeout(*time.Duration) Settings
+	SetTimeout(t *time.Duration) Settings
 }

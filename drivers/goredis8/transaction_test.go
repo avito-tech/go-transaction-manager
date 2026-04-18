@@ -7,20 +7,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 	"github.com/go-redis/redis/v8"
 	"github.com/go-redis/redismock/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers/mock"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2"
-
-	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 const OK = "OK"
@@ -67,7 +62,11 @@ func TestTransaction(t *testing.T) {
 				ctx: ctx,
 			},
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
-				return assert.ErrorContains(t, err, "all expectations were already fulfilled, call to cmd '[watch key1]' was not expected") &&
+				return assert.ErrorContains(
+					t,
+					err,
+					"all expectations were already fulfilled, call to cmd '[watch key1]' was not expected",
+				) &&
 					assert.ErrorIs(t, err, trm.ErrBegin)
 			},
 		},

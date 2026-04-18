@@ -3,11 +3,10 @@ package pgxv4
 import (
 	"testing"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+	"github.com/jackc/pgx/v4"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSettings_EnrichBy(t *testing.T) {

@@ -6,9 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // run with -test.benchtime=1s -test.benchmem
@@ -31,6 +30,7 @@ func BenchmarkMapEmptyTransaction(b *testing.B) {
 	creator := creatorEmpty()
 
 	i := 1
+
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			benchmarkMap(i, creator)
@@ -44,6 +44,7 @@ func BenchmarkMapCopy(b *testing.B) {
 	creator := creatorCopy(getDB())
 
 	i := 1
+
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			benchmarkMap(i, creator)
@@ -57,6 +58,7 @@ func BenchmarkMapRealTransaction(b *testing.B) {
 	creator := creatorRealTransaction(getDB())
 
 	i := 1
+
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			benchmarkMap(i, creator)

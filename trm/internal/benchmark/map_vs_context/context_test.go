@@ -6,9 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (

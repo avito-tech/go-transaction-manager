@@ -23,6 +23,8 @@ func NewDBMock() (*sql.DB, sqlmock.Sqlmock) {
 //
 //nolint:ireturn,nolintlint
 func NewDBMockWithClose(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
+	t.Helper()
+
 	db, dbmock := NewDBMock()
 
 	// need to solve goroutine leak detection https://kumakichi.github.io/goroutine-leak.html
