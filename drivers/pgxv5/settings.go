@@ -31,6 +31,7 @@ func NewSettings(trms trm.Settings, oo ...Opt) (Settings, error) {
 		AccessMode:     "",
 		DeferrableMode: "",
 		BeginQuery:     "",
+		CommitQuery:    "",
 	}}
 
 	for _, o := range oo {
