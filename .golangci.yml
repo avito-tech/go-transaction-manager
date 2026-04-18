@@ -51,10 +51,14 @@ linters:
     - usestdlibvars
     - wastedassign
     - whitespace
-    - wsl
+    - wsl_v5
   settings:
-    wsl:
-      allow-assign-and-anything: true
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
+      disable:
+        - assign
   exclusions:
     generated: lax
     rules:
@@ -68,13 +72,17 @@ linters:
           - lll
         source: '// ?TODO '
       - linters:
-          - wsl
+          - wsl_v5
         path: _test\.go
         text: only cuddled expressions if assigning variable or using from line above
       - linters:
-          - wsl
+          - wsl_v5
         path: _test\.go
         text: assignments should only be cuddled with other assignments
+      - linters:
+          - wsl_v5
+        path: _test\.go
+        text: missing whitespace above this line
       - linters:
           - revive
         path: _test\.go
@@ -105,6 +113,8 @@ linters:
       - linters:
           - gochecknoglobals
         source: DefaultCtxGetter
+      - path: (^trm/internal|^internal|^trm/context)
+        text: 'var-naming: avoid package names that conflict with Go standard library package names'
       - path: (^trm/internal|^internal)
         text: 'var-naming: don''t use an underscore in package name'
       - path: (^trm/internal|^internal)
