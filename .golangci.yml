@@ -111,6 +111,10 @@ linters:
       - <<: *internal_path
         text: "ST1003: should not use underscores in package names"
       - linters:
+          - cyclop
+        path: _test\.go
+        text: "calculated cyclomatic complexity"
+      - linters:
           - containedctx
           - err113
           - errcheck
