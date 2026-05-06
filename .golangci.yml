@@ -19,6 +19,7 @@ linters:
     - testpackage
     - inamedparam
     - noinlineerr
+    - nonamedreturns
   settings:
     wsl_v5:
       allow-whole-block: false
