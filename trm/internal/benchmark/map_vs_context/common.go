@@ -29,7 +29,7 @@ func creatorEmpty() creator {
 }
 
 func creatorCopy(db *sql.DB) creator {
-	srcTr, err := db.Begin()
+	srcTr, err := db.Begin() //nolint:noctx // benchmark code, context is intentionally omitted
 	bench.CheckErr(err)
 
 	return func() *sql.Tx {
@@ -44,7 +44,7 @@ func creatorCopy(db *sql.DB) creator {
 
 func creatorRealTransaction(db *sql.DB) creator {
 	return func() *sql.Tx {
-		tr, err := db.Begin()
+		tr, err := db.Begin() //nolint:noctx // benchmark code, context is intentionally omitted
 		bench.CheckErr(err)
 
 		return tr
