@@ -17,6 +17,7 @@ linters:
     - copyloopvar
     - varnamelen
     - testpackage
+    - inamedparam
   settings:
     wsl_v5:
       allow-whole-block: false
