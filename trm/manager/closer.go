@@ -27,7 +27,7 @@ func newTxCommit(tr trm.Transaction, l logger, c context.CancelFunc) Closer {
 	}).close
 }
 
-//nolint:funlen
+//nolint:funlen,cyclop // transaction lifecycle requires handling multiple states: panic, context errors, skippable errors, commit/rollback
 func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *error) error {
 	defer c.cancel()
 

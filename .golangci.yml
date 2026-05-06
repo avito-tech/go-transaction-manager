@@ -84,7 +84,7 @@ linters:
         source: DefaultCtxGetter
       - linters:
           - wrapcheck
-        source: "multierr\."
+        source: 'multierr\.'
       - &internal_path
         path: (^trm/internal|^internal)
         text: "var-naming: avoid package names that conflict with Go standard library package names"
