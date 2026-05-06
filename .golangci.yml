@@ -21,6 +21,8 @@ linters:
     - noinlineerr
     - nonamedreturns
     - intrange
+    - maintidx
+    - godox
   settings:
     wsl_v5:
       allow-whole-block: false
