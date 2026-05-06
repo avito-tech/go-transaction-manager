@@ -111,14 +111,15 @@ linters:
       - linters:
           - gochecknoglobals
         source: DefaultCtxGetter
-      - path: (^trm/internal|^internal|^trm/context)
-        text: 'var-naming: avoid package names that conflict with Go standard library package names'
-      - path: (^trm/internal|^internal)
-        text: 'var-naming: don''t use an underscore in package name'
-      - path: (^trm/internal|^internal)
-        text: 'package-comments: should have a package comment'
-      - path: (^trm/internal|^internal)
-        text: 'ST1003: should not use underscores in package names'
+      - &internal_path
+        path: (^trm/internal|^internal)
+        text: "var-naming: avoid package names that conflict with Go standard library package names"
+      - <<: *internal_path
+        text: "var-naming: don't use an underscore in package name"
+      - <<: *internal_path
+        text: "package-comments: should have a package comment"
+      - <<: *internal_path
+        text: "ST1003: should not use underscores in package names"
       - linters:
           - containedctx
           - err113
