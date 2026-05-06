@@ -47,6 +47,8 @@ func TestChainedMW_Do(t *testing.T) {
 		},
 		"one": {
 			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
+				t.Helper()
+
 				m := mock.NewMockManager(ctrl)
 
 				m.EXPECT().Do(ctxSource, gomock.Any()).
@@ -146,6 +148,8 @@ func TestChainedMW_DoWithSettings(t *testing.T) {
 		},
 		"one": {
 			mm: func(t *testing.T, ctrl *gomock.Controller) []trm.Manager {
+				t.Helper()
+
 				m := mock.NewMockManager(ctrl)
 
 				m.EXPECT().DoWithSettings(ctxSource, s, gomock.Any()).
