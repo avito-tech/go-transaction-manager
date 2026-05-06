@@ -30,6 +30,7 @@ func WithTransactionOpts(opts *options.TransactionOptions) Opt {
 // Settings contains settings for mongo.Transaction.
 type Settings struct {
 	trm.Settings
+
 	sessionOpts     *options.SessionOptions
 	transactionOpts *options.TransactionOptions
 }

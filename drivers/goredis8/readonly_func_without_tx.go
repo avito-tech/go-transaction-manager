@@ -9,6 +9,7 @@ import (
 // readonlyFuncWithoutTxDecorator calls readonly commands outside of a transaction.
 type readonlyFuncWithoutTxDecorator struct {
 	Cmdable
+
 	readOnly redis.Cmdable
 }
 
