@@ -242,7 +242,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		cancel()
 
@@ -251,13 +251,13 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		<-time.After(time.Millisecond)
 
 		<-ctx.Done()
-		require.False(t, tr.IsActive())
+		assert.False(t, tr.IsActive())
 		<-tr.Closed()
-		require.False(t, tr.IsActive())
+		assert.False(t, tr.IsActive())
 
-		require.Equal(t, context.Canceled, ctx.Err())
+		assert.Equal(t, context.Canceled, ctx.Err())
 		err = tr.Commit(ctx)
-		require.ErrorIs(t, err, sql.ErrTxDone)
+		assert.ErrorIs(t, err, sql.ErrTxDone)
 	}()
 
 	wg.Wait()
@@ -285,11 +285,11 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
-		require.NoError(t, tr.Rollback(ctx))
-		require.False(t, tr.IsActive())
-		require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
+		assert.NoError(t, tr.Rollback(ctx))
+		assert.False(t, tr.IsActive())
+		assert.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
 	}()
 
 	wg.Wait()

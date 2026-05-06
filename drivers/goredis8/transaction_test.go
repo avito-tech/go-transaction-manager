@@ -177,18 +177,18 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		cancel()
 
 		<-ctx.Done()
-		require.True(t, tr.IsActive())
+		assert.True(t, tr.IsActive())
 		<-tr.Closed()
-		require.False(t, tr.IsActive())
+		assert.False(t, tr.IsActive())
 
-		require.Equal(t, context.Canceled, ctx.Err())
+		assert.Equal(t, context.Canceled, ctx.Err())
 		err = tr.Commit(ctx)
-		require.ErrorIs(t, err, redis.ErrClosed)
+		assert.ErrorIs(t, err, redis.ErrClosed)
 	}()
 
 	wg.Wait()
@@ -211,11 +211,11 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
-		require.NoError(t, tr.Rollback(ctx))
-		require.False(t, tr.IsActive())
-		require.NoError(t, tr.Rollback(ctx))
+		assert.NoError(t, tr.Rollback(ctx))
+		assert.False(t, tr.IsActive())
+		assert.NoError(t, tr.Rollback(ctx))
 	}()
 
 	wg.Wait()

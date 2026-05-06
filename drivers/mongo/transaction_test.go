@@ -224,8 +224,8 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 
 		<-ctx.Done()
 
-		require.NoError(mt, err)
-		require.False(mt, tr.IsActive())
+		assert.NoError(mt, err)
+		assert.False(mt, tr.IsActive())
 	}()
 
 	wg.Wait()

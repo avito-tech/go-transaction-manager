@@ -132,7 +132,7 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
 					assert.ErrorIs(t, err, trm.ErrCommit) &&
-					assert.NotNil(t, err, trm.ErrNestedCommit)
+					assert.Error(t, err)
 			},
 		},
 		"rollback_savepoint_after_error": {
@@ -152,7 +152,7 @@ func TestTransaction(t *testing.T) {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
 					assert.ErrorIs(t, err, trm.ErrRollback) &&
-					assert.NotNil(t, err, trm.ErrNestedRollback)
+					assert.Error(t, err)
 			},
 		},
 	}
@@ -227,17 +227,17 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
 		cancel()
 
 		<-ctx.Done()
-		require.True(t, tr.IsActive())
+		assert.True(t, tr.IsActive())
 		<-tr.Closed()
-		require.False(t, tr.IsActive())
+		assert.False(t, tr.IsActive())
 
 		err = tr.Commit(ctx)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 	}()
 
 	wg.Wait()
@@ -261,10 +261,10 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+		assert.NoError(t, err)
 
-		require.NoError(t, tr.Rollback(ctx))
-		require.False(t, tr.IsActive())
+		assert.NoError(t, tr.Rollback(ctx))
+		assert.False(t, tr.IsActive())
 	}()
 
 	wg.Wait()
