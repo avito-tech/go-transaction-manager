@@ -18,6 +18,7 @@ linters:
     - varnamelen
     - testpackage
     - inamedparam
+    - noinlineerr
   settings:
     wsl_v5:
       allow-whole-block: false
