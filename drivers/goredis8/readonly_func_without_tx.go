@@ -200,12 +200,12 @@ func (r *readonlyFuncWithoutTxDecorator) ZCard(ctx context.Context, key string) 
 	return r.readOnly.ZCard(ctx, key)
 }
 
-func (r *readonlyFuncWithoutTxDecorator) ZCount(ctx context.Context, key, min, max string) *redis.IntCmd {
-	return r.readOnly.ZCount(ctx, key, min, max)
+func (r *readonlyFuncWithoutTxDecorator) ZCount(ctx context.Context, key, minVal, maxVal string) *redis.IntCmd {
+	return r.readOnly.ZCount(ctx, key, minVal, maxVal)
 }
 
-func (r *readonlyFuncWithoutTxDecorator) ZLexCount(ctx context.Context, key, min, max string) *redis.IntCmd {
-	return r.readOnly.ZLexCount(ctx, key, min, max)
+func (r *readonlyFuncWithoutTxDecorator) ZLexCount(ctx context.Context, key, minVal, maxVal string) *redis.IntCmd {
+	return r.readOnly.ZLexCount(ctx, key, minVal, maxVal)
 }
 
 func (r *readonlyFuncWithoutTxDecorator) ZInter(ctx context.Context, store *redis.ZStore) *redis.StringSliceCmd {

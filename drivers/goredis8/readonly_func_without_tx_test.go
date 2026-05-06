@@ -39,8 +39,8 @@ const (
 
 	group = "group"
 
-	min = "min"
-	max = "max"
+	minVal = "min"
+	maxVal = "max"
 )
 
 var (
@@ -574,9 +574,9 @@ func Test_readonlyFuncWithoutTxDecorator_ZCount(t *testing.T) {
 	t.Parallel()
 
 	cmdable, mock := newReadOnlyFuncWithoutTxDecorator()
-	mock.ExpectZCount(key1, min, max).SetVal(0)
+	mock.ExpectZCount(key1, minVal, maxVal).SetVal(0)
 
-	cmd := cmdable.ZCount(context.Background(), key1, min, max)
+	cmd := cmdable.ZCount(context.Background(), key1, minVal, maxVal)
 
 	check(t, cmd, mock)
 }
@@ -585,9 +585,9 @@ func Test_readonlyFuncWithoutTxDecorator_ZLexCount(t *testing.T) {
 	t.Parallel()
 
 	cmdable, mock := newReadOnlyFuncWithoutTxDecorator()
-	mock.ExpectZLexCount(key1, min, max).SetVal(0)
+	mock.ExpectZLexCount(key1, minVal, maxVal).SetVal(0)
 
-	cmd := cmdable.ZLexCount(context.Background(), key1, min, max)
+	cmd := cmdable.ZLexCount(context.Background(), key1, minVal, maxVal)
 
 	check(t, cmd, mock)
 }
