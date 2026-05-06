@@ -1,57 +1,19 @@
 version: "2"
 linters:
-  enable:
-    - asasalint
-    - bodyclose
-    - containedctx
-    - contextcheck
-    - dogsled
-    - dupl
-    - durationcheck
-    - err113
-    - errchkjson
-    - errname
-    - errorlint
-    - exhaustive
-    - exhaustruct
-    - forcetypeassert
-    - funlen
-    - gochecknoglobals
-    - gochecknoinits
-    - gocognit
-    - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - gomoddirectives
-    - goprintffuncname
-    - gosec
-    - grouper
-    - importas
-    - interfacebloat
-    - ireturn
-    - lll
-    - makezero
-    - misspell
-    - nakedret
-    - nestif
-    - nilerr
-    - nilnil
-    - nolintlint
-    - paralleltest
-    - prealloc
-    - revive
-    - rowserrcheck
-    - sqlclosecheck
-    - staticcheck
-    - tagliatelle
-    - tparallel
-    - unconvert
-    - unparam
-    - usestdlibvars
-    - wastedassign
-    - whitespace
-    - wsl_v5
+  enable-all: true
+  disable:
+    - arangolint
+    - ginkgolinter
+    - promlinter
+    - protogetter
+    - spancheck
+    - zerologlint
+    - sloglint
+    - goheader
+    - gomodguard
+    - depguard
+    - forbidigo
+    - wsl
   settings:
     wsl_v5:
       allow-whole-block: false
@@ -62,13 +24,13 @@ linters:
     rules:
       - linters:
           - lll
-        source: '^//go:generate '
+        source: "^//go:generate "
       - linters:
           - lll
         source: (?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+
       - linters:
           - lll
-        source: '// ?TODO '
+        source: "// ?TODO "
       - linters:
           - wsl_v5
         path: _test\.go
@@ -88,15 +50,15 @@ linters:
       - linters:
           - revive
         path: _test\.go
-        text: 'context-keys-type: should not use basic type string as key in context.WithValue'
+        text: "context-keys-type: should not use basic type string as key in context.WithValue"
       - linters:
           - revive
         path: _test\.go
-        text: 'context-keys-type: should not use basic type untyped string as key in context.WithValue'
+        text: "context-keys-type: should not use basic type untyped string as key in context.WithValue"
       - linters:
           - staticcheck
         path: _test\.go
-        text: 'SA1029: should not use built-in type string as key for value; define your own type to avoid collisions'
+        text: "SA1029: should not use built-in type string as key for value; define your own type to avoid collisions"
       - linters:
           - ireturn
         path: (.+/)?context\.go
