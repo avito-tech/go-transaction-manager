@@ -1,6 +1,6 @@
 version: "2"
 linters:
-  enable-all: true
+  default: all
   disable:
     - arangolint
     - ginkgolinter
@@ -14,6 +14,8 @@ linters:
     - depguard
     - forbidigo
     - wsl
+    - copyloopvar
+    - varnamelen
   settings:
     wsl_v5:
       allow-whole-block: false

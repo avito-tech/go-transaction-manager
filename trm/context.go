@@ -27,4 +27,6 @@ type CtxManager interface {
 //
 // Deprecated: Type name contains first non-ASCII character.
 // Type is safed in terms of backward compatibility, use above CtxManager instead.
+//
+//nolint:asciicheck // intentional: backward compatibility alias
 type СtxManager = CtxManager
