@@ -3,6 +3,7 @@ package manager
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/multierr"
 
@@ -27,7 +28,7 @@ type Manager struct {
 func New(f trm.TrFactory, oo ...Opt) (*Manager, error) {
 	s, err := settings.New()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("default settings: %w", err)
 	}
 
 	m := &Manager{
@@ -77,6 +78,7 @@ func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ct
 // Init creates a context.Context with a trm.Transaction and Closer to finish trm.Transaction.
 // Required to explicitly close the transaction by calling Closer.
 // Nested goroutines would be canceled after the transaction closing by context.CancelFunc.
+//
 //nolint:cyclop // propagation mode switch requires a case per mode by design
 func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Closer, error) {
 	tr := m.ctxManager.ByKey(ctx, s.CtxKey())

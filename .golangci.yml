@@ -89,6 +89,8 @@ linters:
       - linters:
           - modernize
         text: "plusbuild:"
+      - path: ^trm/context
+        text: "var-naming: avoid package names that conflict with Go standard library package names"
       - &internal_path
         path: (^trm/internal|^internal)
         text: "var-naming: avoid package names that conflict with Go standard library package names"
