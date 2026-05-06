@@ -87,6 +87,12 @@ linters:
           - wrapcheck
         source: 'multierr\.'
       - linters:
+          - wrapcheck
+        path: _test\.go
+      - linters:
+          - wrapcheck
+        source: 'isClosed\.Err'
+      - linters:
           - modernize
         text: "plusbuild:"
       - path: ^trm/context
