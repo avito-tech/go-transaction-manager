@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	benchutil "github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	bench "github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/benchutil"
 )
 
 func trInContext() {
@@ -14,7 +14,7 @@ func trInContext() {
 
 	tr := &sqlx.Tx{}
 
-	key := benchutil.CtxKey{}
+	key := bench.CtxKey{}
 	ctx = context.WithValue(ctx, key, tr)
 
 	wg := sync.WaitGroup{}
