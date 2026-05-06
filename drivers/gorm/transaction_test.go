@@ -272,7 +272,7 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	require.NoError(t, err)
 
 	f := NewDefaultFactory(dbgorm)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet,gosec
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

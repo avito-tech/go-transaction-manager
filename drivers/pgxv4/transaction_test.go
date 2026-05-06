@@ -254,7 +254,7 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	dbmock.ExpectRollback()
 
 	f := NewDefaultFactory(dbmock)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+	ctx, _ := context.WithCancel(context.Background()) //nolint:govet,gosec
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
