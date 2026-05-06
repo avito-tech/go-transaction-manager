@@ -52,6 +52,7 @@ func TestTransaction(t *testing.T) {
 	}{
 		"success": {
 			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
+				t.Helper()
 				m.ExpectBegin()
 
 				spPrepare(t, m)
@@ -78,6 +79,7 @@ func TestTransaction(t *testing.T) {
 		},
 		"commit_error": {
 			prepare: func(t *testing.T, m sqlmock.Sqlmock) {
+				t.Helper()
 				m.ExpectBegin()
 
 				spPrepare(t, m)
