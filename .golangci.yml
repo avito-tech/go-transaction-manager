@@ -111,6 +111,7 @@ linters:
         text: ST1000
     paths:
       - trm/manager/mock
+      - trm/drivers/mock
       - sql/mock
 formatters:
   enable:
@@ -121,4 +122,5 @@ formatters:
     generated: lax
     paths:
       - trm/manager/mock
+      - trm/drivers/mock
       - sql/mock
