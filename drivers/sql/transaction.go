@@ -30,7 +30,7 @@ func NewTransaction(
 ) (context.Context, *Transaction, error) {
 	tx, err := db.BeginTx(ctx, opts)
 	if err != nil {
-		return ctx, nil, err
+		return ctx, nil, fmt.Errorf("begin transaction: %w", err)
 	}
 
 	tr := &Transaction{
@@ -69,7 +69,7 @@ func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Contex
 		// decrement save point ID after error
 		t.decrementID()
 
-		return ctx, nil, err
+		return ctx, nil, fmt.Errorf("create savepoint: %w", err)
 	}
 
 	return ctx, t, nil
@@ -88,7 +88,11 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 	defer t.isClosed.Close()
 
-	return t.tx.Commit()
+	if err := t.tx.Commit(); err != nil {
+		return fmt.Errorf("commit: %w", err)
+	}
+
+	return nil
 }
 
 // Rollback the trm.Transaction.
@@ -104,7 +108,11 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 
 	defer t.isClosed.Close()
 
-	return t.tx.Rollback()
+	if err := t.tx.Rollback(); err != nil {
+		return fmt.Errorf("rollback: %w", err)
+	}
+
+	return nil
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.

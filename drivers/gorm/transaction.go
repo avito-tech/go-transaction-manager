@@ -138,12 +138,11 @@ func (t *Transaction) Rollback(_ context.Context) error {
 
 		<-t.isClosed.Closed()
 
-		err := t.isClosed.Err()
-		if errors.Is(err, drivers.ErrRollbackTr) {
+		if errors.Is(t.isClosed.Err(), drivers.ErrRollbackTr) {
 			return nil
 		}
 
-		return err
+		return t.isClosed.Err()
 	}
 }
 

@@ -4,6 +4,7 @@ package goredis8
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/go-redis/redis/v8"
@@ -77,7 +78,7 @@ func NewTransaction(
 	wg.Wait()
 
 	if err != nil {
-		return ctx, nil, err
+		return ctx, nil, fmt.Errorf("watch: %w", err)
 	}
 
 	go t.awaitDone(ctx)
@@ -108,9 +109,11 @@ func (t *Transaction) Transaction() interface{} {
 func (t *Transaction) Commit(ctx context.Context) error {
 	select {
 	case <-t.isClosed.Closed():
-		_, err := t.tx.Exec(ctx)
+		if _, err := t.tx.Exec(ctx); err != nil {
+			return fmt.Errorf("exec pipeline: %w", err)
+		}
 
-		return err
+		return nil
 	default:
 		t.isClosedClosure.Close()
 
@@ -124,14 +127,17 @@ func (t *Transaction) Commit(ctx context.Context) error {
 func (t *Transaction) Rollback(_ context.Context) error {
 	select {
 	case <-t.isClosed.Closed():
-		return t.tx.Discard()
+		if err := t.tx.Discard(); err != nil {
+			return fmt.Errorf("discard pipeline: %w", err)
+		}
+
+		return nil
 	default:
 		t.isClosedClosure.CloseWithCause(drivers.ErrRollbackTr)
 
 		<-t.isClosed.Closed()
 
-		err := t.isClosed.Err()
-		if errors.Is(err, drivers.ErrRollbackTr) {
+		if errors.Is(t.isClosed.Err(), drivers.ErrRollbackTr) {
 			return nil
 		}
 
@@ -139,7 +145,7 @@ func (t *Transaction) Rollback(_ context.Context) error {
 		// https://github.com/redis/go-redis/blob/v8.11.5/tx.go#L69
 		// https://github.com/redis/go-redis/blob/v8.11.5/pipeline.go#L130
 
-		return err
+		return t.isClosed.Err()
 	}
 }
 

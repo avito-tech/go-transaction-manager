@@ -3,6 +3,7 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,13 +26,13 @@ func NewTransaction(
 ) (context.Context, *Transaction, error) {
 	s, err := client.StartSession(sessionOptions)
 	if err != nil {
-		return ctx, nil, err
+		return ctx, nil, fmt.Errorf("start session: %w", err)
 	}
 
 	if err = s.StartTransaction(trOpts); err != nil {
 		defer s.EndSession(ctx)
 
-		return ctx, nil, err
+		return ctx, nil, fmt.Errorf("start transaction: %w", err)
 	}
 
 	tr := &Transaction{session: s, isClosed: drivers.NewIsClosed()}
@@ -64,7 +65,11 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 	defer t.session.EndSession(ctx)
 
-	return t.session.CommitTransaction(ctx)
+	if err := t.session.CommitTransaction(ctx); err != nil {
+		return fmt.Errorf("commit: %w", err)
+	}
+
+	return nil
 }
 
 // Rollback the trm.Transaction.
@@ -73,7 +78,11 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 
 	defer t.session.EndSession(ctx)
 
-	return t.session.AbortTransaction(ctx)
+	if err := t.session.AbortTransaction(ctx); err != nil {
+		return fmt.Errorf("rollback: %w", err)
+	}
+
+	return nil
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
