@@ -137,9 +137,6 @@ linters:
     paths:
       - trm/manager/mock
       - sql/mock
-      - third_party$
-      - builtin$
-      - examples$
 formatters:
   enable:
     - gofmt
@@ -150,6 +147,3 @@ formatters:
     paths:
       - trm/manager/mock
       - sql/mock
-      - third_party$
-      - builtin$
-      - examples$
