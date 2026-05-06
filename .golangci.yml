@@ -20,6 +20,7 @@ linters:
     - inamedparam
     - noinlineerr
     - nonamedreturns
+    - intrange
   settings:
     wsl_v5:
       allow-whole-block: false
