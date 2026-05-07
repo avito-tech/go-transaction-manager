@@ -6,10 +6,10 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.2
 	github.com/golang/mock v1.6.0
-	github.com/mattn/go-sqlite3 v1.14.14
-	github.com/stretchr/testify v1.8.2
+	github.com/mattn/go-sqlite3 v1.14.22
+	github.com/stretchr/testify v1.9.0
 	go.uber.org/goleak v1.3.0
-	go.uber.org/multierr v1.9.0
+	go.uber.org/multierr v1.10.0
 )
 
 // go mod edit -replace=github.com/avito-tech/go-transaction-manager/trm/v2=../../

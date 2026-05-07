@@ -6,7 +6,8 @@ require (
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.2
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redis/redismock/v8 v8.11.5
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.9.0
 	go.uber.org/goleak v1.3.0
+	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
 )
