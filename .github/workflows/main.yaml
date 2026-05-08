@@ -150,7 +150,7 @@ jobs:
         with:
           go-version: "1.25"
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v9
         with:
           args: --timeout=3m -v
           working-directory: ${{ matrix.modules }}
