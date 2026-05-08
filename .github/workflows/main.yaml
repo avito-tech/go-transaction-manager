@@ -39,7 +39,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -94,7 +94,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -131,7 +131,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Fetch Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - id: set-matrix
         run: |
           DIRECTORIES=$(find .  -not -path "*/vendor/*" -not -path "*/internal/*" -type f -name go.mod -exec sh -c 'echo $(dirname {})' \; | jq -R -s -c 'split("\n")[:-1]')
@@ -145,7 +145,7 @@ jobs:
         modules: ${{fromJson(needs.generate-pkgs-matrix.outputs.matrix)}}
     steps:
       - name: Fetch Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - uses: actions/setup-go@v4
         with:
           go-version: "1.25"
