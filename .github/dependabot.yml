@@ -1,6 +1,58 @@
+# See README "Resolve problems with old version of dependencies".
 version: 2
 updates:
-  - package-ecosystem: "gomod" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # trm, sql, sqlx pins.
+  - package-ecosystem: "gomod"
+    directories:
+      - "/trm"
+      - "/drivers/sql"
+      - "/drivers/sqlx"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "go.uber.org/multierr"
+        versions: [ "> 1.9.0" ] # uses 1.20 Go features
+      - dependency-name: "github.com/mattn/go-sqlite3"
+        versions: [ "> 1.14.14" ] # uses 1.18 Go features
+      - dependency-name: "github.com/stretchr/testify"
+        versions: [ "> 1.8.2" ] # bumps Go from 1.13 to 1.20
+
+  # goredis8 pins
+  - package-ecosystem: "gomod"
+    directory: "/drivers/goredis8"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "github.com/stretchr/testify"
+        versions: [ "> 1.8.2" ] # bumps Go from 1.13 to 1.20
+
+  # mongo pins
+  - package-ecosystem: "gomod"
+    directory: "/drivers/mongo"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "github.com/stretchr/testify"
+        versions: [ "> 1.8.2" ] # bumps Go from 1.13 to 1.20
+
+  # pgxv4 pins
+  - package-ecosystem: "gomod"
+    directory: "/drivers/pgxv4"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "github.com/jackc/pgconn"
+        versions: [ "> 1.14.3" ] # bumps Go from 1.12 to 1.17
+
+  # pgxv5, gorm has no version pins
+  - package-ecosystem: "gomod"
+    directories:
+      - "/drivers/pgxv5"
+      - "/drivers/gorm"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "daily"
