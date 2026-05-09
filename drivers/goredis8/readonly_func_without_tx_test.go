@@ -57,7 +57,6 @@ func newReadOnlyFuncWithoutTxDecorator() (Cmdable, redismock.ClientMock) {
 }
 
 func check(t *testing.T, cmd redis.Cmder, mock redismock.ClientMock) {
-	t.Helper()
 	require.NoError(t, cmd.Err())
 	require.NoError(t, mock.ExpectationsWereMet())
 }
