@@ -119,6 +119,9 @@ linters:
           - unqueryvet
         path: example_test\.go
       - linters:
+          - thelper
+        path: _test\.go
+      - linters:
           - containedctx
           - err113
           - errcheck
