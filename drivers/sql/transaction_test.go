@@ -259,7 +259,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		assert.False(t, tr.IsActive())
 
 		err = tr.Commit(ctx)
-		assert.ErrorIs(t, err, context.Canceled)
+		assert.ErrorIs(t, err, sql.ErrTxDone)
 	}()
 
 	wg.Wait()
