@@ -108,11 +108,9 @@ func (t *Transaction) Transaction() interface{} {
 func (t *Transaction) Commit(ctx context.Context) error {
 	select {
 	case <-t.isClosed.Closed():
-		if _, err := t.tx.Exec(ctx); err != nil {
-			return err
-		}
+		_, err := t.tx.Exec(ctx)
 
-		return nil
+		return err
 	default:
 		t.isClosedClosure.Close()
 
@@ -126,11 +124,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 func (t *Transaction) Rollback(_ context.Context) error {
 	select {
 	case <-t.isClosed.Closed():
-		if err := t.tx.Discard(); err != nil {
-			return err
-		}
-
-		return nil
+		return t.tx.Discard()
 	default:
 		t.isClosedClosure.CloseWithCause(drivers.ErrRollbackTr)
 

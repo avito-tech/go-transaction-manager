@@ -64,11 +64,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 	defer t.session.EndSession(ctx)
 
-	if err := t.session.CommitTransaction(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return t.session.CommitTransaction(ctx)
 }
 
 // Rollback the trm.Transaction.
@@ -77,11 +73,7 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 
 	defer t.session.EndSession(ctx)
 
-	if err := t.session.AbortTransaction(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return t.session.AbortTransaction(ctx)
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
