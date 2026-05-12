@@ -38,7 +38,7 @@ func NewTransaction(
 
 	tr := newDefaultTransaction(tx)
 
-	go tr.awaitDone(ctx)
+	go tr.awaitDone(ctx) //nolint:gosec // G118: awaitDone intentionally uses detached context for rollback cleanup
 
 	return ctx, tr, nil
 }
@@ -50,7 +50,7 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 
 	select {
 	case <-ctx.Done():
-		_ = t.Rollback(context.Background())
+		_ = t.Rollback(context.Background()) //nolint:contextcheck // intentionally detached to avoid pgx "slow write timer" panic (jackc/pgx#2332
 	case <-t.isClosed.Closed():
 	}
 }
