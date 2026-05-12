@@ -3,7 +3,6 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,13 +25,13 @@ func NewTransaction(
 ) (context.Context, *Transaction, error) {
 	s, err := client.StartSession(sessionOptions)
 	if err != nil {
-		return ctx, nil, fmt.Errorf("start session: %w", err)
+		return ctx, nil, err
 	}
 
 	if err = s.StartTransaction(trOpts); err != nil {
 		defer s.EndSession(ctx)
 
-		return ctx, nil, fmt.Errorf("start transaction: %w", err)
+		return ctx, nil, err
 	}
 
 	tr := &Transaction{session: s, isClosed: drivers.NewIsClosed()}
@@ -66,7 +65,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 	defer t.session.EndSession(ctx)
 
 	if err := t.session.CommitTransaction(ctx); err != nil {
-		return fmt.Errorf("commit: %w", err)
+		return err
 	}
 
 	return nil
@@ -79,7 +78,7 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 	defer t.session.EndSession(ctx)
 
 	if err := t.session.AbortTransaction(ctx); err != nil {
-		return fmt.Errorf("rollback: %w", err)
+		return err
 	}
 
 	return nil

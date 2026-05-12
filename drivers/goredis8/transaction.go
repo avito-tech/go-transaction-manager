@@ -4,7 +4,6 @@ package goredis8
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/go-redis/redis/v8"
@@ -78,7 +77,7 @@ func NewTransaction(
 	wg.Wait()
 
 	if err != nil {
-		return ctx, nil, fmt.Errorf("watch: %w", err)
+		return ctx, nil, err
 	}
 
 	go t.awaitDone(ctx)
@@ -110,7 +109,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 	select {
 	case <-t.isClosed.Closed():
 		if _, err := t.tx.Exec(ctx); err != nil {
-			return fmt.Errorf("exec pipeline: %w", err)
+			return err
 		}
 
 		return nil
@@ -128,7 +127,7 @@ func (t *Transaction) Rollback(_ context.Context) error {
 	select {
 	case <-t.isClosed.Closed():
 		if err := t.tx.Discard(); err != nil {
-			return fmt.Errorf("discard pipeline: %w", err)
+			return err
 		}
 
 		return nil

@@ -25,6 +25,7 @@ linters:
     - godox
     - funcorder
     - iface
+    - wrapcheck
   settings:
     wsl_v5:
       allow-whole-block: false
@@ -84,15 +85,6 @@ linters:
       - linters:
           - gochecknoglobals
         source: DefaultCtxGetter
-      - linters:
-          - wrapcheck
-        source: 'multierr\.'
-      - linters:
-          - wrapcheck
-        path: _test\.go
-      - linters:
-          - wrapcheck
-        source: 'isClosed\.Err'
       - linters:
           - modernize
         text: "plusbuild:"

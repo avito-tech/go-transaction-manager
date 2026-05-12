@@ -2,7 +2,6 @@ package pgxv4
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/jackc/pgx/v4"
@@ -34,7 +33,7 @@ func NewTransaction(
 ) (context.Context, *Transaction, error) {
 	tx, err := db.BeginTx(ctx, opts)
 	if err != nil {
-		return ctx, nil, fmt.Errorf("begin transaction: %w", err)
+		return ctx, nil, err
 	}
 
 	tr := newDefaultTransaction(tx)
@@ -65,7 +64,7 @@ func (t *Transaction) Transaction() interface{} {
 func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
 	tx, err := t.tx.Begin(ctx)
 	if err != nil {
-		return ctx, nil, fmt.Errorf("begin nested transaction: %w", err)
+		return ctx, nil, err
 	}
 
 	tr := newDefaultTransaction(tx)
@@ -80,7 +79,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 	defer t.isClosed.Close()
 
 	if err := t.tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit: %w", err)
+		return err
 	}
 
 	return nil
@@ -93,7 +92,7 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 	defer t.isClosed.Close()
 
 	if err := t.tx.Rollback(ctx); err != nil {
-		return fmt.Errorf("rollback: %w", err)
+		return err
 	}
 
 	return nil
