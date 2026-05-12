@@ -210,6 +210,47 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
+// captureRollbackTx is a minimal pgx.Tx that records the context passed to Rollback.
+// All other methods are intentionally left unimplemented (the embedded nil interface panics
+// if called, which is fine since the test only exercises Rollback via awaitDone).
+type captureRollbackTx struct {
+	pgx.Tx
+	mu          sync.Mutex
+	capturedCtx context.Context
+}
+
+func (c *captureRollbackTx) Rollback(ctx context.Context) error {
+	c.mu.Lock()
+	c.capturedCtx = ctx
+	c.mu.Unlock()
+
+	return nil
+}
+
+// TestTransaction_awaitDone_rollbackCtxNotCancelled verifies that awaitDone calls
+// Rollback with a non-cancelled context so that pgx does not trigger the
+// "slow write timer already active" panic (jackc/pgx#2332).
+func TestTransaction_awaitDone_rollbackCtxNotCancelled(t *testing.T) {
+	t.Parallel()
+
+	captureTx := &captureRollbackTx{}
+	tr := newDefaultTransaction(captureTx)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go tr.awaitDone(ctx)
+
+	cancel()
+	<-tr.Closed()
+
+	captureTx.mu.Lock()
+	rollbackCtx := captureTx.capturedCtx
+	captureTx.mu.Unlock()
+
+	require.NotNil(t, rollbackCtx, "awaitDone must call Rollback")
+	assert.NoError(t, rollbackCtx.Err(),
+		"awaitDone called Rollback with a cancelled context — this triggers pgx 'slow write timer already active' panic")
+}
+
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
@@ -219,7 +260,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	dbmock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	dbmock.ExpectBeginTx(pgx.TxOptions{})
-	dbmock.ExpectCommit()
+	dbmock.ExpectRollback()
 
 	f := NewDefaultFactory(dbmock)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -232,13 +273,10 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 
 		cancel()
 
-		<-ctx.Done()
-		require.True(t, tr.IsActive())
 		<-tr.Closed()
 		require.False(t, tr.IsActive())
 
-		err = tr.Commit(ctx)
-		require.ErrorIs(t, err, context.Canceled)
+		assert.NoError(t, dbmock.ExpectationsWereMet())
 	}()
 
 	wg.Wait()

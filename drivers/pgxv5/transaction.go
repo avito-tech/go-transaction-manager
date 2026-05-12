@@ -50,7 +50,7 @@ func (t *Transaction) awaitDone(ctx context.Context) {
 
 	select {
 	case <-ctx.Done():
-		_ = t.Rollback(ctx)
+		_ = t.Rollback(context.Background())
 	case <-t.isClosed.Closed():
 	}
 }
