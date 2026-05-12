@@ -224,7 +224,9 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 
 		<-ctx.Done()
 
-		assert.NoError(mt, err)
+		if !assert.NoError(t, err) {
+			return
+		}
 		assert.False(mt, tr.IsActive())
 	}()
 

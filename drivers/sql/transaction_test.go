@@ -243,7 +243,9 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
-		assert.NoError(t, err)
+		if !assert.NoError(t, err) {
+			return
+		}
 
 		cancel()
 
@@ -285,7 +287,9 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 		defer wg.Done()
 
 		_, tr, err := f(ctx, settings.Must())
-		assert.NoError(t, err)
+		if !assert.NoError(t, err) {
+			return
+		}
 
 		assert.NoError(t, tr.Rollback(ctx))
 		assert.False(t, tr.IsActive())
