@@ -695,8 +695,6 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 			},
 			ctx: context.WithCancel,
 			do: func(t *testing.T, ctx context.Context) {
-				t.Helper()
-
 				time.Sleep(time.Millisecond)
 
 				assert.ErrorIs(t, ctx.Err(), context.Canceled)
@@ -723,8 +721,6 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 				return ctx, func() {}
 			},
 			do: func(t *testing.T, ctx context.Context) {
-				t.Helper()
-
 				select {
 				case <-time.After(time.Second):
 				case <-ctx.Done():
