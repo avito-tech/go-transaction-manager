@@ -204,24 +204,14 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	db, rmock := redismock.NewClientMock()
 
 	f := NewDefaultFactory(db)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet,gosec
+	ctx := context.Background()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
+	require.NoError(t, tr.Rollback(ctx))
+	require.False(t, tr.IsActive())
+	require.NoError(t, tr.Rollback(ctx))
 
-		_, tr, err := f(ctx, settings.Must())
-		if !assert.NoError(t, err) {
-			return
-		}
-
-		assert.NoError(t, tr.Rollback(ctx))
-		assert.False(t, tr.IsActive())
-		assert.NoError(t, tr.Rollback(ctx))
-	}()
-
-	wg.Wait()
 	assert.NoError(t, rmock.ExpectationsWereMet())
 }

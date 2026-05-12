@@ -278,23 +278,12 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	})
 
 	f := NewDefaultFactory(db)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet,gosec
+	ctx := context.Background()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
-
-		_, tr, err := f(ctx, settings.Must())
-		if !assert.NoError(t, err) {
-			return
-		}
-
-		assert.NoError(t, tr.Rollback(ctx))
-		assert.False(t, tr.IsActive())
-		assert.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
-	}()
-
-	wg.Wait()
+	require.NoError(t, tr.Rollback(ctx))
+	require.False(t, tr.IsActive())
+	require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
 }

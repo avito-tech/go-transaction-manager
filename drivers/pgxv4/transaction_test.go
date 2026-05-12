@@ -254,22 +254,11 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	dbmock.ExpectRollback()
 
 	f := NewDefaultFactory(dbmock)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet,gosec
+	ctx := context.Background()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
-
-		_, tr, err := f(ctx, settings.Must())
-		if !assert.NoError(t, err) {
-			return
-		}
-
-		assert.NoError(t, tr.Rollback(ctx))
-		assert.False(t, tr.IsActive())
-	}()
-
-	wg.Wait()
+	require.NoError(t, tr.Rollback(ctx))
+	require.False(t, tr.IsActive())
 }
