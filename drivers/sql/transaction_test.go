@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"sync"
 	"testing"
 	"time"
 
@@ -236,33 +235,22 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	f := NewDefaultFactory(db)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
+	cancel()
 
-		_, tr, err := f(ctx, settings.Must())
-		if !assert.NoError(t, err) {
-			return
-		}
+	// Need to wait for the transaction to be closed.
+	// https://github.com/golang/go/blob/go1.21.6/src/database/sql/sql.go#L2174
+	<-time.After(time.Millisecond)
 
-		cancel()
+	<-ctx.Done()
+	require.False(t, tr.IsActive())
+	<-tr.Closed()
+	require.False(t, tr.IsActive())
 
-		// Need to wait for the transaction to be closed.
-		// https://github.com/golang/go/blob/go1.21.6/src/database/sql/sql.go#L2174
-		<-time.After(time.Millisecond)
-
-		<-ctx.Done()
-		assert.False(t, tr.IsActive())
-		<-tr.Closed()
-		assert.False(t, tr.IsActive())
-
-		err = tr.Commit(ctx)
-		assert.ErrorIs(t, err, sql.ErrTxDone)
-	}()
-
-	wg.Wait()
+	err = tr.Commit(ctx)
+	require.ErrorIs(t, err, sql.ErrTxDone)
 }
 
 // TestTransaction_awaitDone_byRollback checks goroutine leak when we close transaction manually.

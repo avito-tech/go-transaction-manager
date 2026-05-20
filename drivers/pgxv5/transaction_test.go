@@ -3,7 +3,6 @@ package pgxv5
 import (
 	"context"
 	"errors"
-	"sync"
 	"testing"
 
 	"github.com/jackc/pgx/v5"
@@ -213,9 +212,6 @@ func TestTransaction(t *testing.T) {
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
 	dbmock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	dbmock.ExpectBeginTx(pgx.TxOptions{})
@@ -224,26 +220,18 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	f := NewDefaultFactory(dbmock)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go func() {
-		defer wg.Done()
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-		_, tr, err := f(ctx, settings.Must())
-		if !assert.NoError(t, err) {
-			return
-		}
+	cancel()
 
-		cancel()
+	<-ctx.Done()
+	require.True(t, tr.IsActive())
+	<-tr.Closed()
+	require.False(t, tr.IsActive())
 
-		<-ctx.Done()
-		assert.True(t, tr.IsActive())
-		<-tr.Closed()
-		assert.False(t, tr.IsActive())
-
-		err = tr.Commit(ctx)
-		assert.ErrorIs(t, err, context.Canceled)
-	}()
-
-	wg.Wait()
+	err = tr.Commit(ctx)
+	require.ErrorIs(t, err, context.Canceled)
 }
 
 func TestTransaction_awaitDone_byRollback(t *testing.T) {

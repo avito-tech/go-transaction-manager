@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"sync"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -210,9 +209,6 @@ func TestTransaction(t *testing.T) {
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
 	db, dbmock := test.NewDBMock()
 	dbmock.ExpectBegin()
 	dbmock.ExpectRollback()
@@ -230,27 +226,19 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	f := NewDefaultFactory(dbgorm)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go func() {
-		defer wg.Done()
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-		_, tr, err := f(ctx, settings.Must())
-		if !assert.NoError(t, err) {
-			return
-		}
+	cancel()
 
-		cancel()
+	<-ctx.Done()
+	require.True(t, tr.IsActive())
+	<-tr.Closed()
+	require.False(t, tr.IsActive())
 
-		<-ctx.Done()
-		assert.True(t, tr.IsActive())
-		<-tr.Closed()
-		assert.False(t, tr.IsActive())
-
-		assert.Equal(t, context.Canceled, ctx.Err())
-		err = tr.Commit(ctx)
-		assert.ErrorIs(t, err, sql.ErrTxDone)
-	}()
-
-	wg.Wait()
+	require.Equal(t, context.Canceled, ctx.Err())
+	err = tr.Commit(ctx)
+	require.ErrorIs(t, err, sql.ErrTxDone)
 }
 
 // TestTransaction_awaitDone_byRollback checks goroutine leak when we close transaction manually.
