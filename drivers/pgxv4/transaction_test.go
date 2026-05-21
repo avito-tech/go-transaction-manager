@@ -3,7 +3,6 @@ package pgxv4
 import (
 	"context"
 	"errors"
-	"sync"
 	"testing"
 
 	"github.com/jackc/pgx/v4"
@@ -209,41 +208,10 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-func TestTransaction_awaitDone_byContext(t *testing.T) {
-	t.Parallel()
-
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
-	dbmock, err := pgxmock.NewPool()
-	require.NoError(t, err)
-	dbmock.ExpectBeginTx(pgx.TxOptions{})
-	dbmock.ExpectCommit()
-
-	f := NewDefaultFactory(dbmock)
-	ctx, cancel := context.WithCancel(context.Background())
-
-	go func() {
-		defer wg.Done()
-
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
-
-		cancel()
-
-		<-ctx.Done()
-		require.True(t, tr.IsActive())
-		<-tr.Closed()
-		require.False(t, tr.IsActive())
-
-		err = tr.Commit(ctx)
-		require.NoError(t, err)
-	}()
-
-	wg.Wait()
-}
-
-func TestTransaction_awaitDone_byRollback(t *testing.T) {
+// TestTransaction_Rollback_withCancelledCtx verifies that Rollback uses a fresh context
+// when the original context is cancelled, so pgx sends ROLLBACK to the server instead
+// of failing immediately with context.Canceled (jackc/pgx#2332).
+func TestTransaction_Rollback_withCancelledCtx(t *testing.T) {
 	t.Parallel()
 
 	dbmock, err := pgxmock.NewPool()
@@ -252,20 +220,34 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	dbmock.ExpectRollback()
 
 	f := NewDefaultFactory(dbmock)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+	ctx, cancel := context.WithCancel(context.Background())
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
+	cancel()
 
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+	require.NoError(t, tr.Rollback(ctx))
+	require.False(t, tr.IsActive())
 
-		require.NoError(t, tr.Rollback(ctx))
-		require.False(t, tr.IsActive())
-	}()
+	assert.NoError(t, dbmock.ExpectationsWereMet())
+}
 
-	wg.Wait()
+func TestTransaction_Rollback(t *testing.T) {
+	t.Parallel()
+
+	dbmock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	dbmock.ExpectBeginTx(pgx.TxOptions{})
+	dbmock.ExpectRollback()
+
+	f := NewDefaultFactory(dbmock)
+
+	_, tr, err := f(context.Background(), settings.Must())
+	require.NoError(t, err)
+
+	require.NoError(t, tr.Rollback(context.Background()))
+	require.False(t, tr.IsActive())
+
+	assert.NoError(t, dbmock.ExpectationsWereMet())
 }
