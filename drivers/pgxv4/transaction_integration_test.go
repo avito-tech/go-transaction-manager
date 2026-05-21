@@ -78,6 +78,51 @@ func TestTransaction_WithRealDB_RollbackOnContextCancel(t *testing.T) {
 	require.NoError(t, tr.Rollback(ctx))
 }
 
+// TestTransaction_WithRealDB_NoConcurrentAccessOnContextCancel verifies that
+// cancelling a context while a query is in-flight does not cause concurrent
+// pgx.Tx access (jackc/pgx#2332: "slow write timer already active" panic).
+//
+// On main (before fix): awaitDone goroutine calls tx.Rollback concurrently
+// with the in-flight query, causing "conn busy" errors or panic.
+// After fix: awaitDone is removed, no concurrent access occurs.
+func TestTransaction_WithRealDB_NoConcurrentAccessOnContextCancel(t *testing.T) {
+	ctx := context.Background()
+
+	pool, err := db(ctx)
+	require.NoError(t, err)
+	defer waitPoolIsClosed(t, pool)
+
+	f := pgxv4.NewDefaultFactory(pool)
+	ctx, cancel := context.WithCancel(ctx)
+
+	txCtx, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
+
+	pgxTx := tr.Transaction().(pgx.Tx)
+
+	queryCh := make(chan error, 1)
+	go func() {
+		_, err := pgxTx.Exec(txCtx, "SELECT pg_sleep(1)")
+		queryCh <- err
+	}()
+
+	// wait for query to reach the server
+	time.Sleep(50 * time.Millisecond)
+
+	// cancel while query is in-flight:
+	// before fix: awaitDone fires and calls Rollback concurrently → conn busy / panic
+	// after fix:  no awaitDone, no concurrent access
+	cancel()
+
+	queryErr := <-queryCh
+	require.Error(t, queryErr, "query must fail due to context cancellation")
+
+	// Connection may be closed by pgx after context cancellation.
+	// The key guarantee: no panic from concurrent pgx.Tx access (jackc/pgx#2332).
+	_ = tr.Rollback(context.Background())
+	require.False(t, tr.IsActive())
+}
+
 func waitPoolIsClosed(t *testing.T, pool *pgxpool.Pool) {
 	const checkTick = 50 * time.Millisecond
 	const waitDurationDeadline = 30 * time.Second
