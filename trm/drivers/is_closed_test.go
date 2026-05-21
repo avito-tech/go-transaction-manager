@@ -28,19 +28,18 @@ func TestIsClose(t *testing.T) {
 
 		go func() {
 			defer wg.Done()
-			assert.NotPanics(t, func() {
-				<-isClosed.Closed()
 
-				assert.ErrorIs(t, isClosed.Err(), errExpected)
-				assert.False(t, isClosed.IsActive())
-				assert.True(t, isClosed.IsClosed())
+			<-isClosed.Closed()
 
-				isClosed.CloseWithCause(err)
+			assert.ErrorIs(t, isClosed.Err(), errExpected)
+			assert.False(t, isClosed.IsActive())
+			assert.True(t, isClosed.IsClosed())
 
-				assert.ErrorIs(t, isClosed.Err(), errExpected)
-				assert.False(t, isClosed.IsActive())
-				assert.True(t, isClosed.IsClosed())
-			})
+			isClosed.CloseWithCause(err)
+
+			assert.ErrorIs(t, isClosed.Err(), errExpected)
+			assert.False(t, isClosed.IsActive())
+			assert.True(t, isClosed.IsClosed())
 		}()
 	}
 
