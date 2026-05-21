@@ -131,8 +131,7 @@ func TestTransaction(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
-					assert.ErrorIs(t, err, trm.ErrCommit) &&
-					assert.Error(t, err)
+					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 		},
 		"rollback_savepoint_after_error": {
@@ -151,8 +150,7 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
-					assert.ErrorIs(t, err, trm.ErrRollback) &&
-					assert.Error(t, err)
+					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 	}
