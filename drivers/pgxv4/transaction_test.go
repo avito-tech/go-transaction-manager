@@ -206,6 +206,53 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
+// TestTransaction_nested_handledByDriver checks that nested transactions use pgx's own subtransaction mechanism, not trm's nested transaction layer.
+func TestTransaction_nested_handledByDriver(t *testing.T) {
+	t.Parallel()
+
+	testErr := errors.New("inner error")
+	testRollbackErr := errors.New("savepoint rollback error")
+
+	dbmock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	log := mock.NewLog()
+
+	dbmock.ExpectBegin()
+	dbmock.ExpectBegin()
+	dbmock.ExpectRollback().WillReturnError(testRollbackErr)
+	dbmock.ExpectRollback()
+
+	m := manager.Must(
+		NewDefaultFactory(dbmock),
+		manager.WithLog(log),
+		manager.WithSettings(settings.Must(
+			settings.WithPropagation(trm.PropagationNested),
+		)),
+	)
+
+	var tr, trNested trm.Transaction
+
+	err = m.Do(context.Background(), func(ctx context.Context) error {
+		tr = trmcontext.DefaultManager.Default(ctx)
+
+		return m.Do(ctx, func(ctx context.Context) error {
+			trNested = trmcontext.DefaultManager.Default(ctx)
+
+			return testErr
+		})
+	})
+
+	require.False(t, tr.IsActive())
+	require.False(t, trNested.IsActive())
+
+	require.ErrorIs(t, err, testErr)
+	require.ErrorIs(t, err, testRollbackErr)
+	require.ErrorIs(t, err, trm.ErrRollback)
+	require.NotErrorIs(t, err, trm.ErrNestedRollback)
+
+	assert.NoError(t, dbmock.ExpectationsWereMet())
+}
+
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
