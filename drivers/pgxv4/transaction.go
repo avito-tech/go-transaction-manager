@@ -80,10 +80,10 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 	}
 
 	if ctx.Err() != nil {
-		ctx = context.Background()
+		ctx = context.Background() //nolint:contextcheck,nolintlint // use detached ctx when cancelled to avoid pgx "slow write timer" panic (jackc/pgx#2332)
 	}
 
-	return t.tx.Rollback(ctx) //nolint:contextcheck // use detached ctx when cancelled to avoid pgx "slow write timer" panic (jackc/pgx#2332)
+	return t.tx.Rollback(ctx)
 }
 
 // IsActive returns true if the transaction started but not committed or rolled back.
