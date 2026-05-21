@@ -56,23 +56,13 @@ func NewTransaction(
 		defer t.txMutex.Unlock()
 		tx := t.tx
 
-		if tx != nil {
-			// Return error from transaction rollback.
-			// Error from commit returns from db.Transaction closure.
-			// For nested transactions (savepoints), gorm accumulates the RollbackTo
-			// error on the outer db, not on the session passed to the closure.
-			if errors.Is(err, drivers.ErrRollbackTr) {
-				if tx.Error != nil {
-					err = tx.Error
-				} else if db.Error != nil {
-					err = db.Error
-				}
-			}
-
-			t.isClosed.CloseWithCause(err)
-		} else {
+		if tx == nil {
 			wg.Done()
+
+			return
 		}
+
+		t.isClosed.CloseWithCause(rollbackErr(err, tx.Error, db.Error))
 	}()
 
 	wg.Wait()
@@ -159,4 +149,23 @@ func (t *Transaction) IsActive() bool {
 // Closed returns a channel that's closed when transaction committed or rolled back.
 func (t *Transaction) Closed() <-chan struct{} {
 	return t.isClosed.Closed()
+}
+
+// rollbackErr resolves the actual rollback error from gorm's tx or db.
+// For nested transactions (savepoints), gorm accumulates the RollbackTo error
+// on the outer db, not on the session passed to the closure.
+func rollbackErr(err, txErr, dbErr error) error {
+	if !errors.Is(err, drivers.ErrRollbackTr) {
+		return err
+	}
+
+	if txErr != nil {
+		return txErr
+	}
+
+	if dbErr != nil {
+		return dbErr
+	}
+
+	return err
 }
