@@ -57,11 +57,16 @@ func NewTransaction(
 		tx := t.tx
 
 		if tx != nil {
-			// Return error from transaction rollback
-			// Error from commit returns from db.Transaction closure
-			if errors.Is(err, drivers.ErrRollbackTr) &&
-				tx.Error != nil {
-				err = t.tx.Error
+			// Return error from transaction rollback.
+			// Error from commit returns from db.Transaction closure.
+			// For nested transactions (savepoints), gorm accumulates the RollbackTo
+			// error on the outer db, not on the session passed to the closure.
+			if errors.Is(err, drivers.ErrRollbackTr) {
+				if tx.Error != nil {
+					err = tx.Error
+				} else if db.Error != nil {
+					err = db.Error
+				}
 			}
 
 			t.isClosed.CloseWithCause(err)

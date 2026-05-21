@@ -140,11 +140,10 @@ func TestTransaction(t *testing.T) {
 				ctx: ctx,
 			},
 			ret: testErr,
-			// testRollbackErr is swallowed: gorm accumulates the savepoint rollback
-			// error on the parent db, not the closure's tx, so the driver cannot
-			// detect it and silently returns nil from Rollback.
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
-				return assert.ErrorIs(t, err, testErr)
+				return assert.ErrorIs(t, err, testErr) &&
+					assert.ErrorIs(t, err, testRollbackErr) &&
+					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 	}
