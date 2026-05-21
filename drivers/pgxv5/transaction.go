@@ -38,21 +38,7 @@ func NewTransaction(
 
 	tr := newDefaultTransaction(tx)
 
-	go tr.awaitDone(ctx)
-
 	return ctx, tr, nil
-}
-
-func (t *Transaction) awaitDone(ctx context.Context) {
-	if ctx.Done() == nil {
-		return
-	}
-
-	select {
-	case <-ctx.Done():
-		_ = t.Rollback(context.Background()) //nolint:contextcheck // intentionally detached to avoid pgx "slow write timer" panic (jackc/pgx#2332)
-	case <-t.isClosed.Closed():
-	}
 }
 
 // Transaction returns the real transaction pgx.Tx.
@@ -86,6 +72,16 @@ func (t *Transaction) Rollback(ctx context.Context) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	defer t.isClosed.Close()
+
+	select {
+	case <-t.isClosed.Closed():
+		return nil
+	default:
+	}
+
+	if ctx.Err() != nil {
+		ctx = context.Background() //nolint:contextcheck
+	}
 
 	return t.tx.Rollback(ctx)
 }

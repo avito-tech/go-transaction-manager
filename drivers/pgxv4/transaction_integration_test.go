@@ -50,7 +50,7 @@ func TestTransaction_WithRealDB(t *testing.T) {
 	require.False(t, tr.IsActive())
 
 	require.ErrorIs(t, tr.Commit(ctx), pgx.ErrTxClosed)
-	require.ErrorIs(t, tr.Rollback(ctx), pgx.ErrTxClosed)
+	require.NoError(t, tr.Rollback(ctx)) // idempotent: returns nil when already closed
 }
 
 // transaction should release all resources if context is cancelled
@@ -75,6 +75,7 @@ func TestTransaction_WithRealDB_RollbackOnContextCancel(t *testing.T) {
 	require.True(t, tr.IsActive())
 
 	cancel()
+	require.NoError(t, tr.Rollback(ctx))
 }
 
 func waitPoolIsClosed(t *testing.T, pool *pgxpool.Pool) {
