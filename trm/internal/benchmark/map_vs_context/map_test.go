@@ -8,19 +8,19 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/common"
+	bench "github.com/avito-tech/go-transaction-manager/trm/v2/internal/benchmark/benchutil"
 )
 
 // run with -test.benchtime=1s -test.benchmem
 
 type syncMap struct {
-	v  map[common.IDKey]*sql.Tx
+	v  map[bench.IDKey]*sql.Tx
 	mu *sync.RWMutex
 }
 
 func newSyncMap() *syncMap {
 	return &syncMap{
-		v:  make(map[common.IDKey]*sql.Tx, 2000),
+		v:  make(map[bench.IDKey]*sql.Tx, 2000),
 		mu: &sync.RWMutex{},
 	}
 }
@@ -69,9 +69,9 @@ func BenchmarkMapRealTransaction(b *testing.B) {
 func benchmarkMap(i int, creator creator) {
 	ctx := context.Background()
 
-	key := common.IDKey(i)
+	key := bench.IDKey(i)
 
-	ctx = context.WithValue(ctx, common.CtxKey{}, key)
+	ctx = context.WithValue(ctx, bench.CtxKey{}, key)
 
 	tr := creator()
 
@@ -101,7 +101,7 @@ func mapRunNested(ctx context.Context) {
 func mapNested(ctx context.Context, wgNested *sync.WaitGroup) {
 	defer wgNested.Done()
 
-	key := ctx.Value(common.CtxKey{}).(common.IDKey)
+	key := ctx.Value(bench.CtxKey{}).(bench.IDKey)
 
 	trMap.mu.RLock()
 	t := trMap.v[key]

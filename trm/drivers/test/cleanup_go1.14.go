@@ -10,5 +10,6 @@ import (
 // Cleanup is a helper function to register cleanup function for a test.
 // t.Cleanup was added in go1.14.
 func Cleanup(t *testing.T, fn func()) {
+	t.Helper()
 	t.Cleanup(fn)
 }

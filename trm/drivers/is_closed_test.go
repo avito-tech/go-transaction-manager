@@ -5,6 +5,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,19 +28,18 @@ func TestIsClose(t *testing.T) {
 
 		go func() {
 			defer wg.Done()
-			require.NotPanics(t, func() {
-				<-isClosed.Closed()
 
-				require.ErrorIs(t, isClosed.Err(), errExpected)
-				require.False(t, isClosed.IsActive())
-				require.True(t, isClosed.IsClosed())
+			<-isClosed.Closed()
 
-				isClosed.CloseWithCause(err)
+			assert.ErrorIs(t, isClosed.Err(), errExpected)
+			assert.False(t, isClosed.IsActive())
+			assert.True(t, isClosed.IsClosed())
 
-				require.ErrorIs(t, isClosed.Err(), errExpected)
-				require.False(t, isClosed.IsActive())
-				require.True(t, isClosed.IsClosed())
-			})
+			isClosed.CloseWithCause(err)
+
+			assert.ErrorIs(t, isClosed.Err(), errExpected)
+			assert.False(t, isClosed.IsActive())
+			assert.True(t, isClosed.IsClosed())
 		}()
 	}
 

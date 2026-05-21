@@ -3,7 +3,6 @@ package pgxv4
 import (
 	"context"
 	"errors"
-	"sync"
 	"testing"
 
 	"github.com/jackc/pgx/v4"
@@ -131,8 +130,7 @@ func TestTransaction(t *testing.T) {
 			},
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
-					assert.ErrorIs(t, err, trm.ErrCommit) &&
-					assert.NotNil(t, err, trm.ErrNestedCommit)
+					assert.ErrorIs(t, err, trm.ErrCommit)
 			},
 		},
 		"rollback_savepoint_after_error": {
@@ -151,8 +149,7 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
-					assert.ErrorIs(t, err, trm.ErrRollback) &&
-					assert.NotNil(t, err, trm.ErrNestedRollback)
+					assert.ErrorIs(t, err, trm.ErrRollback)
 			},
 		},
 	}
@@ -212,9 +209,6 @@ func TestTransaction(t *testing.T) {
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
 	dbmock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	dbmock.ExpectBeginTx(pgx.TxOptions{})
@@ -223,24 +217,18 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	f := NewDefaultFactory(dbmock)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go func() {
-		defer wg.Done()
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+	cancel()
 
-		cancel()
+	<-ctx.Done()
+	require.True(t, tr.IsActive())
+	<-tr.Closed()
+	require.False(t, tr.IsActive())
 
-		<-ctx.Done()
-		require.True(t, tr.IsActive())
-		<-tr.Closed()
-		require.False(t, tr.IsActive())
-
-		err = tr.Commit(ctx)
-		require.NoError(t, err)
-	}()
-
-	wg.Wait()
+	err = tr.Commit(ctx)
+	require.NoError(t, err)
 }
 
 func TestTransaction_awaitDone_byRollback(t *testing.T) {
@@ -252,20 +240,11 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	dbmock.ExpectRollback()
 
 	f := NewDefaultFactory(dbmock)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+	ctx := context.Background()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
-
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
-
-		require.NoError(t, tr.Rollback(ctx))
-		require.False(t, tr.IsActive())
-	}()
-
-	wg.Wait()
+	require.NoError(t, tr.Rollback(ctx))
+	require.False(t, tr.IsActive())
 }

@@ -6,7 +6,6 @@ package mongo
 import (
 	"context"
 	"errors"
-	"sync"
 	"testing"
 	"time"
 
@@ -208,25 +207,16 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 			ShareClient(true),
 	)
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
 	f := NewDefaultFactory(mt.Client)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go func() {
-		defer wg.Done()
+	_, tr, err := f(ctx, settings.Must())
 
-		_, tr, err := f(ctx, settings.Must())
+	cancel()
+	<-time.After(time.Second)
 
-		cancel()
-		<-time.After(time.Second)
+	<-ctx.Done()
 
-		<-ctx.Done()
-
-		require.NoError(mt, err)
-		require.False(mt, tr.IsActive())
-	}()
-
-	wg.Wait()
+	require.NoError(t, err)
+	require.False(t, tr.IsActive())
 }
