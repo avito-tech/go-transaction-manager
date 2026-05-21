@@ -143,7 +143,8 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
-					assert.ErrorIs(t, err, trm.ErrRollback)
+					assert.ErrorIs(t, err, trm.ErrRollback) &&
+					assert.NotErrorIs(t, err, trm.ErrNestedRollback) // driver uses own nested transactions
 			},
 		},
 	}
@@ -203,6 +204,59 @@ func TestTransaction(t *testing.T) {
 			assert.NoError(t, dbmock.ExpectationsWereMet())
 		})
 	}
+}
+
+// TestTransaction_nested_handledByDriver checks that nested transactions use gorm's
+// own savepoint mechanism, not trm's nested transaction layer.
+func TestTransaction_nested_handledByDriver(t *testing.T) {
+	t.Parallel()
+
+	testErr := errors.New("inner error")
+	testRollbackErr := errors.New("savepoint rollback error")
+
+	db, dbmock := test.NewDBMockWithClose(t)
+	dbgorm, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      db,
+		SkipInitializeWithVersion: true,
+	}), &gorm.Config{})
+	require.NoError(t, err)
+
+	log := mock.NewLog()
+
+	dbmock.ExpectBegin()
+	dbmock.ExpectExec("^SAVEPOINT sp.+$").WillReturnResult(sqlmock.NewResult(0, 0))
+	dbmock.ExpectExec("^ROLLBACK TO SAVEPOINT sp.+$").WillReturnError(testRollbackErr)
+	dbmock.ExpectRollback()
+
+	m := manager.Must(
+		NewDefaultFactory(dbgorm),
+		manager.WithLog(log),
+		manager.WithSettings(settings.Must(
+			settings.WithPropagation(trm.PropagationNested),
+		)),
+	)
+
+	var tr, trNested trm.Transaction
+
+	err = m.Do(context.Background(), func(ctx context.Context) error {
+		tr = trmcontext.DefaultManager.Default(ctx)
+
+		return m.Do(ctx, func(ctx context.Context) error {
+			trNested = trmcontext.DefaultManager.Default(ctx)
+
+			return testErr
+		})
+	})
+
+	require.False(t, tr.IsActive())
+	require.False(t, trNested.IsActive())
+
+	require.ErrorIs(t, err, testErr)
+	require.ErrorIs(t, err, testRollbackErr)
+	require.ErrorIs(t, err, trm.ErrRollback)
+	require.NotErrorIs(t, err, trm.ErrNestedRollback)
+
+	assert.NoError(t, dbmock.ExpectationsWereMet())
 }
 
 func TestTransaction_awaitDone_byContext(t *testing.T) {
