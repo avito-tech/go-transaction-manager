@@ -222,7 +222,8 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-// TestTransaction_nested_handledByLibrary checks that nested transactions are handled by trm via SAVEPOINT, surfacing ErrNestedRollback in the error chain.
+// TestTransaction_nested_handledByLibrary checks that nested transactions are handled by trm
+// via SAVEPOINT, surfacing ErrNestedRollback in the error chain.
 func TestTransaction_nested_handledByLibrary(t *testing.T) {
 	t.Parallel()
 

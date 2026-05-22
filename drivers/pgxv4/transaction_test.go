@@ -206,7 +206,8 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-// TestTransaction_nested_handledByDriver checks that nested transactions use pgx's own subtransaction mechanism, not trm's nested transaction layer.
+// TestTransaction_nested_handledByDriver checks that nested transactions use pgx's own
+// subtransaction mechanism, not trm's nested transaction layer.
 func TestTransaction_nested_handledByDriver(t *testing.T) {
 	t.Parallel()
 

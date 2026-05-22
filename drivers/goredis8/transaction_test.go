@@ -161,7 +161,8 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-// TestTransaction_nested_reusesOuterTransaction checks that nested transactions reuse the outer Redis transaction since Redis WATCH does not support savepoints.
+// TestTransaction_nested_reusesOuterTransaction checks that nested transactions reuse the outer
+// Redis transaction since Redis WATCH does not support savepoints.
 func TestTransaction_nested_reusesOuterTransaction(t *testing.T) {
 	t.Parallel()
 
