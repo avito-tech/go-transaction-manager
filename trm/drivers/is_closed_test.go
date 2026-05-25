@@ -2,6 +2,7 @@ package drivers
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 
@@ -25,9 +26,11 @@ func TestIsClose(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 
+		i := i
 		go func() {
 			defer wg.Done()
-			require.NotPanics(t, func() {
+
+			t.Run(fmt.Sprintf("goroutine-%d", i), func(t *testing.T) {
 				<-isClosed.Closed()
 
 				require.ErrorIs(t, isClosed.Err(), errExpected)

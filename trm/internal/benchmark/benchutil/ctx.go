@@ -1,4 +1,4 @@
-package common
+package benchutil
 
 // IDKey is a type for context.Context value.
 type IDKey int

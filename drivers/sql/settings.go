@@ -21,6 +21,7 @@ func WithTxOptions(opts *sql.TxOptions) Opt {
 // Settings contains settings for sql.Transaction.
 type Settings struct {
 	trm.Settings
+
 	txOpts *sql.TxOptions
 }
 

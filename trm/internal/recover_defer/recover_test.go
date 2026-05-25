@@ -22,6 +22,8 @@ func TestInline(t *testing.T) {
 }
 
 func recoverer(t *testing.T) func() {
+	t.Helper()
+
 	return func() {
 		assert.Equal(t, panicText, recover())
 	}
@@ -38,6 +40,8 @@ func TestNestedFunc(t *testing.T) {
 }
 
 func emptyRecoverer(t *testing.T) func() {
+	t.Helper()
+
 	return func() {
 		assert.Empty(t, recover())
 	}

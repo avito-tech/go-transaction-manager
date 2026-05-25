@@ -21,6 +21,7 @@ func WithTxOptions(opts pgx.TxOptions) Opt {
 // Settings contains settings for pgxv5.Transaction.
 type Settings struct {
 	trm.Settings
+
 	txOpts pgx.TxOptions
 }
 

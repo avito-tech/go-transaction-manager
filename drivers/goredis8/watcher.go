@@ -21,6 +21,7 @@ type Watch interface {
 
 type tx struct {
 	redis.Pipeliner
+
 	tx *redis.Tx
 }
 

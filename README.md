@@ -44,11 +44,12 @@ Compatibility beyond that is not guaranteed.
 
 The critical bugs are firstly solved for the most recent two Golang versions and then for older ones if it is simple.
 
-#### Disclaimer: Keep your dependencies up to date, even indirect ones.
-
-`go get -u && go mod tidy` helps you.
-
-**Note**: The go-transaction-manager uses some old dependencies to support backwards compatibility for old versions of Go.
+> [!CAUTION]
+> **Disclaimer: Keep your dependencies up to date, even indirect ones.**
+>
+> `go get -u && go mod tidy` helps you.
+>
+> **Note**: The go-transaction-manager uses some old dependencies to support backwards compatibility for old versions of Go.
 
 ## Usage
 
