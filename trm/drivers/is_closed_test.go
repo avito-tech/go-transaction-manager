@@ -2,10 +2,10 @@ package drivers
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,20 +26,23 @@ func TestIsClose(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 
+		i := i
 		go func() {
 			defer wg.Done()
 
-			<-isClosed.Closed()
+			t.Run(fmt.Sprintf("goroutine-%d", i), func(t *testing.T) {
+				<-isClosed.Closed()
 
-			assert.ErrorIs(t, isClosed.Err(), errExpected)
-			assert.False(t, isClosed.IsActive())
-			assert.True(t, isClosed.IsClosed())
+				require.ErrorIs(t, isClosed.Err(), errExpected)
+				require.False(t, isClosed.IsActive())
+				require.True(t, isClosed.IsClosed())
 
-			isClosed.CloseWithCause(err)
+				isClosed.CloseWithCause(err)
 
-			assert.ErrorIs(t, isClosed.Err(), errExpected)
-			assert.False(t, isClosed.IsActive())
-			assert.True(t, isClosed.IsClosed())
+				require.ErrorIs(t, isClosed.Err(), errExpected)
+				require.False(t, isClosed.IsActive())
+				require.True(t, isClosed.IsClosed())
+			})
 		}()
 	}
 

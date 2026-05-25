@@ -245,6 +245,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	<-time.After(time.Millisecond)
 
 	<-ctx.Done()
+	require.False(t, tr.IsActive())
 	<-tr.Closed()
 	require.False(t, tr.IsActive())
 

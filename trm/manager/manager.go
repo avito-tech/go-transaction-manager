@@ -3,6 +3,7 @@ package manager
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/multierr"
 
@@ -27,7 +28,7 @@ type Manager struct {
 func New(f trm.TrFactory, oo ...Opt) (*Manager, error) {
 	s, err := settings.New()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("default settings: %w", err)
 	}
 
 	m := &Manager{
