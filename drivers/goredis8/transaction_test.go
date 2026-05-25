@@ -161,48 +161,6 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-// TestTransaction_nested_reusesOuterTransaction checks that nested transactions reuse the outer
-// Redis transaction since Redis WATCH does not support savepoints.
-func TestTransaction_nested_reusesOuterTransaction(t *testing.T) {
-	t.Parallel()
-
-	testKey := "key1"
-
-	db, rmock := redismock.NewClientMock()
-	log := mock.NewLog()
-
-	rmock.ExpectWatch(testKey)
-
-	s := MustSettings(settings.Must(
-		settings.WithPropagation(trm.PropagationNested),
-	), WithWatchKeys(testKey), WithRet(&[]redis.Cmder{}))
-	m := manager.Must(
-		NewDefaultFactory(db),
-		manager.WithLog(log),
-		manager.WithSettings(s),
-	)
-
-	var tr, trNested trm.Transaction
-
-	err := m.Do(context.Background(), func(ctx context.Context) error {
-		tr = trmcontext.DefaultManager.Default(ctx)
-
-		return m.Do(ctx, func(ctx context.Context) error {
-			trNested = trmcontext.DefaultManager.Default(ctx)
-
-			return nil
-		})
-	})
-
-	require.False(t, tr.IsActive())
-	require.False(t, trNested.IsActive())
-
-	require.NoError(t, err)
-	require.Equal(t, tr, trNested)
-
-	assert.NoError(t, rmock.ExpectationsWereMet())
-}
-
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 

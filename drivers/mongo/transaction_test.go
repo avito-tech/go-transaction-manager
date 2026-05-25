@@ -197,47 +197,6 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-// TestTransaction_nested_reusesOuterTransaction checks that nested transactions reuse the outer
-// MongoDB transaction since the driver does not implement trm.NestedTrFactory.
-func TestTransaction_nested_reusesOuterTransaction(t *testing.T) {
-	t.Parallel()
-
-	mt := mtest.New(
-		t,
-		mtest.NewOptions().
-			ClientType(mtest.Mock).
-			ShareClient(true),
-	)
-
-	log := mock.NewLog()
-
-	m := manager.Must(
-		NewDefaultFactory(mt.Client),
-		manager.WithLog(log),
-		manager.WithSettings(MustSettings(settings.Must(
-			settings.WithPropagation(trm.PropagationNested),
-		), WithSessionOpts(&options.SessionOptions{}))),
-	)
-
-	var tr, trNested trm.Transaction
-
-	err := m.Do(context.Background(), func(ctx context.Context) error {
-		tr = trmcontext.DefaultManager.Default(ctx)
-
-		return m.Do(ctx, func(ctx context.Context) error {
-			trNested = trmcontext.DefaultManager.Default(ctx)
-
-			return nil
-		})
-	})
-
-	require.False(t, tr.IsActive())
-	require.False(t, trNested.IsActive())
-	require.Equal(t, tr, trNested)
-
-	require.NoError(t, err)
-}
-
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 

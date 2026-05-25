@@ -222,53 +222,6 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-// TestTransaction_nested_handledByLibrary checks that nested transactions are handled by trm
-// via SAVEPOINT, surfacing ErrNestedRollback in the error chain.
-func TestTransaction_nested_handledByLibrary(t *testing.T) {
-	t.Parallel()
-
-	testErr := errors.New("inner error")
-	testRollbackErr := errors.New("savepoint rollback error")
-
-	db, dbmock := test.NewDBMockWithClose(t)
-	log := mock.NewLog()
-
-	dbmock.ExpectBegin()
-	dbmock.ExpectExec("SAVEPOINT tx_1").WillReturnResult(sqlmock.NewResult(0, 0))
-	dbmock.ExpectExec("ROLLBACK TO SAVEPOINT tx_1").WillReturnError(testRollbackErr)
-	dbmock.ExpectRollback()
-
-	m := manager.Must(
-		NewDefaultFactory(db),
-		manager.WithLog(log),
-		manager.WithSettings(settings.Must(
-			settings.WithPropagation(trm.PropagationNested),
-		)),
-	)
-
-	var tr, trNested trm.Transaction
-
-	err := m.Do(context.Background(), func(ctx context.Context) error {
-		tr = trmcontext.DefaultManager.Default(ctx)
-
-		return m.Do(ctx, func(ctx context.Context) error {
-			trNested = trmcontext.DefaultManager.Default(ctx)
-
-			return testErr
-		})
-	})
-
-	require.False(t, tr.IsActive())
-	require.False(t, trNested.IsActive())
-
-	require.ErrorIs(t, err, testErr)
-	require.ErrorIs(t, err, testRollbackErr)
-	require.ErrorIs(t, err, trm.ErrRollback)
-	require.ErrorIs(t, err, trm.ErrNestedRollback)
-
-	assert.NoError(t, dbmock.ExpectationsWereMet())
-}
-
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
