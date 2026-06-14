@@ -19,6 +19,7 @@ type Opt func(*Settings) error
 // Settings contains settings for redis.Transaction.
 type Settings struct {
 	trm.Settings
+
 	isMulti     *bool
 	watchKeys   []string
 	txDecorator []TxDecorator

@@ -3,7 +3,6 @@ package goredis8
 import (
 	"context"
 	"errors"
-	"sync"
 	"testing"
 	"time"
 
@@ -165,34 +164,26 @@ func TestTransaction(t *testing.T) {
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
 	db, rmock := redismock.NewClientMock()
 
 	f := NewDefaultFactory(db)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go func() {
-		defer wg.Done()
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+	cancel()
 
-		cancel()
+	<-ctx.Done()
+	require.True(t, tr.IsActive())
+	<-tr.Closed()
+	require.False(t, tr.IsActive())
 
-		<-ctx.Done()
-		require.True(t, tr.IsActive())
-		<-tr.Closed()
-		require.False(t, tr.IsActive())
+	require.Equal(t, context.Canceled, ctx.Err())
+	err = tr.Commit(ctx)
+	require.ErrorIs(t, err, redis.ErrClosed)
 
-		require.Equal(t, context.Canceled, ctx.Err())
-		err = tr.Commit(ctx)
-		require.ErrorIs(t, err, redis.ErrClosed)
-	}()
-
-	wg.Wait()
-	assert.NoError(t, rmock.ExpectationsWereMet())
+	require.NoError(t, rmock.ExpectationsWereMet())
 }
 
 // TestTransaction_awaitDone_byRollback checks goroutine leak when we close transaction manually.
@@ -202,22 +193,14 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	db, rmock := redismock.NewClientMock()
 
 	f := NewDefaultFactory(db)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+	ctx := context.Background()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
+	require.NoError(t, tr.Rollback(ctx))
+	require.False(t, tr.IsActive())
+	require.NoError(t, tr.Rollback(ctx))
 
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
-
-		require.NoError(t, tr.Rollback(ctx))
-		require.False(t, tr.IsActive())
-		require.NoError(t, tr.Rollback(ctx))
-	}()
-
-	wg.Wait()
 	assert.NoError(t, rmock.ExpectationsWereMet())
 }

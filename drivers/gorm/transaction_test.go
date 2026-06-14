@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"sync"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -143,9 +142,9 @@ func TestTransaction(t *testing.T) {
 			ret: testErr,
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testErr) &&
-					assert.NotNil(t, err, testRollbackErr) &&
-					assert.NotNil(t, err, trm.ErrRollback) &&
-					assert.NotNil(t, err, trm.ErrNestedRollback)
+					assert.ErrorIs(t, err, testRollbackErr) &&
+					assert.ErrorIs(t, err, trm.ErrRollback) &&
+					assert.NotErrorIs(t, err, trm.ErrNestedRollback) // driver uses own nested transactions
 			},
 		},
 	}
@@ -210,9 +209,6 @@ func TestTransaction(t *testing.T) {
 func TestTransaction_awaitDone_byContext(t *testing.T) {
 	t.Parallel()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
 	db, dbmock := test.NewDBMock()
 	dbmock.ExpectBegin()
 	dbmock.ExpectRollback()
@@ -230,25 +226,19 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	f := NewDefaultFactory(dbgorm)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go func() {
-		defer wg.Done()
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+	cancel()
 
-		cancel()
+	<-ctx.Done()
+	require.True(t, tr.IsActive())
+	<-tr.Closed()
+	require.False(t, tr.IsActive())
 
-		<-ctx.Done()
-		require.True(t, tr.IsActive())
-		<-tr.Closed()
-		require.False(t, tr.IsActive())
-
-		require.Equal(t, context.Canceled, ctx.Err())
-		err = tr.Commit(ctx)
-		require.ErrorIs(t, err, sql.ErrTxDone)
-	}()
-
-	wg.Wait()
+	require.Equal(t, context.Canceled, ctx.Err())
+	err = tr.Commit(ctx)
+	require.ErrorIs(t, err, sql.ErrTxDone)
 }
 
 // TestTransaction_awaitDone_byRollback checks goroutine leak when we close transaction manually.
@@ -270,21 +260,12 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	require.NoError(t, err)
 
 	f := NewDefaultFactory(dbgorm)
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+	ctx := context.Background()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
-
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
-
-		require.NoError(t, tr.Rollback(ctx))
-		require.False(t, tr.IsActive())
-		require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
-	}()
-
-	wg.Wait()
+	require.NoError(t, tr.Rollback(ctx))
+	require.False(t, tr.IsActive())
+	require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"sync"
 	"testing"
 	"time"
 
@@ -29,7 +28,7 @@ func TestTransaction(t *testing.T) {
 		ctx context.Context
 	}
 
-	//nolint:govet
+	//nolint:govet,gosec
 	ctx, _ := context.WithCancel(context.Background())
 
 	testErr := errors.New("error test")
@@ -235,32 +234,23 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 	f := NewDefaultFactory(sqlx.NewDb(db, "sqlmock"))
 	ctx, cancel := context.WithCancel(context.Background())
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
+	cancel()
 
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
+	// Need to wait for the transaction to be closed.
+	// https://github.com/golang/go/blob/go1.21.6/src/database/sql/sql.go#L2174
+	<-time.After(time.Millisecond)
 
-		cancel()
+	<-ctx.Done()
+	require.False(t, tr.IsActive())
+	<-tr.Closed()
+	require.False(t, tr.IsActive())
 
-		// Need to wait for the transaction to be closed.
-		// https://github.com/golang/go/blob/go1.21.6/src/database/sql/sql.go#L2174
-		<-time.After(time.Millisecond)
-
-		<-ctx.Done()
-		require.False(t, tr.IsActive())
-		<-tr.Closed()
-		require.False(t, tr.IsActive())
-
-		require.Equal(t, context.Canceled, ctx.Err())
-		err = tr.Commit(ctx)
-		require.ErrorIs(t, err, sql.ErrTxDone)
-	}()
-
-	wg.Wait()
+	require.Equal(t, context.Canceled, ctx.Err())
+	err = tr.Commit(ctx)
+	require.ErrorIs(t, err, sql.ErrTxDone)
 }
 
 // TestTransaction_awaitDone_byRollback checks goroutine leak when we close transaction manually.
@@ -276,21 +266,12 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	})
 
 	f := NewDefaultFactory(sqlx.NewDb(db, "sqlmock"))
-	ctx, _ := context.WithCancel(context.Background()) //nolint:govet
+	ctx := context.Background()
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	_, tr, err := f(ctx, settings.Must())
+	require.NoError(t, err)
 
-	go func() {
-		defer wg.Done()
-
-		_, tr, err := f(ctx, settings.Must())
-		require.NoError(t, err)
-
-		require.NoError(t, tr.Rollback(ctx))
-		require.False(t, tr.IsActive())
-		require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
-	}()
-
-	wg.Wait()
+	require.NoError(t, tr.Rollback(ctx))
+	require.False(t, tr.IsActive())
+	require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
 }

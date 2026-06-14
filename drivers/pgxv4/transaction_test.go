@@ -131,7 +131,7 @@ func TestTransaction(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.ErrorIs(t, err, testCommitErr) &&
 					assert.ErrorIs(t, err, trm.ErrCommit) &&
-					assert.NotNil(t, err, trm.ErrNestedCommit)
+					assert.NotErrorIs(t, err, trm.ErrNestedCommit) // driver uses own nested transactions
 			},
 		},
 		"rollback_savepoint_after_error": {
@@ -151,7 +151,7 @@ func TestTransaction(t *testing.T) {
 				return assert.ErrorIs(t, err, testErr) &&
 					assert.ErrorIs(t, err, testRollbackErr) &&
 					assert.ErrorIs(t, err, trm.ErrRollback) &&
-					assert.NotNil(t, err, trm.ErrNestedRollback)
+					assert.NotErrorIs(t, err, trm.ErrNestedRollback) // driver uses own nested transactions
 			},
 		},
 	}

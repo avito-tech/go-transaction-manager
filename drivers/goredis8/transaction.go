@@ -130,8 +130,7 @@ func (t *Transaction) Rollback(_ context.Context) error {
 
 		<-t.isClosed.Closed()
 
-		err := t.isClosed.Err()
-		if errors.Is(err, drivers.ErrRollbackTr) {
+		if errors.Is(t.isClosed.Err(), drivers.ErrRollbackTr) {
 			return nil
 		}
 
@@ -139,7 +138,7 @@ func (t *Transaction) Rollback(_ context.Context) error {
 		// https://github.com/redis/go-redis/blob/v8.11.5/tx.go#L69
 		// https://github.com/redis/go-redis/blob/v8.11.5/pipeline.go#L130
 
-		return err
+		return t.isClosed.Err()
 	}
 }
 
