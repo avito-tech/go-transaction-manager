@@ -241,7 +241,7 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 
 	// Need to wait for the transaction to be closed.
 	// https://github.com/golang/go/blob/go1.21.6/src/database/sql/sql.go#L2174
-	<-time.After(time.Millisecond)
+	<-time.After(100 * time.Millisecond)
 
 	<-ctx.Done()
 	require.False(t, tr.IsActive())
