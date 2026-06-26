@@ -105,7 +105,7 @@ func TestTransaction_WithRealDB_NoDataRaceOnContextCancelDuringQuery_139(t *test
 
 	// 8 MB parameter writing keeps the connection write-busy to hit every phase of the protocol.
 	// That forces the slow write timer to already be active, triggering a panic
-	// even if we don't run without the race detector (-race).
+	// even when run without -race.
 	payload := strings.Repeat("x", 8*1024*1024)
 
 	const (

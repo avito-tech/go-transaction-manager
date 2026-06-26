@@ -10,6 +10,14 @@ import (
 )
 
 // Transaction is trm.Transaction for pgx.Tx.
+//
+// Transaction is NOT safe for concurrent use. pgx.Tx does not support running
+// commands from multiple goroutines simultaneously (jackc/pgx#2332), so a query
+// must never overlap with Commit or Rollback on the same Transaction. For this
+// reason context cancellation does not roll back the Transaction from a
+// background goroutine: with manager.Manager the rollback is issued after the
+// transactional function returns, and standalone callers must call Rollback
+// themselves.
 type Transaction struct {
 	tx       pgx.Tx
 	isClosed *drivers.IsClosed

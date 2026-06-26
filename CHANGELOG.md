@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.3-rc1]
+
+### Fixed
+
+- Removed the awaitDone goroutine from pgx v4 and pgx v5 drivers to prevent concurrent access to pgx.Tx, which could panic during an in-flight query on context cancellation (jackc/pgx#2332, #139).
+
+### Changes
+
+- pgx v4 and pgx v5 transactions are not safe for concurrent use. Context cancellation no longer triggers an automatic rollback from a background goroutine: with the manager the rollback is issued after the transactional function returns, and standalone callers must call Rollback explicitly.
+
 ## [2.0.2] - 2025-10-24
 
 ### Fixed
