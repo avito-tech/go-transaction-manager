@@ -2,7 +2,6 @@ package pgxv5
 
 import (
 	"context"
-	"sync"
 
 	"github.com/jackc/pgx/v5"
 
@@ -12,14 +11,12 @@ import (
 
 // Transaction is trm.Transaction for pgx.Tx.
 type Transaction struct {
-	mu       sync.Mutex
 	tx       pgx.Tx
 	isClosed *drivers.IsClosed
 }
 
 func newDefaultTransaction(tx pgx.Tx) *Transaction {
 	return &Transaction{
-		mu:       sync.Mutex{},
 		tx:       tx,
 		isClosed: drivers.NewIsClosed(),
 	}
@@ -60,8 +57,6 @@ func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Contex
 
 // Commit the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
 	defer t.isClosed.Close()
 
 	return t.tx.Commit(ctx)
@@ -69,19 +64,7 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
 	defer t.isClosed.Close()
-
-	select {
-	case <-t.isClosed.Closed():
-		return nil
-	default:
-	}
-
-	if ctx.Err() != nil {
-		return t.tx.Rollback(context.Background()) //nolint:contextcheck // use detached ctx when cancelled to avoid pgx "slow write timer" panic (jackc/pgx#2332)
-	}
 
 	return t.tx.Rollback(ctx)
 }

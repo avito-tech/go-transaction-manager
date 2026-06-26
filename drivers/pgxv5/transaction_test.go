@@ -209,9 +209,9 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-// TestTransaction_Rollback_withCancelledCtx verifies that Rollback uses a fresh context
-// when the original context is cancelled, so pgx sends ROLLBACK to the server instead
-// of failing immediately with context.Canceled (jackc/pgx#2332).
+// TestTransaction_Rollback_withCancelledCtx verifies that Rollback with a cancelled
+// context still issues the rollback and marks the transaction closed, propagating the
+// context.Canceled error rather than swallowing it (jackc/pgx#2332).
 func TestTransaction_Rollback_withCancelledCtx(t *testing.T) {
 	t.Parallel()
 
@@ -228,7 +228,7 @@ func TestTransaction_Rollback_withCancelledCtx(t *testing.T) {
 
 	cancel()
 
-	require.NoError(t, tr.Rollback(ctx))
+	require.ErrorIs(t, tr.Rollback(ctx), context.Canceled)
 	require.False(t, tr.IsActive())
 
 	assert.NoError(t, dbmock.ExpectationsWereMet())
