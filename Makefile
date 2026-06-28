@@ -4,18 +4,20 @@ GO_TEST=cd ./sh && bash ./go.test.sh
 GO_TEST_COVERAGE=cd ./sh && bash ./go.test.coverage.sh
 
 GO_TEST_WITH_REAL_DB=--tags=with_real_db
+# -count=1 disables the test result cache so tests always run
+GO_TEST_NO_CACHE=-count=1
 
 test:
-	$(GO_TEST)
+	$(GO_TEST) $(GO_TEST_NO_CACHE)
 
 test.with_real_db:
-	$(GO_TEST) $(GO_TEST_WITH_REAL_DB)
+	$(GO_TEST) $(GO_TEST_WITH_REAL_DB) $(GO_TEST_NO_CACHE)
 
 test.coverage:
-	$(GO_TEST_COVERAGE)
+	$(GO_TEST_COVERAGE) $(GO_TEST_NO_CACHE)
 
 test.coverage.with_real_db:
-	$(GO_TEST_COVERAGE) $(GO_TEST_WITH_REAL_DB)
+	$(GO_TEST_COVERAGE) $(GO_TEST_WITH_REAL_DB) $(GO_TEST_NO_CACHE)
 
 fmt:
 	cd sh && sh ./go.fmt.sh

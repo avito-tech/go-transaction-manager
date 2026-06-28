@@ -2,7 +2,6 @@ package pgxv4
 
 import (
 	"context"
-	"sync"
 
 	"github.com/jackc/pgx/v4"
 
@@ -11,15 +10,21 @@ import (
 )
 
 // Transaction is trm.Transaction for pgx.Tx.
+//
+// Transaction is NOT safe for concurrent use. pgx.Tx does not support running
+// commands from multiple goroutines simultaneously (jackc/pgx#2332), so a query
+// must never overlap with Commit or Rollback on the same Transaction. For this
+// reason context cancellation does not roll back the Transaction from a
+// background goroutine: with manager.Manager the rollback is issued after the
+// transactional function returns, and standalone callers must call Rollback
+// themselves.
 type Transaction struct {
-	mu       sync.Mutex
 	tx       pgx.Tx
 	isClosed *drivers.IsClosed
 }
 
 func newDefaultTransaction(tx pgx.Tx) *Transaction {
 	return &Transaction{
-		mu:       sync.Mutex{},
 		tx:       tx,
 		isClosed: drivers.NewIsClosed(),
 	}
@@ -38,21 +43,7 @@ func NewTransaction(
 
 	tr := newDefaultTransaction(tx)
 
-	go tr.awaitDone(ctx)
-
 	return ctx, tr, nil
-}
-
-func (t *Transaction) awaitDone(ctx context.Context) {
-	if ctx.Done() == nil {
-		return
-	}
-
-	select {
-	case <-ctx.Done():
-		_ = t.Rollback(ctx)
-	case <-t.isClosed.Closed():
-	}
 }
 
 // Transaction returns the real transaction pgx.Tx.
@@ -74,8 +65,6 @@ func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Contex
 
 // Commit the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
 	defer t.isClosed.Close()
 
 	return t.tx.Commit(ctx)
@@ -83,8 +72,6 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
 	defer t.isClosed.Close()
 
 	return t.tx.Rollback(ctx)

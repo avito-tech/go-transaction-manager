@@ -209,13 +209,16 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
-func TestTransaction_awaitDone_byContext(t *testing.T) {
+// TestTransaction_Rollback_withCancelledCtx verifies that Rollback with a cancelled
+// context still issues the rollback and marks the transaction closed, propagating the
+// context.Canceled error rather than swallowing it (jackc/pgx#2332).
+func TestTransaction_Rollback_withCancelledCtx(t *testing.T) {
 	t.Parallel()
 
 	dbmock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	dbmock.ExpectBeginTx(pgx.TxOptions{})
-	dbmock.ExpectCommit()
+	dbmock.ExpectRollback()
 
 	f := NewDefaultFactory(dbmock)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -225,16 +228,13 @@ func TestTransaction_awaitDone_byContext(t *testing.T) {
 
 	cancel()
 
-	<-ctx.Done()
-	require.True(t, tr.IsActive())
-	<-tr.Closed()
+	require.ErrorIs(t, tr.Rollback(ctx), context.Canceled)
 	require.False(t, tr.IsActive())
 
-	err = tr.Commit(ctx)
-	require.ErrorIs(t, err, context.Canceled)
+	assert.NoError(t, dbmock.ExpectationsWereMet())
 }
 
-func TestTransaction_awaitDone_byRollback(t *testing.T) {
+func TestTransaction_Rollback(t *testing.T) {
 	t.Parallel()
 
 	dbmock, err := pgxmock.NewPool()
@@ -243,11 +243,12 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	dbmock.ExpectRollback()
 
 	f := NewDefaultFactory(dbmock)
-	ctx := context.Background()
 
-	_, tr, err := f(ctx, settings.Must())
+	_, tr, err := f(context.Background(), settings.Must())
 	require.NoError(t, err)
 
-	require.NoError(t, tr.Rollback(ctx))
+	require.NoError(t, tr.Rollback(context.Background()))
 	require.False(t, tr.IsActive())
+
+	assert.NoError(t, dbmock.ExpectationsWereMet())
 }

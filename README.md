@@ -27,6 +27,15 @@ Easiest way to get the perfect repository.
 * [pgx_v5](https://github.com/jackc/pgx), [docs](https://pkg.go.dev/github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2) (
   Go 1.19)
 
+> [!WARNING]
+> The **pgx v4 and pgx v5** transactions are **not safe for concurrent use**: `pgx.Tx`
+> does not support running commands from multiple goroutines simultaneously
+> ([jackc/pgx#2332](https://github.com/jackc/pgx/issues/2332)). Never run a query
+> concurrently with `Commit`/`Rollback` on the same transaction. Context cancellation
+> does not roll back the transaction from a background goroutine — with the manager the
+> rollback runs after your function returns; standalone callers must call `Rollback`
+> explicitly.
+
 ## Installation
 
 ```bash
