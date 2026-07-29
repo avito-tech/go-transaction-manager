@@ -80,53 +80,58 @@ func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ct
 // Nested goroutines would be canceled after the transaction closing by context.CancelFunc.
 //
 //nolint:cyclop // propagation mode switch requires a case per mode by design
-func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Closer, error) {
+func (m *Manager) Init(ctx context.Context, s trm.Settings) (resCtx context.Context, closer Closer, err error) {
 	tr := m.ctxManager.ByKey(ctx, s.CtxKey())
 	isOpened := tr != nil
 
-	ctx, cancel := m.withCancel(ctx, s)
+	resCtx, cancel := m.withCancel(ctx, s)
+	defer func() {
+		if cancel != nil && err != nil {
+			cancel()
+		}
+	}()
 
 	switch s.Propagation() {
 	case trm.PropagationRequired:
 		if isOpened {
-			return ctx, newNilClose(cancel), nil
+			return resCtx, newNilClose(cancel), nil
 		}
 	case trm.PropagationNested:
 		if isOpened {
-			return m.propagationNested(ctx, s, tr, cancel)
+			return m.propagationNested(resCtx, s, tr, cancel)
 		}
 	case trm.PropagationsMandatory:
 		if isOpened {
-			return ctx, newNilClose(cancel), nil
+			return resCtx, newNilClose(cancel), nil
 		}
 
-		return ctx, nil, trm.ErrPropagationMandatory
+		return resCtx, nil, trm.ErrPropagationMandatory
 	case trm.PropagationNever:
 		if isOpened {
-			return ctx, nil, trm.ErrPropagationNever
+			return resCtx, nil, trm.ErrPropagationNever
 		}
 
-		return ctx, newNilClose(cancel), nil
+		return resCtx, newNilClose(cancel), nil
 	case trm.PropagationNotSupported:
 		if isOpened {
-			return m.ctxManager.SetByKey(ctx, s.CtxKey(), nil),
+			return m.ctxManager.SetByKey(resCtx, s.CtxKey(), nil),
 				newNilClose(cancel),
 				nil
 		}
 
-		return ctx, newNilClose(cancel), nil
+		return resCtx, newNilClose(cancel), nil
 	case trm.PropagationRequiresNew:
 		// do nothing
 	case trm.PropagationSupports:
-		return ctx, newNilClose(cancel), nil
+		return resCtx, newNilClose(cancel), nil
 	}
 
-	ctx, tr, err := m.getTransaction(ctx, s)
+	resCtx, tr, err = m.getTransaction(resCtx, s)
 	if err != nil {
-		return nil, nil, multierr.Combine(trm.ErrBegin, err)
+		return resCtx, nil, multierr.Combine(trm.ErrBegin, err)
 	}
 
-	return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
+	return m.ctxManager.SetByKey(resCtx, s.CtxKey(), tr),
 		newTxCommit(tr, m.log, cancel),
 		nil
 }

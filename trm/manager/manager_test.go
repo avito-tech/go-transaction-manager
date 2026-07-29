@@ -770,6 +770,39 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 	}
 }
 
+func Test_transactionManager_Init_CancelsContextOnError(t *testing.T) {
+	t.Parallel()
+
+	t.Run("factory_error", func(t *testing.T) {
+		t.Parallel()
+
+		m := Must(func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
+			return ctx, nil, errors.New("boom")
+		})
+
+		ctx, _, err := m.Init(context.Background(), settings.Must(settings.WithTimeout(time.Hour)))
+
+		require.Error(t, err)
+		require.ErrorContains(t, err, "boom")
+		require.ErrorIs(t, ctx.Err(), context.Canceled)
+	})
+
+	t.Run("propagation_error", func(t *testing.T) {
+		t.Parallel()
+
+		m := Must(nil)
+
+		ctx, _, err := m.Init(context.Background(), settings.Must(
+			settings.WithTimeout(time.Hour),
+			settings.WithPropagation(trm.PropagationsMandatory),
+		))
+
+		require.Error(t, err)
+		require.ErrorIs(t, err, trm.ErrPropagationMandatory)
+		require.ErrorIs(t, ctx.Err(), context.Canceled)
+	})
+}
+
 func TestManager_WithOpts(t *testing.T) {
 	t.Parallel()
 
