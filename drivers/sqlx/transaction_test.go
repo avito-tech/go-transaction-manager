@@ -11,6 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/multierr"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
@@ -219,6 +220,39 @@ func TestTransaction(t *testing.T) {
 			assert.NoError(t, dbmock.ExpectationsWereMet())
 		})
 	}
+}
+
+func TestTransaction_Begin_NestedErrorNoDuplicate(t *testing.T) {
+	t.Parallel()
+
+	db, dbmock := test.NewDBMockWithClose(t)
+	dbmock.ExpectBegin()
+	dbmock.ExpectExec("SAVEPOINT tx_1").WillReturnError(errors.New("savepoint failed"))
+	dbmock.ExpectRollback()
+
+	s := settings.Must(settings.WithPropagation(trm.PropagationNested))
+	m := manager.Must(
+		NewDefaultFactory(sqlx.NewDb(db, "sqlmock")),
+		manager.WithSettings(s),
+	)
+
+	err := m.Do(context.Background(), func(ctx context.Context) error {
+		return m.Do(ctx, func(_ context.Context) error {
+			return nil
+		})
+	})
+
+	require.Error(t, err)
+
+	nestedBeginCount := 0
+	for _, e := range multierr.Errors(err) {
+		if errors.Is(e, trm.ErrNestedBegin) {
+			nestedBeginCount++
+		}
+	}
+
+	assert.Equal(t, 1, nestedBeginCount, "trm.ErrNestedBegin must appear exactly once in the error chain")
+	assert.NoError(t, dbmock.ExpectationsWereMet())
 }
 
 func TestTransaction_awaitDone_byContext(t *testing.T) {

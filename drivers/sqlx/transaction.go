@@ -71,7 +71,7 @@ func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Contex
 		// decrement save point ID after error
 		t.decrementID()
 
-		return ctx, nil, multierr.Combine(trm.ErrNestedBegin, err)
+		return ctx, nil, err
 	}
 
 	return ctx, t, nil
