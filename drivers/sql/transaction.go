@@ -122,15 +122,15 @@ func (t *Transaction) hasSavePoint() bool {
 }
 
 func (t *Transaction) incrementID() string {
-	atomic.AddInt64(&t.saves, 1)
+	id := atomic.AddInt64(&t.saves, 1)
 
-	return t.id()
+	return fmt.Sprintf("tx_%d", id)
 }
 
 func (t *Transaction) decrementID() string {
-	defer atomic.AddInt64(&t.saves, -1)
+	id := atomic.AddInt64(&t.saves, -1) + 1
 
-	return t.id()
+	return fmt.Sprintf("tx_%d", id)
 }
 
 func (t *Transaction) id() string {
