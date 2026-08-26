@@ -3,8 +3,6 @@ package sql
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"sync/atomic"
 
 	"go.uber.org/multierr"
 
@@ -17,7 +15,7 @@ import (
 type Transaction struct {
 	tx        *sql.Tx
 	savePoint SavePoint
-	saves     int64
+	spCounter *drivers.SavePointCounter
 	isClosed  *drivers.IsClosed
 }
 
@@ -36,7 +34,7 @@ func NewTransaction(
 	tr := &Transaction{
 		tx:        tx,
 		savePoint: sp,
-		saves:     0,
+		spCounter: drivers.NewSavePointCounter(),
 		isClosed:  drivers.NewIsClosed(),
 	}
 
@@ -64,10 +62,9 @@ func (t *Transaction) Transaction() interface{} {
 
 // Begin nested transaction by save point.
 func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
+	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.spCounter.IncrementID()))
 	if err != nil {
-		// decrement save point ID after error
-		t.decrementID()
+		t.spCounter.DecrementID()
 
 		return ctx, nil, err
 	}
@@ -77,8 +74,8 @@ func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Contex
 
 // Commit the trm.Transaction.
 func (t *Transaction) Commit(ctx context.Context) error {
-	if t.hasSavePoint() {
-		_, err := t.tx.ExecContext(ctx, t.savePoint.Release(t.decrementID()))
+	if t.spCounter.HasSavePoint() {
+		_, err := t.tx.ExecContext(ctx, t.savePoint.Release(t.spCounter.DecrementID()))
 		if err != nil {
 			return multierr.Combine(trm.ErrNestedCommit, err)
 		}
@@ -93,8 +90,8 @@ func (t *Transaction) Commit(ctx context.Context) error {
 
 // Rollback the trm.Transaction.
 func (t *Transaction) Rollback(ctx context.Context) error {
-	if t.hasSavePoint() {
-		_, err := t.tx.ExecContext(ctx, t.savePoint.Rollback(t.decrementID()))
+	if t.spCounter.HasSavePoint() {
+		_, err := t.tx.ExecContext(ctx, t.savePoint.Rollback(t.spCounter.DecrementID()))
 		if err != nil {
 			return multierr.Combine(trm.ErrNestedRollback, err)
 		}
@@ -115,24 +112,4 @@ func (t *Transaction) IsActive() bool {
 // Closed returns a channel that's closed when transaction committed or rolled back.
 func (t *Transaction) Closed() <-chan struct{} {
 	return t.isClosed.Closed()
-}
-
-func (t *Transaction) hasSavePoint() bool {
-	return atomic.LoadInt64(&t.saves) > 0
-}
-
-func (t *Transaction) incrementID() string {
-	atomic.AddInt64(&t.saves, 1)
-
-	return t.id()
-}
-
-func (t *Transaction) decrementID() string {
-	defer atomic.AddInt64(&t.saves, -1)
-
-	return t.id()
-}
-
-func (t *Transaction) id() string {
-	return fmt.Sprintf("tx_%d", atomic.LoadInt64(&t.saves))
 }
