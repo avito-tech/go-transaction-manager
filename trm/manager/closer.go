@@ -5,9 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"go.uber.org/multierr"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"go.uber.org/multierr"
 )
 
 // Closer closes trm.Transaction.
@@ -44,7 +43,7 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 
 	hasError := *errInProcessTr != nil
 	isErrSkippable := hasError && trm.IsSkippable(*errInProcessTr)
-	// TODO not sure that context errors should be propagated.
+	// NOTE: uncertainty whether context errors should be propagated.
 	isCtxCanceled := errors.Is(*errInProcessTr, context.Canceled)
 	isCtxDeadlineExceeded := errors.Is(*errInProcessTr, context.DeadlineExceeded)
 	isCtxErr := isCtxCanceled || isCtxDeadlineExceeded
@@ -97,11 +96,11 @@ func (c *trCloser) close(ctx context.Context, p interface{}, errInProcessTr *err
 }
 
 func newNilClose(cancel context.CancelFunc) Closer {
-	return func(_ context.Context, p interface{}, err *error) error {
+	return func(_ context.Context, panicVal interface{}, err *error) error {
 		defer cancel()
 
-		if p != nil {
-			panic(p)
+		if panicVal != nil {
+			panic(panicVal)
 		}
 
 		if *err != nil {

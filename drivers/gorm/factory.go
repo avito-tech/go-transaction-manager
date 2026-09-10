@@ -3,9 +3,8 @@ package gorm
 import (
 	"context"
 
-	"gorm.io/gorm"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"gorm.io/gorm"
 )
 
 // NewDefaultFactory creates default trm.Transaction(gorm.DB).

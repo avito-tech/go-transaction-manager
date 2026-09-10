@@ -1,4 +1,4 @@
-// Package trm contains of interfaces to programmatic transaction management.
+// Package trm contains interfaces for programmatic transaction management.
 package trm
 
 //go:generate mockgen -source=$GOFILE -destination=drivers/mock/$GOFILE -package=mock
@@ -44,10 +44,10 @@ type Transaction interface {
 	Transaction() interface{}
 	// Commit the trm.Transaction.
 	// Commit should be used only inside of Manager.
-	Commit(context.Context) error
+	Commit(ctx context.Context) error
 	// Rollback the trm.Transaction.
 	// Rollback should be used only inside of Manager.
-	Rollback(context.Context) error
+	Rollback(ctx context.Context) error
 	// IsActive returns true if the transaction started but not committed or rolled back.
 	IsActive() bool
 	// Closed returns a channel that's closed when transaction committed or rolled back.

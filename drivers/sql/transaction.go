@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"go.uber.org/multierr"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers"
+	"go.uber.org/multierr"
 )
 
 // Transaction is trm.Transaction for sql.Tx.
@@ -63,7 +62,11 @@ func (t *Transaction) Transaction() interface{} {
 }
 
 // Begin nested transaction by save point.
-func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
+func (t *Transaction) Begin(ctx context.Context, _ trm.Settings) (
+	context.Context,
+	trm.Transaction,
+	error,
+) {
 	_, err := t.tx.ExecContext(ctx, t.savePoint.Create(t.incrementID()))
 	if err != nil {
 		// decrement save point ID after error

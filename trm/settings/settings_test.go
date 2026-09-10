@@ -4,9 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSettings_EnrichBy(t *testing.T) {

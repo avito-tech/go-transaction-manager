@@ -6,9 +6,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/go-redis/redis/v8"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2/drivers"
+	"github.com/go-redis/redis/v8"
 )
 
 // TxDecorator is an interface for Transaction.tx decoration.
@@ -16,7 +15,7 @@ type TxDecorator func(tx Cmdable, db redis.Cmdable) Cmdable
 
 // Transaction is trm.Transaction for sqlx.Tx.
 type Transaction struct {
-	tx              txInterface
+	tx              Cmdable
 	isClosed        *drivers.IsClosed
 	isClosedClosure *drivers.IsClosed
 }

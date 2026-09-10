@@ -3,12 +3,11 @@ package mongo
 import (
 	"testing"
 
+	"github.com/avito-tech/go-transaction-manager/trm/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readconcern"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2"
-	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
 )
 
 func TestSettings_EnrichBy(t *testing.T) {

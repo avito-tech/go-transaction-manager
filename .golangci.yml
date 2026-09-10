@@ -134,6 +134,7 @@ linters:
 formatters:
   enable:
     - gofmt
+    - gci
     - gofumpt
     - goimports
   exclusions:

@@ -5,12 +5,10 @@ import (
 	"context"
 	"fmt"
 
-	"go.uber.org/multierr"
-
-	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
-
 	"github.com/avito-tech/go-transaction-manager/trm/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/settings"
+	"go.uber.org/multierr"
 )
 
 // Opt is a type to configure Manager.
@@ -25,14 +23,14 @@ type Manager struct {
 }
 
 // New creates Manager.
-func New(f trm.TrFactory, oo ...Opt) (*Manager, error) {
+func New(factory trm.TrFactory, oo ...Opt) (*Manager, error) {
 	s, err := settings.New()
 	if err != nil {
 		return nil, fmt.Errorf("default settings: %w", err)
 	}
 
 	m := &Manager{
-		getTransaction: f,
+		getTransaction: factory,
 		log:            defaultLog,
 		ctxManager:     trmcontext.DefaultManager,
 		settings:       s,
@@ -63,7 +61,11 @@ func (m *Manager) Do(ctx context.Context, fn func(ctx context.Context) error) (e
 }
 
 // DoWithSettings processes a transaction inside a closure with custom trm.Settings.
-func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ctx context.Context) error) (err error) {
+func (m *Manager) DoWithSettings(
+	ctx context.Context,
+	s trm.Settings,
+	fn func(ctx context.Context) error,
+) (err error) {
 	ctx, closer, err := m.Init(ctx, s.EnrichBy(m.settings))
 	if err != nil {
 		return err
@@ -81,6 +83,18 @@ func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ct
 //
 //nolint:cyclop // propagation mode switch requires a case per mode by design
 func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Closer, error) {
+	return m.initWithFactory(ctx, s, nil)
+}
+
+// initWithFactory is like Init but uses the given factory when creating a new transaction.
+// If factory is nil, m.getTransaction is used. Used by XManager to inject wrapped transactions.
+//
+//nolint:cyclop // complex control flow is intentional and small refactor would be intrusive
+func (m *Manager) initWithFactory(
+	ctx context.Context,
+	s trm.Settings,
+	factory trm.TrFactory,
+) (context.Context, Closer, error) {
 	tr := m.ctxManager.ByKey(ctx, s.CtxKey())
 	isOpened := tr != nil
 
@@ -121,7 +135,12 @@ func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Cl
 		return ctx, newNilClose(cancel), nil
 	}
 
-	ctx, tr, err := m.getTransaction(ctx, s)
+	getTr := m.getTransaction
+	if factory != nil {
+		getTr = factory
+	}
+
+	ctx, tr, err := getTr(ctx, s)
 	if err != nil {
 		return nil, nil, multierr.Combine(trm.ErrBegin, err)
 	}
@@ -131,7 +150,12 @@ func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Cl
 		nil
 }
 
-func (m *Manager) propagationNested(ctx context.Context, s trm.Settings, tr trm.Transaction, c context.CancelFunc) (context.Context, Closer, error) {
+func (m *Manager) propagationNested(
+	ctx context.Context,
+	s trm.Settings,
+	tr trm.Transaction,
+	cancel context.CancelFunc,
+) (context.Context, Closer, error) {
 	nestedFactory, ok := tr.(trm.NestedTrFactory)
 	if ok {
 		ctx, tr, err := nestedFactory.Begin(ctx, s)
@@ -140,14 +164,17 @@ func (m *Manager) propagationNested(ctx context.Context, s trm.Settings, tr trm.
 		}
 
 		return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
-			newTxCommit(tr, m.log, c),
+			newTxCommit(tr, m.log, cancel),
 			nil
 	}
 
-	return ctx, newNilClose(c), nil
+	return ctx, newNilClose(cancel), nil
 }
 
-func (m *Manager) withCancel(ctx context.Context, s trm.Settings) (context.Context, context.CancelFunc) {
+func (m *Manager) withCancel(
+	ctx context.Context,
+	s trm.Settings,
+) (context.Context, context.CancelFunc) {
 	t := s.TimeoutOrNil()
 	if t != nil {
 		return context.WithTimeout(ctx, *t)
