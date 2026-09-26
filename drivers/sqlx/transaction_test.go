@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -274,4 +275,30 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	require.NoError(t, tr.Rollback(ctx))
 	require.False(t, tr.IsActive())
 	require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
+}
+
+// TestTransaction_SavepointID_Consistency verifies that savepoint identifiers increment and decrement deterministically
+// without relying on separate reads.
+func TestTransaction_SavepointID_Consistency(t *testing.T) {
+	t.Parallel()
+
+	tr := &Transaction{
+		saves: 0,
+	}
+
+	const total = 50
+	expectedIDs := make([]string, total)
+	for i := 1; i <= total; i++ {
+		expectedIDs[i-1] = fmt.Sprintf("tx_%d", i)
+	}
+
+	for i := 0; i < total; i++ {
+		assert.Equal(t, expectedIDs[i], tr.incrementID())
+	}
+
+	for i := total - 1; i >= 0; i-- {
+		assert.Equal(t, expectedIDs[i], tr.decrementID())
+	}
+
+	assert.Equal(t, int64(0), tr.saves)
 }

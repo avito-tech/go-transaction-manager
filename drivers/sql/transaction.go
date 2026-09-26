@@ -3,7 +3,7 @@ package sql
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"sync/atomic"
 
 	"go.uber.org/multierr"
@@ -122,17 +122,13 @@ func (t *Transaction) hasSavePoint() bool {
 }
 
 func (t *Transaction) incrementID() string {
-	atomic.AddInt64(&t.saves, 1)
+	id := atomic.AddInt64(&t.saves, 1)
 
-	return t.id()
+	return "tx_" + strconv.FormatInt(id, 10)
 }
 
 func (t *Transaction) decrementID() string {
-	defer atomic.AddInt64(&t.saves, -1)
+	id := atomic.AddInt64(&t.saves, -1) + 1
 
-	return t.id()
-}
-
-func (t *Transaction) id() string {
-	return fmt.Sprintf("tx_%d", atomic.LoadInt64(&t.saves))
+	return "tx_" + strconv.FormatInt(id, 10)
 }
