@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed a context leak in `manager.Manager.Init` on its error paths (a failed `Begin`, `ErrNestedBegin`, `ErrPropagationMandatory`, `ErrPropagationNever`): the derived context is now canceled, and a failed `Begin` returns that canceled context instead of `nil` (#174).
 
-## [2.0.5]
-
 ### Added
 
-- `drivers.SavePointCounter` in `trm/drivers`: the atomic savepoint counter (`HasSavePoint`, `IncrementID`, `DecrementID`) that the `sql` and `sqlx` drivers each carried a copy of; the drivers switch to it in the next release (#182).
+- `drivers.SavePointCounter` in `trm/drivers`: the atomic savepoint counter (`HasSavePoint`, `IncrementID`, `DecrementID`) that the `sql` and `sqlx` drivers each carried a copy of; the `sql` and `sqlx` drivers now use it (#182).
+
+### Changes
+
+- `sqlx.Transaction.Begin` no longer wraps a failed savepoint creation in `trm.ErrNestedBegin`; it now returns the underlying error as-is, matching `sql`, `pgxv4` and `pgxv5`, which never wrapped it. Callers using this driver directly (bypassing `trm.Manager`, which still wraps with `ErrNestedBegin` in nested propagation) and checking `errors.Is(err, trm.ErrNestedBegin)` on `Begin`'s error should check the underlying error instead (#178).
 
 ## [2.0.4]
 
