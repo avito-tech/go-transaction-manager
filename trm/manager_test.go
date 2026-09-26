@@ -115,7 +115,7 @@ func TestUnSkippable(t *testing.T) {
 					assert.ErrorIs(t, err, errTest)
 			},
 		},
-		"only the bare ErrSkip is dropped, a wrapped one stays with its message": {
+		"bare_err_skip_dropped_wrapped_one_kept": {
 			args: args{
 				err: multierr.Combine(fmt.Errorf("wrapped: %w", ErrSkip), errTest, ErrSkip),
 			},
