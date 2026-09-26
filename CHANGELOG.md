@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed a context leak in `manager.Manager.Init` on its error paths (a failed `Begin`, `ErrNestedBegin`, `ErrPropagationMandatory`, `ErrPropagationNever`): the derived context is now canceled, and a failed `Begin` returns that canceled context instead of `nil` (#174).
 
+## [2.0.5]
+
+### Added
+
+- `drivers.SavePointCounter` in `trm/drivers`: the atomic savepoint counter (`HasSavePoint`, `IncrementID`, `DecrementID`) that the `sql` and `sqlx` drivers each carried a copy of; the drivers switch to it in the next release (#182).
+
 ## [2.0.4]
 
 ### Fixed
