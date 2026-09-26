@@ -78,6 +78,7 @@ func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ct
 // Init creates a context.Context with a trm.Transaction and Closer to finish trm.Transaction.
 // Required to explicitly close the transaction by calling Closer.
 // Nested goroutines would be canceled after the transaction closing by context.CancelFunc.
+// On error Closer is nil and the context derived from ctx is already canceled.
 //
 //nolint:cyclop // propagation mode switch requires a case per mode by design
 func (m *Manager) Init(ctx context.Context, s trm.Settings) (resCtx context.Context, closer Closer, err error) {

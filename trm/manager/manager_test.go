@@ -784,6 +784,7 @@ func Test_transactionManager_Init_CancelsContextOnError(t *testing.T) {
 
 		require.Error(t, err)
 		require.ErrorContains(t, err, "boom")
+		require.NotNil(t, ctx)
 		require.ErrorIs(t, ctx.Err(), context.Canceled)
 	})
 
@@ -799,6 +800,7 @@ func Test_transactionManager_Init_CancelsContextOnError(t *testing.T) {
 
 		require.Error(t, err)
 		require.ErrorIs(t, err, trm.ErrPropagationMandatory)
+		require.NotNil(t, ctx)
 		require.ErrorIs(t, ctx.Err(), context.Canceled)
 	})
 }
