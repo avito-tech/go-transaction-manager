@@ -776,7 +776,7 @@ func Test_transactionManager_Init_CancelsContextOnError(t *testing.T) {
 	ctxManager := trmcontext.DefaultManager
 	errBegin := errors.New("begin failed")
 
-	failingFactory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
+	failingFactory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) { //nolint:unparam // trm.TrFactory signature
 		return ctx, nil, errBegin
 	}
 

@@ -86,6 +86,7 @@ func (m *Manager) Init(ctx context.Context, s trm.Settings) (_ context.Context, 
 	isOpened := tr != nil
 
 	ctx, cancel := m.withCancel(ctx, s)
+
 	defer func() {
 		if err != nil {
 			cancel()
