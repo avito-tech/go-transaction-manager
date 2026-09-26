@@ -190,6 +190,13 @@ func (r *repo) Save(ctx context.Context, u *user) error {
 * To install all dependencies use `make go.mod.tidy` or `make go.mod.vendor`.
 * To run all tests use `make test` or `make test.with_real_db` for integration tests.
 
+The root [`go.work`](go.work) workspace already wires every driver module to the local `trm`
+checkout, so `go build`/`go test` run from a driver directory (e.g. `drivers/sql`) resolve
+`trm/v2` locally without any change to that driver's `go.mod`. Do not add a `replace` directive
+for `trm/v2` to a driver's `go.mod` — it is unnecessary inside the workspace and breaks consumers
+who `go get` the module outside of it. The commented-out `go mod edit -replace=...` lines in each
+driver's `go.mod` are only a recipe for building that module standalone, outside the workspace.
+
 To run database by docker, there is [docker-compose.yaml](trm/drivers/test/docker-compose.yaml).
 ```bash
 docker compose -f trm/drivers/test/docker-compose.yaml up

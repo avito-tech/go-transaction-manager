@@ -15,5 +15,3 @@ require (
 // go mod edit -replace=github.com/avito-tech/go-transaction-manager/trm/v2=../../
 // go get github.com/avito-tech/go-transaction-manager/trm/v2
 // go mod edit -dropreplace=github.com/avito-tech/go-transaction-manager/trm/v2
-
-replace github.com/avito-tech/go-transaction-manager/trm/v2 => ../../trm

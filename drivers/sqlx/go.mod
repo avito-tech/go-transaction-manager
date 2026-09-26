@@ -12,5 +12,3 @@ require (
 	go.uber.org/goleak v1.3.0
 	go.uber.org/multierr v1.9.0
 )
-
-replace github.com/avito-tech/go-transaction-manager/trm/v2 => ../../trm
