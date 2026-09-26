@@ -3,7 +3,7 @@ module github.com/avito-tech/go-transaction-manager/drivers/pgxv4/v2
 go 1.16
 
 require (
-	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.2
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.5
 	github.com/jackc/pgconn v1.14.2
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/pashagolub/pgxmock v1.8.0
