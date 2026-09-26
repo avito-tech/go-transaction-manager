@@ -5,11 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.4]
+## [2.0.5]
 
 ### Fixed
 
 - Fixed a context leak in `manager.Manager.Init` on its error paths (a failed `Begin`, `ErrNestedBegin`, `ErrPropagationMandatory`, `ErrPropagationNever`): the derived context is now canceled, and a failed `Begin` returns that canceled context instead of `nil` (#174).
+
+## [2.0.4]
+
+### Fixed
+
 - Removed the awaitDone goroutine from pgx v4 and pgx v5 drivers to prevent concurrent access to pgx.Tx, which could panic during an in-flight query on context cancellation (jackc/pgx#2332, #139).
 
 ### Changes
