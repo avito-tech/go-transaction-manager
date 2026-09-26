@@ -132,7 +132,3 @@ func (t *Transaction) decrementID() string {
 
 	return "tx_" + strconv.FormatInt(id, 10)
 }
-
-func (t *Transaction) id() string {
-	return "tx_" + strconv.FormatInt(atomic.LoadInt64(&t.saves), 10)
-}

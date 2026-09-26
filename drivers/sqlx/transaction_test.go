@@ -277,8 +277,8 @@ func TestTransaction_awaitDone_byRollback(t *testing.T) {
 	require.ErrorIs(t, tr.Rollback(ctx), sql.ErrTxDone)
 }
 
-// TestTransaction_SavepointID_Consistency verify that savepoint identifiers increment and decrement deterministically
-// without relying on separate reads
+// TestTransaction_SavepointID_Consistency verifies that savepoint identifiers increment and decrement deterministically
+// without relying on separate reads.
 func TestTransaction_SavepointID_Consistency(t *testing.T) {
 	t.Parallel()
 
