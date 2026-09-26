@@ -78,16 +78,16 @@ func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ct
 // Init creates a context.Context with a trm.Transaction and Closer to finish trm.Transaction.
 // Required to explicitly close the transaction by calling Closer.
 // Nested goroutines would be canceled after the transaction closing by context.CancelFunc.
-// On error Closer is nil and the context derived from ctx is already canceled.
+// On error Closer is nil and the returned context.Context, derived from ctx, is already canceled.
 //
 //nolint:cyclop // propagation mode switch requires a case per mode by design
-func (m *Manager) Init(ctx context.Context, s trm.Settings) (resCtx context.Context, closer Closer, err error) {
+func (m *Manager) Init(ctx context.Context, s trm.Settings) (_ context.Context, _ Closer, err error) {
 	tr := m.ctxManager.ByKey(ctx, s.CtxKey())
 	isOpened := tr != nil
 
-	resCtx, cancel := m.withCancel(ctx, s)
+	ctx, cancel := m.withCancel(ctx, s)
 	defer func() {
-		if cancel != nil && err != nil {
+		if err != nil {
 			cancel()
 		}
 	}()
@@ -95,44 +95,44 @@ func (m *Manager) Init(ctx context.Context, s trm.Settings) (resCtx context.Cont
 	switch s.Propagation() {
 	case trm.PropagationRequired:
 		if isOpened {
-			return resCtx, newNilClose(cancel), nil
+			return ctx, newNilClose(cancel), nil
 		}
 	case trm.PropagationNested:
 		if isOpened {
-			return m.propagationNested(resCtx, s, tr, cancel)
+			return m.propagationNested(ctx, s, tr, cancel)
 		}
 	case trm.PropagationsMandatory:
 		if isOpened {
-			return resCtx, newNilClose(cancel), nil
+			return ctx, newNilClose(cancel), nil
 		}
 
-		return resCtx, nil, trm.ErrPropagationMandatory
+		return ctx, nil, trm.ErrPropagationMandatory
 	case trm.PropagationNever:
 		if isOpened {
-			return resCtx, nil, trm.ErrPropagationNever
+			return ctx, nil, trm.ErrPropagationNever
 		}
 
-		return resCtx, newNilClose(cancel), nil
+		return ctx, newNilClose(cancel), nil
 	case trm.PropagationNotSupported:
 		if isOpened {
-			return m.ctxManager.SetByKey(resCtx, s.CtxKey(), nil),
+			return m.ctxManager.SetByKey(ctx, s.CtxKey(), nil),
 				newNilClose(cancel),
 				nil
 		}
 
-		return resCtx, newNilClose(cancel), nil
+		return ctx, newNilClose(cancel), nil
 	case trm.PropagationRequiresNew:
 		// do nothing
 	case trm.PropagationSupports:
-		return resCtx, newNilClose(cancel), nil
+		return ctx, newNilClose(cancel), nil
 	}
 
-	resCtx, tr, err = m.getTransaction(resCtx, s)
+	ctx, tr, err = m.getTransaction(ctx, s)
 	if err != nil {
-		return resCtx, nil, multierr.Combine(trm.ErrBegin, err)
+		return ctx, nil, multierr.Combine(trm.ErrBegin, err)
 	}
 
-	return m.ctxManager.SetByKey(resCtx, s.CtxKey(), tr),
+	return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
 		newTxCommit(tr, m.log, cancel),
 		nil
 }

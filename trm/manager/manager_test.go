@@ -773,36 +773,76 @@ func Test_transactionManager_Do_Cancel(t *testing.T) {
 func Test_transactionManager_Init_CancelsContextOnError(t *testing.T) {
 	t.Parallel()
 
-	t.Run("factory_error", func(t *testing.T) {
-		t.Parallel()
+	ctxManager := trmcontext.DefaultManager
+	errBegin := errors.New("begin failed")
 
-		m := Must(func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
-			return ctx, nil, errors.New("boom")
+	failingFactory := func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
+		return ctx, nil, errBegin
+	}
+
+	tests := map[string]struct {
+		propagation trm.Propagation
+		// opened is the transaction already in ctx; nil for none.
+		opened  func(ctrl *gomock.Controller) trm.Transaction
+		wantErr error
+	}{
+		"begin_error": {
+			propagation: trm.PropagationRequired,
+			wantErr:     trm.ErrBegin,
+		},
+		"nested_begin_error": {
+			propagation: trm.PropagationNested,
+			opened: func(ctrl *gomock.Controller) trm.Transaction {
+				tx := mock2.NewMocktransactionWithSP(ctrl)
+				tx.EXPECT().Begin(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, _ trm.Settings) (context.Context, trm.Transaction, error) {
+						return ctx, nil, errBegin
+					})
+
+				return tx
+			},
+			wantErr: trm.ErrNestedBegin,
+		},
+		"mandatory_without_transaction": {
+			propagation: trm.PropagationsMandatory,
+			wantErr:     trm.ErrPropagationMandatory,
+		},
+		"never_with_transaction": {
+			propagation: trm.PropagationNever,
+			opened: func(ctrl *gomock.Controller) trm.Transaction {
+				return mock2.NewMockTransaction(ctrl)
+			},
+			wantErr: trm.ErrPropagationNever,
+		},
+	}
+
+	for name, tt := range tests {
+		tt := tt
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			ctx := context.Background()
+			if tt.opened != nil {
+				ctx = ctxManager.SetByKey(ctx, settings.DefaultCtxKey, tt.opened(ctrl))
+			}
+
+			m := Must(failingFactory)
+
+			ctx, closer, err := m.Init(ctx, settings.Must(
+				settings.WithCancelable(true),
+				settings.WithPropagation(tt.propagation),
+			))
+
+			require.ErrorIs(t, err, tt.wantErr)
+			require.Nil(t, closer)
+			require.NotNil(t, ctx)
+			require.ErrorIs(t, ctx.Err(), context.Canceled, "the derived context must be canceled, not leaked")
 		})
-
-		ctx, _, err := m.Init(context.Background(), settings.Must(settings.WithTimeout(time.Hour)))
-
-		require.Error(t, err)
-		require.ErrorContains(t, err, "boom")
-		require.NotNil(t, ctx)
-		require.ErrorIs(t, ctx.Err(), context.Canceled)
-	})
-
-	t.Run("propagation_error", func(t *testing.T) {
-		t.Parallel()
-
-		m := Must(nil)
-
-		ctx, _, err := m.Init(context.Background(), settings.Must(
-			settings.WithTimeout(time.Hour),
-			settings.WithPropagation(trm.PropagationsMandatory),
-		))
-
-		require.Error(t, err)
-		require.ErrorIs(t, err, trm.ErrPropagationMandatory)
-		require.NotNil(t, ctx)
-		require.ErrorIs(t, ctx.Err(), context.Canceled)
-	})
+	}
 }
 
 func TestManager_WithOpts(t *testing.T) {
