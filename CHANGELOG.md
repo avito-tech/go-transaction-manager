@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed a context leak in `manager.Manager.Init` on its error paths (a failed `Begin`, `ErrNestedBegin`, `ErrPropagationMandatory`, `ErrPropagationNever`): the derived context is now canceled, and a failed `Begin` returns that canceled context instead of `nil` (#174).
 
+### Changes
+
+- `sqlx.Transaction.Begin` no longer wraps a failed savepoint creation in `trm.ErrNestedBegin`; it now returns the underlying error as-is, matching `sql`, `pgxv4` and `pgxv5`, which never wrapped it. Callers using this driver directly (bypassing `trm.Manager`, which still wraps with `ErrNestedBegin` in nested propagation) and checking `errors.Is(err, trm.ErrNestedBegin)` on `Begin`'s error should check the underlying error instead (#178).
+
 ## [2.0.4]
 
 ### Fixed
