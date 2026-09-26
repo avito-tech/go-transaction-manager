@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestGenerate(t *testing.T) {
@@ -24,7 +23,7 @@ func TestGenerate(t *testing.T) {
 
 			key := generator.Generate()
 			_, loaded := generatedKeys.LoadOrStore(key, struct{}{})
-			require.False(t, loaded, "duplicate key generated: %v", key)
+			assert.False(t, loaded, "duplicate key generated: %v", key)
 		}()
 	}
 
