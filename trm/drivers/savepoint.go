@@ -29,7 +29,7 @@ func (s *SavePointCounter) IncrementID() string {
 	return savePointPrefix + strconv.FormatInt(id, 10)
 }
 
-// DecrementID atomically decrements and returns the current savepoint identifier.
+// DecrementID atomically decrements the counter and returns the identifier of the savepoint being released.
 func (s *SavePointCounter) DecrementID() string {
 	id := atomic.AddInt64(&s.saves, -1) + 1
 
