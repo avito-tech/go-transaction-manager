@@ -78,13 +78,20 @@ func (m *Manager) DoWithSettings(ctx context.Context, s trm.Settings, fn func(ct
 // Init creates a context.Context with a trm.Transaction and Closer to finish trm.Transaction.
 // Required to explicitly close the transaction by calling Closer.
 // Nested goroutines would be canceled after the transaction closing by context.CancelFunc.
+// On error Closer is nil and the returned context.Context, derived from ctx, is already canceled.
 //
 //nolint:cyclop // propagation mode switch requires a case per mode by design
-func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Closer, error) {
+func (m *Manager) Init(ctx context.Context, s trm.Settings) (_ context.Context, _ Closer, err error) {
 	tr := m.ctxManager.ByKey(ctx, s.CtxKey())
 	isOpened := tr != nil
 
 	ctx, cancel := m.withCancel(ctx, s)
+
+	defer func() {
+		if err != nil {
+			cancel()
+		}
+	}()
 
 	switch s.Propagation() {
 	case trm.PropagationRequired:
@@ -121,9 +128,9 @@ func (m *Manager) Init(ctx context.Context, s trm.Settings) (context.Context, Cl
 		return ctx, newNilClose(cancel), nil
 	}
 
-	ctx, tr, err := m.getTransaction(ctx, s)
+	ctx, tr, err = m.getTransaction(ctx, s)
 	if err != nil {
-		return nil, nil, multierr.Combine(trm.ErrBegin, err)
+		return ctx, nil, multierr.Combine(trm.ErrBegin, err)
 	}
 
 	return m.ctxManager.SetByKey(ctx, s.CtxKey(), tr),
