@@ -2,9 +2,11 @@ package trm
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/multierr"
 )
 
 var errTest = errors.New("test")
@@ -111,6 +113,17 @@ func TestUnSkippable(t *testing.T) {
 			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
 				return assert.NotErrorIs(t, err, ErrSkip) &&
 					assert.ErrorIs(t, err, errTest)
+			},
+		},
+		"only the bare ErrSkip is dropped, a wrapped one stays with its message": {
+			args: args{
+				err: multierr.Combine(fmt.Errorf("wrapped: %w", ErrSkip), errTest, ErrSkip),
+			},
+			wantErr: func(t assert.TestingT, err error, _ ...interface{}) bool {
+				return assert.Len(t, multierr.Errors(err), 2) &&
+					assert.ErrorIs(t, err, errTest) &&
+					assert.ErrorIs(t, err, ErrSkip) &&
+					assert.Contains(t, err.Error(), "wrapped: "+ErrSkip.Error())
 			},
 		},
 		"nil": {
