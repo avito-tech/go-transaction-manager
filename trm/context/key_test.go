@@ -10,7 +10,9 @@ import (
 func TestGenerate(t *testing.T) {
 	t.Parallel()
 
-	const iterations = 50
+	const iterations = 1000
+	generator := NewKeyGenerator()
+	generatedKeys := sync.Map{}
 
 	wg := sync.WaitGroup{}
 	wg.Add(iterations)
@@ -19,11 +21,13 @@ func TestGenerate(t *testing.T) {
 		go func() {
 			defer wg.Done()
 
-			Generate()
+			key := generator.Generate()
+			_, loaded := generatedKeys.LoadOrStore(key, struct{}{})
+			assert.False(t, loaded, "duplicate key generated: %v", key)
 		}()
 	}
 
 	wg.Wait()
 
-	assert.Equal(t, int64(iterations+1), Generate().(int64))
+	assert.Equal(t, int64(iterations+1), generator.Generate().(int64))
 }

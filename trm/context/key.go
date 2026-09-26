@@ -32,7 +32,5 @@ func NewKeyGenerator() *KeyGenerator {
 //
 //nolint:ireturn,nolintlint
 func (g *KeyGenerator) Generate() trm.CtxKey {
-	defer atomic.AddInt64(&g.key, 1)
-
-	return atomic.LoadInt64(&g.key)
+	return atomic.AddInt64(&g.key, 1) - 1
 }
